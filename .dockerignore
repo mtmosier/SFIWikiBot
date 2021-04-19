@@ -1,0 +1,11 @@
+test
+settings.ini
+
+# Python created files/directories
+__pycache__
+SFIWikiBotLib/__pycache__
+build
+
+# OS specific files/directories
+*.DS_Store
+Thumbs.db
