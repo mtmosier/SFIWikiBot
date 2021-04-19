@@ -968,8 +968,8 @@ def UpdateIndividualItemPageByItemRange(itemList, comment=None, allowRetry=True)
 
                 if GeneralUtils.GenerateDataSignature(infoBox['data']) != GeneralUtils.GenerateDataSignature(template['data']):
                     updatedTemplate = ConvertDictionaryToWikiTemplate(infoBox['name'], infoBox['data'])
-                    newContent = content.replace('{}'.format(template['content']), updatedTemplate.strip())
-                    if newContent:
+                    newContent = content.replace(template['content'].strip(), updatedTemplate.strip())
+                    if newContent and newContent != content:
                         content = newContent
                         updatesIncluded.append("Infobox stats")
                     else:
@@ -1050,7 +1050,7 @@ def UpdateIndividualShipPage(ship, comment=None, allowRetry=True):
                         newContent = content.replace('{}\n'.format(template['content']), updatedTemplate)
                     if newContent == content:
                         newContent = content.replace('{}'.format(template['content']), updatedTemplate)
-                    if newContent:
+                    if newContent and newContent != content:
                         content = newContent
                         updatesIncluded.append("Infobox stats")
                     else:
@@ -1384,15 +1384,22 @@ def GetTemplateListFromWikiPageContent(content):
             'data': OrderedDict(),
         }
 
+        input = input.replace(templateData['content'], '')
+
+        if resInvoke['placeholderMap']:  templateData['content'] = ReplacePlaceholdersWithWikiContent(templateData['content'], resInvoke['placeholderMap'])
+        if resVar['placeholderMap']:  templateData['content'] = ReplacePlaceholdersWithWikiContent(templateData['content'], resVar['placeholderMap'])
+        if resLink['placeholderMap']:  templateData['content'] = ReplacePlaceholdersWithWikiContent(templateData['content'], resLink['placeholderMap'])
+
         content =result.group(2)
 
         if '|' in content:
             dataLines = content.split('|')
             templateData['name'] = dataLines[0].strip()
             for i in range(1, len(dataLines)):
-                lineContent = ReplacePlaceholdersWithWikiContent(dataLines[i], resInvoke['placeholderMap'])
-                lineContent = ReplacePlaceholdersWithWikiContent(lineContent, resVar['placeholderMap'])
-                lineContent = ReplacePlaceholdersWithWikiContent(lineContent, resLink['placeholderMap'])
+                lineContent = dataLines[i]
+                if resInvoke['placeholderMap']:  lineContent = ReplacePlaceholdersWithWikiContent(lineContent, resInvoke['placeholderMap'])
+                if resVar['placeholderMap']:  lineContent = ReplacePlaceholdersWithWikiContent(lineContent, resVar['placeholderMap'])
+                if resLink['placeholderMap']:  lineContent = ReplacePlaceholdersWithWikiContent(lineContent, resLink['placeholderMap'])
                 lineParts = lineContent.split('=', 1)
                 key = lineParts[0].strip()
                 try:
@@ -1401,9 +1408,10 @@ def GetTemplateListFromWikiPageContent(content):
                     val = ''
                 templateData['data'][key] = val
         elif ':' in content:
-            lineContent = ReplacePlaceholdersWithWikiContent(content, resInvoke['placeholderMap'])
-            lineContent = ReplacePlaceholdersWithWikiContent(lineContent, resVar['placeholderMap'])
-            lineContent = ReplacePlaceholdersWithWikiContent(lineContent, resLink['placeholderMap'])
+            lineContent = content
+            if resInvoke['placeholderMap']:  lineContent = ReplacePlaceholdersWithWikiContent(lineContent, resInvoke['placeholderMap'])
+            if resVar['placeholderMap']:  lineContent = ReplacePlaceholdersWithWikiContent(lineContent, resVar['placeholderMap'])
+            if resLink['placeholderMap']:  lineContent = ReplacePlaceholdersWithWikiContent(lineContent, resLink['placeholderMap'])
             lineParts = lineContent.split(':', 1)
             templateData['name'] = lineParts[0].strip()
             try:
@@ -1411,7 +1419,6 @@ def GetTemplateListFromWikiPageContent(content):
             except:
                 pass
 
-        input = input.replace(templateData['content'], '')
         templateList.append(templateData)
         result = regex.match(input)
 
@@ -1540,11 +1547,11 @@ def ReplaceModuleInvokationsWithPlaceholders(content):
 
 
 def ReplacePlaceholdersWithWikiContent(content, placeholderMap):
-    for placeholder, wikiLink in placeholderMap.items():
+    for placeholder, wikiContent in placeholderMap.items():
         prevContent = ""
         while prevContent != content:
             prevContent = content
-            content = content.replace(placeholder, wikiLink)
+            content = content.replace(placeholder, wikiContent)
 
     return content
 
