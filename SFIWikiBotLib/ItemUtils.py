@@ -302,17 +302,14 @@ def GetWikiInfoboxDataForPrimaryOrSecondary(itemList):
     if displayData != '999':
         infobox['required_skill'] = "{} {}".format(GetItemSkillName(primaryItem), displayData)
 
-    try:
-        vdata = [ GeneralUtils.NumDisplay(GetDamagePerRoundForItem(i), 1) for i in itemList ]
-        if vdata[0] != '0':
-            if DisplayDamageAsPerSecond(primaryItem):
-                vdata = [ '{}/s'.format(i) for i in vdata ]
-            displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
-            infobox['damage_per_round'] = displayData
-    except:
-        pass
+    vdata = [ GeneralUtils.NumDisplay(GetDamagePerRoundForItem(i), 1) for i in itemList ]
+    if vdata[0] != '0':
+        if DisplayDamageAsPerSecond(primaryItem):
+            vdata = [ '{}/s'.format(i) for i in vdata ]
+        displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
+        infobox['damage_per_round'] = displayData
 
-    try:
+    with suppress(ZeroDivisionError):
         if weaponType != 'Large':
             vdata = [ GeneralUtils.NumDisplay(i['fireRate'], 1) for i in itemList ]
 
@@ -332,26 +329,18 @@ def GetWikiInfoboxDataForPrimaryOrSecondary(itemList):
                 else:
                     displayData = str(vdata[0]) if len(set(vdata)) == 1 else " / ".join(vdata)
                     infobox['fire_rate'] = "1 per {} sec".format(displayData)
-    except:
-        pass
 
-    try:
-        if 'damage_per_round' in infobox:
-            vdata = [ GetNumOfDamagingProjectiles(i, True) for i in itemList ]
-            displayData = str(vdata[0]) if len(set(vdata)) == 1 else " / ".join(vdata)
-            if vdata[-1] > 1:
-                infobox['amount'] = displayData
-    except:
-        pass
+    if 'damage_per_round' in infobox:
+        vdata = [ GetNumOfDamagingProjectiles(i, True) for i in itemList ]
+        if vdata[-1] > 1:
+            displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join([str(v) for v in vdata])
+            infobox['amount'] = displayData
 
-    try:
-        vdata = [ ItemDisplayStatTotalDps(i) for i in itemList ]
-        if vdata[0] is not None:
-            displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
-            if displayData != '0':
-                infobox['damage_per_second'] = displayData
-    except:
-        pass
+    vdata = [ ItemDisplayStatTotalDps(i) for i in itemList ]
+    if vdata[0] is not None:
+        displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
+        if displayData != '0':
+            infobox['damage_per_second'] = displayData
 
     damageType = GetDamageTypeForItem(primaryItem)
     if damageType:
@@ -361,147 +350,122 @@ def GetWikiInfoboxDataForPrimaryOrSecondary(itemList):
         else:
             infobox['damage_type'] = damageType
 
-    try:
-        vdata = [ ItemDisplayStatTotalDamagePerVolley(i) for i in itemList ]
-        if vdata[0] is not None and vdata[0] != '0':
+
+    vdata = [ ItemDisplayStatTotalDamagePerVolley(i) for i in itemList ]
+    if vdata[0] is not None and vdata[0] != '0':
+        displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
+        if 'damage_per_round' not in infobox or infobox['damage_per_round'] != displayData:
+            infobox['total_damage_per_round'] = displayData
+
+
+    if primaryItem['energyBased']:
+        vdata = [ ItemDisplayStatTotalDpe(i) for i in itemList ]
+        if vdata[0] is not None:
             displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
-            if 'damage_per_round' not in infobox or infobox['damage_per_round'] != displayData:
-                infobox['total_damage_per_round'] = displayData
-    except:
-        pass
+            infobox['damage_per_energy'] = displayData
 
 
-    try:
-        if primaryItem['energyBased']:
-            vdata = [ ItemDisplayStatTotalDpe(i) for i in itemList ]
-            if vdata[0] is not None:
-                displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
-                infobox['damage_per_energy'] = displayData
-    except:
-        pass
-
-    try:
-        if primaryItem['energyBased']:
-            vdata = [ GeneralUtils.NumDisplay(i['ammoOrEnergyUsage'], 2) for i in itemList ]
-            if vdata[0] != '0':
-                displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
-                infobox['energy_usage'] = displayData
-        else:
-            vdata = [ i['ammoOrEnergyUsage'] for i in itemList ]
-            if GeneralUtils.floatCmp(vdata[0], '>', 0):
-                if weaponType == 'Large':
-                    displayData = GeneralUtils.NumDisplay(vdata[0], 0) if len(set(vdata)) == 1 else " / ".join([GeneralUtils.NumDisplay(x, 0) for x in vdata])
-                else:
-                    displayData = "{} ({})".format(GeneralUtils.NumDisplay(vdata[0], 0), GeneralUtils.NumDisplay(vdata[0] * 5, 0)) if len(set(vdata)) == 1 else " / ".join(["{} ({})".format(GeneralUtils.NumDisplay(x, 0), GeneralUtils.NumDisplay(x * 5, 0)) for x in vdata])
-                infobox['ammo'] = displayData
-
-            vdata = [ (GeneralUtils.NumDisplay(GetItemAmmoCost(i), 0, True) if GetItemAmmoCost(i) > 0 else None) for i in itemList ]
-            if vdata[0] is not None:
-                displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
-                infobox['ammo_cost'] = displayData
-    except:
-        pass
-
-    try:
-        if primaryItem['guidance'] == 1 or primaryItem['guidance'] == 5:
-            infobox['requires_lock'] = 'Yes'
-
-            vdata = [ GeneralUtils.NumDisplay(i['lockingRange'], 1) for i in itemList ]
-            displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
-            infobox['locking_range'] = '{}su'.format(displayData)
-        else:
-            infobox['requires_lock'] = 'No'
-    except:
-        pass
-
-    try:
-        if 'locking_range' not in infobox:
-            vdata = [ GeneralUtils.NumDisplay(GetItemRange(i), 0) for i in itemList ]
-            displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
-            if displayData and displayData != '0':
-                infobox['range'] = '{}su'.format(displayData)
-    except:
-        pass
-
-    try:
-        if primaryItem['guidance'] != 3:
-            vdata = [ GeneralUtils.NumDisplay(GetItemMinRange(i), 1) for i in itemList ]
-            displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
-            if displayData:
-                infobox['min_range'] = '{}su'.format(displayData)
-    except:
-        pass
-
-    try:
-        if not isBeam and 'Vortex Bomb' not in primaryItem['name']:
-            vdata = [ GeneralUtils.NumDisplay(GetItemMaxSpeed(i), 1) for i in itemList ]
-            if vdata[0] != '0' and vdata[0] != '':
-                displayData = str(vdata[0]) if len(set(vdata)) == 1 else " / ".join(vdata)
-                infobox['speed'] = "{}su/s".format(displayData)
-    except:
-        pass
-
-    try:
-        if 'speed' in infobox:
-            vdata = [ GeneralUtils.NumDisplay(GetItemInitialSpeed(i), 1) for i in itemList ]
-            if vdata[0] != '0' and vdata[0] != '':
-                displayData = str(vdata[0]) if len(set(vdata)) == 1 else " / ".join(vdata)
-                initialSpeedDisplay = "{}su/s".format(displayData)
-                if initialSpeedDisplay != infobox['speed']:
-                    infobox['initial_speed'] = initialSpeedDisplay
-    except:
-        pass
-
-    try:
-        if 'initial_speed' in infobox and GeneralUtils.floatCmp(primaryItem['acceleration'], '>', 0):
-            vdata = [ GeneralUtils.NumDisplay(i['acceleration'], 2) for i in itemList ]
-            if vdata[0] != '0' and vdata[0] != '':
-                displayData = str(vdata[0]) if len(set(vdata)) == 1 else " / ".join(vdata)
-                infobox['acceleration'] = "{}su/s/s".format(displayData)
-    except:
-        pass
-
-    try:
-        largeWeaponsWithLifetimeList = ['Thunderbomb', 'Tornadian Hurricane', 'Radicane', 'Firestorm', 'Vortex Bomb', 'Ultra Vortex Bomb', 'Anti Vortex Bomb', 'Ghostly Vortex Bomb']
-        if not isBeam and (weaponType != 'Large' or primaryItem['name'] in largeWeaponsWithLifetimeList):
-            if 'Vortex Bomb' in primaryItem['name']:
-                vdata = [ GeneralUtils.NumDisplay(i['effectTime'], 1) for i in itemList ]
-            else:
-                vdata = [ GeneralUtils.NumDisplay(i['life'], 1) for i in itemList ]
-            if vdata[0] != '0':
-                displayData = str(vdata[0]) if len(set(vdata)) == 1 else "s / ".join(vdata)
-                infobox['lifetime'] = "{}s".format(displayData)
-    except:
-        pass
-
-    try:
-        if not isBeam and weaponType != 'Mine' and weaponType != 'Proximity':
-            vdata = [ GeneralUtils.NumDisplay(i['accuracy'], 1) for i in itemList ]
-            displayData = vdata[0] if len(set(vdata)) == 1 else "° / ".join(vdata)
-            if weaponType in ['Secondary', 'Primary'] or displayData != '0':
-                infobox['accuracy'] = "{}°".format(displayData)
-    except:
-        pass
-
-    try:
-        vdata = [ GeneralUtils.NumDisplay(i['turning'] * Config.turnMultiplier, 1) for i in itemList ]
+    if primaryItem['energyBased']:
+        vdata = [ GeneralUtils.NumDisplay(i['ammoOrEnergyUsage'], 2) for i in itemList ]
         if vdata[0] != '0':
-            displayData = vdata[0] if len(set(vdata)) == 1 else "° / ".join(vdata)
-            infobox['turning'] = "{}°".format(displayData)
-    except:
-        pass
+            displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
+            infobox['energy_usage'] = displayData
+    else:
+        vdata = [ i['ammoOrEnergyUsage'] for i in itemList ]
+        if GeneralUtils.floatCmp(vdata[0], '>', 0):
+            if weaponType == 'Large':
+                displayData = GeneralUtils.NumDisplay(vdata[0], 0) if len(set(vdata)) == 1 else " / ".join([GeneralUtils.NumDisplay(x, 0) for x in vdata])
+            else:
+                displayData = "{} ({})".format(GeneralUtils.NumDisplay(vdata[0], 0), GeneralUtils.NumDisplay(vdata[0] * 5, 0)) if len(set(vdata)) == 1 else " / ".join(["{} ({})".format(GeneralUtils.NumDisplay(x, 0), GeneralUtils.NumDisplay(x * 5, 0)) for x in vdata])
+            infobox['ammo'] = displayData
 
-    try:
-        armIsNotLifeExceptionList = ['Thunderbomb', 'Tornadian Hurricane']
-        if weaponType == 'Large' and primaryItem['name'] not in armIsNotLifeExceptionList:
-            vdata = [ GeneralUtils.NumDisplay(i['life'], 1) for i in itemList ]
+        vdata = [ (GeneralUtils.NumDisplay(GetItemAmmoCost(i), 0, True) if GetItemAmmoCost(i) > 0 else None) for i in itemList ]
+        if vdata[0] is not None:
+            displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
+            infobox['ammo_cost'] = displayData
+
+
+    if primaryItem['guidance'] == 1 or primaryItem['guidance'] == 5:
+        infobox['requires_lock'] = 'Yes'
+
+        vdata = [ GeneralUtils.NumDisplay(i['lockingRange'], 1) for i in itemList ]
+        displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
+        infobox['locking_range'] = '{}su'.format(displayData)
+    else:
+        infobox['requires_lock'] = 'No'
+
+
+    if 'locking_range' not in infobox:
+        vdata = [ GeneralUtils.NumDisplay(GetItemRange(i), 0) for i in itemList ]
+        displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
+        if displayData and displayData != '0':
+            infobox['range'] = '{}su'.format(displayData)
+
+
+    if primaryItem['guidance'] != 3:
+        vdata = [ GeneralUtils.NumDisplay(GetItemMinRange(i), 1) for i in itemList ]
+        displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
+        if displayData:
+            infobox['min_range'] = '{}su'.format(displayData)
+
+
+    if not isBeam and 'Vortex Bomb' not in primaryItem['name']:
+        vdata = [ GeneralUtils.NumDisplay(GetItemMaxSpeed(i), 1) for i in itemList ]
+        if vdata[0] != '0' and vdata[0] != '':
+            displayData = str(vdata[0]) if len(set(vdata)) == 1 else " / ".join(vdata)
+            infobox['speed'] = "{}su/s".format(displayData)
+
+
+    if 'speed' in infobox:
+        vdata = [ GeneralUtils.NumDisplay(GetItemInitialSpeed(i), 1) for i in itemList ]
+        if vdata[0] != '0' and vdata[0] != '':
+            displayData = str(vdata[0]) if len(set(vdata)) == 1 else " / ".join(vdata)
+            initialSpeedDisplay = "{}su/s".format(displayData)
+            if initialSpeedDisplay != infobox['speed']:
+                infobox['initial_speed'] = initialSpeedDisplay
+
+
+    if 'initial_speed' in infobox and GeneralUtils.floatCmp(primaryItem['acceleration'], '>', 0):
+        vdata = [ GeneralUtils.NumDisplay(i['acceleration'], 2) for i in itemList ]
+        if vdata[0] != '0' and vdata[0] != '':
+            displayData = str(vdata[0]) if len(set(vdata)) == 1 else " / ".join(vdata)
+            infobox['acceleration'] = "{}su/s/s".format(displayData)
+
+
+    largeWeaponsWithLifetimeList = ['Thunderbomb', 'Tornadian Hurricane', 'Radicane', 'Firestorm', 'Vortex Bomb', 'Ultra Vortex Bomb', 'Anti Vortex Bomb', 'Ghostly Vortex Bomb']
+    if not isBeam and (weaponType != 'Large' or primaryItem['name'] in largeWeaponsWithLifetimeList):
+        if 'Vortex Bomb' in primaryItem['name']:
+            vdata = [ GeneralUtils.NumDisplay(i['effectTime'], 1) for i in itemList ]
         else:
-            vdata = [ GeneralUtils.NumDisplay(i['armingTime'], 1) for i in itemList ]
-        displayData = vdata[0] if len(set(vdata)) == 1 else "s / ".join(vdata)
-        if displayData != '0':
-            infobox['arming_time'] = "{}s".format(displayData)
-    except:
-        pass
+            vdata = [ GeneralUtils.NumDisplay(i['life'], 1) for i in itemList ]
+        if vdata[0] != '0':
+            displayData = str(vdata[0]) if len(set(vdata)) == 1 else "s / ".join(vdata)
+            infobox['lifetime'] = "{}s".format(displayData)
+
+
+    if not isBeam and weaponType != 'Mine' and weaponType != 'Proximity':
+        vdata = [ GeneralUtils.NumDisplay(i['accuracy'], 1) for i in itemList ]
+        displayData = vdata[0] if len(set(vdata)) == 1 else "° / ".join(vdata)
+        if weaponType in ['Secondary', 'Primary'] or displayData != '0':
+            infobox['accuracy'] = "{}°".format(displayData)
+
+
+
+    vdata = [ GeneralUtils.NumDisplay(i['turning'] * Config.turnMultiplier, 1) for i in itemList ]
+    if vdata[0] != '0':
+        displayData = vdata[0] if len(set(vdata)) == 1 else "° / ".join(vdata)
+        infobox['turning'] = "{}°".format(displayData)
+
+
+    armIsNotLifeExceptionList = ['Thunderbomb', 'Tornadian Hurricane']
+    if weaponType == 'Large' and primaryItem['name'] not in armIsNotLifeExceptionList:
+        vdata = [ GeneralUtils.NumDisplay(i['life'], 1) for i in itemList ]
+    else:
+        vdata = [ GeneralUtils.NumDisplay(i['armingTime'], 1) for i in itemList ]
+    displayData = vdata[0] if len(set(vdata)) == 1 else "s / ".join(vdata)
+    if displayData != '0':
+        infobox['arming_time'] = "{}s".format(displayData)
+
 
     effectList = GetEffectNameListForItem(primaryItem)
     if effectList:
@@ -509,14 +473,13 @@ def GetWikiInfoboxDataForPrimaryOrSecondary(itemList):
         for effectName in effectList:
             infobox['effect'] += '[[:Category:Effect:{}|{}]]<br>\n'.format(effectName, effectName)
 
-    try:
-        if 'effect' in infobox and primaryItem['effectTime'] >= 0:
-            if len(effectList) > 1 or effectList[0] != 'Negative Impact' or primaryItem['effectTime'] > 0:
-                vdata = [ GeneralUtils.NumDisplay(i['effectTime'], 1) for i in itemList ]
-                displayData = vdata[0] if len(set(vdata)) == 1 else "s / ".join(vdata)
-                infobox['effect_time'] = "{}s".format(displayData)
-    except:
-        pass
+
+    if 'effect' in infobox and primaryItem['effectTime'] >= 0:
+        if len(effectList) > 1 or effectList[0] != 'Negative Impact' or primaryItem['effectTime'] > 0:
+            vdata = [ GeneralUtils.NumDisplay(i['effectTime'], 1) for i in itemList ]
+            displayData = vdata[0] if len(set(vdata)) == 1 else "s / ".join(vdata)
+            infobox['effect_time'] = "{}s".format(displayData)
+
 
     vdata = [ ItemDisplayStatBPLocation(i) for i in itemList ]
     if vdata[0]:
@@ -1372,7 +1335,7 @@ def GetItemEffectDamage(item, shipMass=..., amount=...):
     subWeapon = GetItemSubWeapon(item)
     if subWeapon:  return GetItemEffectDamage(subWeapon, shipMass, amount)
 
-    try:
+    with suppress(KeyError):
         if item['effect'] >= 0:
             effectInfo = SmallConstants.effectsData[item['effect']]
             effectName = effectInfo['name']
@@ -1389,9 +1352,6 @@ def GetItemEffectDamage(item, shipMass=..., amount=...):
                 return (effectTime + 1) * effectTime / 2
             else:
                 return round(SmallConstants.effectDamagesData[effectName] * effectTime, 2)
-
-    except:
-        raise
 
 
 def GetItemEffectDamagePerSecond(item, shipMass=..., amount=...):
