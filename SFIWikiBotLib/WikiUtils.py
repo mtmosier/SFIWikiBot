@@ -1362,6 +1362,18 @@ def GetTableListFromWikiPageContent(content):
 def GetTemplateListFromWikiPageContent(content):
     templateList = []
 
+
+
+    resLink = ReplaceWikiLinksWithPlaceholders(content)
+    content = resLink['content']
+
+    resVar = ReplaceWikiVariablesWithPlaceholders(content)
+    content = resVar['content']
+
+    resInvoke = ReplaceModuleInvokationsWithPlaceholders(content)
+    content = resInvoke['content']
+
+
     regex = re.compile(r'.*?(\{\{(.*?)(?<!\{\{!)\}\})', re.S)
     input = content
     result = regex.match(input)
@@ -1372,14 +1384,15 @@ def GetTemplateListFromWikiPageContent(content):
             'data': OrderedDict(),
         }
 
-        res = ReplaceWikiLinksWithPlaceholders(result.group(2))
-        content = res['content']
+        content =result.group(2)
 
         if '|' in content:
             dataLines = content.split('|')
             templateData['name'] = dataLines[0].strip()
             for i in range(1, len(dataLines)):
-                lineContent = ReplacePlaceholdersWithWikiLinks(dataLines[i], res['placeholderMap'])
+                lineContent = ReplacePlaceholdersWithWikiContent(dataLines[i], resInvoke['placeholderMap'])
+                lineContent = ReplacePlaceholdersWithWikiContent(lineContent, resVar['placeholderMap'])
+                lineContent = ReplacePlaceholdersWithWikiContent(lineContent, resLink['placeholderMap'])
                 lineParts = lineContent.split('=', 1)
                 key = lineParts[0].strip()
                 try:
@@ -1388,7 +1401,9 @@ def GetTemplateListFromWikiPageContent(content):
                     val = ''
                 templateData['data'][key] = val
         elif ':' in content:
-            lineContent = ReplacePlaceholdersWithWikiLinks(content, res['placeholderMap'])
+            lineContent = ReplacePlaceholdersWithWikiContent(content, resInvoke['placeholderMap'])
+            lineContent = ReplacePlaceholdersWithWikiContent(lineContent, resVar['placeholderMap'])
+            lineContent = ReplacePlaceholdersWithWikiContent(lineContent, resLink['placeholderMap'])
             lineParts = lineContent.split(':', 1)
             templateData['name'] = lineParts[0].strip()
             try:
@@ -1464,7 +1479,7 @@ def ReplaceWikiLinksWithPlaceholders(content):
     idx = 0
     while result:
         wikiLink = result.group(1)
-        placeholder = '^^^PLACEHOLDER_{}^^^'.format(idx)
+        placeholder = '^^^LINK_PLACEHOLDER_{}^^^'.format(idx)
         content = content.replace(wikiLink, placeholder)
         placeholderMap[placeholder] = wikiLink
 
@@ -1478,7 +1493,53 @@ def ReplaceWikiLinksWithPlaceholders(content):
     }
 
 
-def ReplacePlaceholdersWithWikiLinks(content, placeholderMap):
+def ReplaceWikiVariablesWithPlaceholders(content):
+    placeholderMap = {}
+
+    regex = re.compile(r'.*?(\{\{\s*([a-zA-Z0-9_-]*)\s*\}\})', re.S)
+
+    result = regex.match(content)
+    idx = 0
+    while result:
+        wikiLink = result.group(1)
+        placeholder = '^^^VAR_PLACEHOLDER_{}^^^'.format(idx)
+        content = content.replace(wikiLink, placeholder)
+        placeholderMap[placeholder] = wikiLink
+
+        result = regex.match(content)
+        idx += 1
+
+
+    return {
+        'content': content,
+        'placeholderMap': placeholderMap,
+    }
+
+
+def ReplaceModuleInvokationsWithPlaceholders(content):
+    placeholderMap = {}
+
+    regex = re.compile(r'.*?(\{\{#invoke:(.*?)}\})', re.S)
+
+    result = regex.match(content)
+    idx = 0
+    while result:
+        wikiLink = result.group(1)
+        placeholder = '^^^INV_PLACEHOLDER_{}^^^'.format(idx)
+        content = content.replace(wikiLink, placeholder)
+        placeholderMap[placeholder] = wikiLink
+
+        result = regex.match(content)
+        idx += 1
+
+
+    return {
+        'content': content,
+        'placeholderMap': placeholderMap,
+    }
+
+
+def ReplacePlaceholdersWithWikiContent(content, placeholderMap):
     for placeholder, wikiLink in placeholderMap.items():
         prevContent = ""
         while prevContent != content:
@@ -2039,7 +2100,7 @@ def ConvertDictionaryToWikiTemplate(templateName, templateData):
     rtnVal = "{{" + templateName + "\n"
     for key, val in templateData.items():
         res = ReplaceWikiLinksWithPlaceholders(str(val))
-        val = ReplacePlaceholdersWithWikiLinks(res['content'].replace('|', '{{!}}'), res['placeholderMap'])
+        val = ReplacePlaceholdersWithWikiContent(res['content'].replace('|', '{{!}}'), res['placeholderMap'])
         rtnVal += "| {} = {}\n".format(key, val)
 
     rtnVal += "}}\n"
