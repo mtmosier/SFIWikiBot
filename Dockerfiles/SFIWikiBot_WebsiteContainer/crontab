@@ -1,0 +1,3 @@
+# These scripts keep the cache fresh for the website.  Enable if website is in use.
+*/10 *   * * *    /home/app/scripts/refreshCache.sh wikiData
+0    */6 * * *    /home/app/scripts/refreshCache.sh gameData

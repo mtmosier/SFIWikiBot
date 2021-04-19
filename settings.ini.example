@@ -1,0 +1,43 @@
+[settings]
+# Visit https://starfighter-infinity.fandom.com/wiki/Special:BotPasswords to set up your password
+botUsername =
+botPassword =
+
+# debug = False
+# botCacheDir = /tmp
+#
+# These settings are recommended (2021-04-18)
+botUnreleasedRaceList = Enlightened, Face of Space, Robosphere, Church of Megmos, Chronoduke
+botUnreleasedShipList = Forkworm Abomination, Face of Space
+botUnreleasedSystemList = TBZ, Sol, A
+botBpLocationOverride = White Xandelevium Blaster=Sh-1-4
+#
+# botUnreleasedRaceList =
+# botUnreleasedShipList =
+# botUnreleasedSystemList = TBZ
+# botBpLocationOverride =
+#
+# botCraftingPageName = Crafting
+#
+# botMaxWordsInArticleTitleSearch = 4
+# botDefaultDpsTimeframeInSec = 10
+# botShipMassForDamageCalculation = 2
+# botTurnMultiplier = 30
+#
+# botWikiLinkReplacementExclusionList = Black, Damage, Energy, Ships
+# botProjectileCountOverride = Sheenite Orbital Ultra Ring=30, Sheenite Orbital Chevron Ring=8
+# botWeaponRangeOverride = Sheenite Orbital Ultra Ring=17, Sheenite Orbital Chevron Ring=17, Ascendant Gun Turret=125
+# botSubWeaponIDOverride = Cake Bomb=cks, Stinger Cloud=st_1, Sheenite Orbital Ultra Ring=soc, Sheenite Orbital Chevron Ring=soc
+#
+# botPauseBetweenContentUpdateStepsInSec = 2
+# botPauseAfterSuccessfullyUpdatingWikiPageInSec = 1.5
+# botPauseAfterFailingToUpdateWikiPageInSec = 2
+# botPauseAfterSkippingWikiPageUpdateInSec = 1
+#
+# botWikiImageAndPageListTtlSec = 900
+# botPublicDatabaseContentTtlSec = 25200
+# botPrivateDatabaseContentTtlSec = 25200
+#
+# botPublicDatabaseUrl = http://www.starfighterinfinity.com/Database.htm
+# botPrivateDataUrlTemplate = https://www.benoldinggames.co.uk/sfi/gamedata/files/{}.jsonp
+# botPrivateObjectListUrl = https://benoldinggames.co.uk/sfi/files/planets/planets.htm

@@ -1,0 +1,14 @@
+# STUB - Completely untested
+version: '0'
+
+services:
+
+  sfwikibot:
+    image: mtmosier/sfiwikibot_website
+    restart: unless-stopped
+
+    # Username/Password is optional for website usage, but required if
+    # you plan to use this container to also write updates to the wiki
+    #environment:
+    #  botUsername: mybotuser
+    #  botPassword: mybotpass

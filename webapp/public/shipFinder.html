@@ -1,0 +1,210 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Starfighter: Infinity - Ship Finder</title>
+  <link href="includes/bootstrap.min.css" rel="stylesheet">
+  <link href="includes/docs.min.css" rel="stylesheet">
+  <link href="includes/style.css" rel="stylesheet">
+  <link href="includes/bootstrap-datepicker3.min.css" rel="stylesheet">
+  <link href="includes/bootstrap-slider.min.css" rel="stylesheet">
+  <link href="includes/selectize.bootstrap3.css" rel="stylesheet">
+  <link href="includes/bootstrap-select.min.css" rel="stylesheet">
+  <link href="includes/awesome-bootstrap-checkbox.css" rel="stylesheet">
+  <link href="includes/query-builder.default.min.css" rel="stylesheet">
+  <link href="includes/jquery-ui.css" rel="stylesheet">
+  <link href="includes/objFinder.css" rel="stylesheet">
+  <link href="https://starfighter-infinity.fandom.com/wiki/MediaWiki:DisplayLiveItemInfo.css?ctype=text/css&action=raw" rel="stylesheet">
+  <!--  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/css/theme.default.min.css" integrity="sha512-wghhOJkjQX0Lh3NSWvNKeZ0ZpNn+SPVXX1Qyc9OCaogADktxrBiBdKGDoqVUOyhStvMBmJQ8ZdMHiR3wuEq8+w==" crossorigin="anonymous" />  -->
+  <script src="includes/jquery-1.11.2.min.js"></script>
+  <script src="includes/jquery-ui-1.11.2.js"></script>
+  <script src="includes/bootstrap.min.js"></script>
+  <script src="includes/bootbox.min.js"></script>
+  <script src="includes/docs.min.js"></script>
+  <script src="includes/script.js"></script>
+  <script src="includes/moment.min.js"></script>
+  <script src="includes/bootstrap-datepicker.min.js"></script>
+  <script src="includes/bootstrap-slider.min.js"></script>
+  <script src="includes/selectize.min.js"></script>
+  <script src="includes/bootstrap-select.min.js"></script>
+  <script src="includes/query-builder.standalone.min.js"></script>
+  <script src="includes/sql-parser.min.js"></script>
+  <script src="includes/interact.min.js"></script>
+  <script src="includes/objFinderUtils.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/js/jquery.tablesorter.combined.min.js" integrity="sha512-xFKr8IKEr6c+C4NJ5Ajbfy/vWg4LFD/jLUtY+hSO8WX1+eNAWEV4Rn9ovme8C+9DY7mD8XMQkO4qYYOjMAJOWA==" crossorigin="anonymous"></script>
+  <script src="/js/getFilterListForShipFinder"></script>
+  <script src="/js/getPresetListForShipFinder"></script>
+
+  <script>
+  $( document ).ready(function() {
+    //*** Display the list of presets
+    displayAvailablePresets('ship');
+
+    try {
+        var qsPreset = JSON.parse(getParameterByName("preset"));
+        if (qsPreset) {
+            loadPreset(qsPreset);
+        }
+    } catch(err) {}
+  });
+  </script>
+</head>
+
+<body>
+<!-- <div class="alertBanner">This site is running very slowly due to a bug recently introduced.  Please be patient.  I'll have it fixed when I can.</div> -->
+<div id="bodyContainer">
+  <div class="pageTitle">Ship Finder</div>
+  <div class="configurationSection">
+    <div class="btn-group pull-right btn-group-nav">
+      <button class="btn btn-primary btn-view-item-finder" onclick="location.href = 'itemFinder.html'; return false;">Go to Item Finder</button>
+    </div>
+    <div class="col-md-12" style="">
+      <div id="builder-basic"></div>
+
+      <div class="btn-group">
+        <button type="button" class="btn btn-warning reset" data-target="basic">Clear</button>
+        <button type="button" class="btn btn-success show-url" data-target="basic">Get Link</button>
+        <button type="button" class="btn btn-primary submit-query submit-query-ship" data-target="basic">Submit</button>
+      </div>
+      <div class="btn-group pull-right">
+        <button type="button" class="btn btn-primary show-rules" data-target="basic">Show RuleSet</button>
+        <button type="button" class="btn btn-danger show-preset" data-target="basic">Show Preset</button>
+      </div>
+    </div>
+    <br clear="both">
+
+    <form onsubmit='event.preventDefault();'>
+    <div id="tableOptionsDisplay">
+        <input type="checkbox" id="useCustomTableOptions" name="useCustomTableOptions" value="1"><label for="useCustomTableOptions" class="optionName"> Use Custom Table Settings</label>
+        <br>
+        <div id="customTableOptionsTrigger">
+            <span class="toggleOption" onclick="showCustomTableOptions()">+ Show Table Settings</span>
+        </div>
+        <div id="customTableOptionsDisplay">
+            <span class="toggleOption" onclick="hideCustomTableOptions()">- Hide Table Settings</span>
+            <br><br>
+            <table cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td class="optionName">Sort By</td>
+                <td class="optionValue">
+                    <select id="sortBy">
+                        <option value="">Default</option>
+                        <option value="name">Name</option>
+                        <option value="race">Race</option>
+                        <option value="unlockLevel">Unlock Level</option>
+                    </select>
+                </td>
+              </tr>
+              <tr>
+                <td class="optionName">Table Header</td>
+                <td class="optionValue"><input type="text" id="tableHeader" value=""> <span class="optionDesc">- Heading (&lt;h3&gt;) appearing before the table.</span></td>
+              </tr>
+              <tr>
+                <td class="optionName">Table Caption</td>
+                <td class="optionValue"><input type="text" id="tableCaption" value=""> <span class="optionDesc">- Table caption field - small text displaying directly above the table.</span></td>
+              </tr>
+              <tr>
+                <td class="optionName">Table Class Name(s)</td>
+                <td class="optionValue"><input type="text" id="tableClassNames" value="wikitable sortable floatheader"> <span class="optionDesc">- Table class names. You can specify multiple classes separated by spaces.</span></td>
+              </tr>
+              <tr>
+                <td class="optionName">Table Fields</td>
+                <td class="optionValue">
+                    <ul id="availableColumns" class="connectedColumnList">
+                        <li class="ui-state-default" colName="Accel">Accel</li>
+                        <li class="ui-state-default" colName="Augmentations">Augmentations</li>
+                        <li class="ui-state-default" colName="Buyable">Buyable</li>
+                        <li class="ui-state-default" colName="Cargo">Cargo</li>
+                        <li class="ui-state-default" colName="Cockpit">Cockpit</li>
+                        <li class="ui-state-default" colName="Description">Description</li>
+                        <li class="ui-state-default" colName="Drop %">Drop %</li>
+                        <li class="ui-state-default" colName="High Mass">High Mass</li>
+                        <li class="ui-state-default" colName="Image">Image</li>
+                        <li class="ui-state-default" colName="Img">Image/Name (Img)</li>
+                        <li class="ui-state-default" colName="Large Slots">Large Slots</li>
+                        <li class="ui-state-default" colName="Level">Level Available (Level)</li>
+                        <li class="ui-state-default" colName="Life Cost">Life Cost</li>
+                        <li class="ui-state-default" colName="Lock Angle">Lock Angle</li>
+                        <li class="ui-state-default" colName="Low Mass">Low Mass</li>
+                        <li class="ui-state-default" colName="Mass">Mass</li>
+                        <li class="ui-state-default" colName="Mine Slots">Mine Slots</li>
+                        <li class="ui-state-default" colName="Name">Name</li>
+                        <li class="ui-state-default" colName="Price Unmodified">Price Unmodified</li>
+                        <li class="ui-state-default" colName="Proximity Slots">Proximity Slots</li>
+                        <li class="ui-state-default" colName="Race">Race</li>
+                        <li class="ui-state-default" colName="Shield Size">Shield Size</li>
+                        <li class="ui-state-default" colName="Shields">Shields</li>
+                        <li class="ui-state-default" colName="Ship Cost">Ship Cost</li>
+                        <li class="ui-state-default" colName="Ship Type">Ship Type</li>
+                        <li class="ui-state-default" colName="Slots (S/U/M/P/L/A)">Slots (S/U/M/P/L/A)</li>
+                        <li class="ui-state-default" colName="Speed">Speed</li>
+                        <li class="ui-state-default" colName="Standard Slots">Standard Slots</li>
+                        <li class="ui-state-default" colName="Turn">Turn</li>
+                        <li class="ui-state-default" colName="Turret">Turret</li>
+                        <li class="ui-state-default" colName="Utility Slots">Utility Slots</li>
+                    </ul>
+
+                    <ul id="selectedColumns" class="connectedColumnList">
+                        <li class="ui-state-default" colName="Ship">Image/Name (Ship)</li>
+                        <li class="ui-state-default" colName="Sh">Shields (Sh)</li>
+                        <li class="ui-state-default" colName="Sp">Speed (Sp)</li>
+                        <li class="ui-state-default" colName="T">Turn (T)</li>
+                        <li class="ui-state-default" colName="Ac">Accel (Ac)</li>
+                        <li class="ui-state-default" colName="La">Lock Angle (La)</li>
+                        <li class="ui-state-default" colName="Ma">Mass (Ma)</li>
+                        <li class="ui-state-default" colName="C">Cargo (C)</li>
+                        <li class="ui-state-default" colName="Tu">Turret (Tu)</li>
+                        <li class="ui-state-default" colName="Ra">Shield Size (Ra)</li>
+                        <li class="ui-state-default" colName="Le">Level Available (Le)</li>
+                        <li class="ui-state-default" colName="S">Standard Slots (S)</li>
+                        <li class="ui-state-default" colName="U">Utility Slots (U)</li>
+                        <li class="ui-state-default" colName="M">Mine Slots (M)</li>
+                        <li class="ui-state-default" colName="P">Proximity Slots (P)</li>
+                        <li class="ui-state-default" colName="L">Large Slots (L)</li>
+                        <li class="ui-state-default" colName="A">Augmentations (A)</li>
+                    </ul>
+                    <br>
+                    <span class="optionDesc" style="width: 350px; display: inline-block; padding-top: 10px;">- Select the data to display in the table.</span>
+                    <br clear="both">
+                </td>
+              </tr>
+            </table>
+        </div>
+    </div>
+    <div id="presetOptionsTrigger">
+        <span class="toggleOption" onclick="showPresetOptions()">+ Show Presets</span>
+    </div>
+    <div id="presetOptionsDisplay">
+        <span class="toggleOption" onclick="hidePresetOptions()">- Hide Presets</span>
+        <br><br>
+        <div class="addPresetSection">
+          <span>
+            <input type="text" id="newPresetName" class="form-control">
+            <button class="btn btn-primary btn-add-preset" onclick="saveNewLocalPreset($('#newPresetName').val(), 'ship'); return false;">Save Preset</button>
+          </span>
+        </div>
+        <div id="presetList"></div>
+    </div>
+    </form>
+  </div>
+  <br clear="both">
+  <hr>
+  <br>
+  <div class="output">
+    <div class="title">Results (<span id="resultCount">&nbsp;</span>)</div>
+    <div class="tab">
+      <button id="resultDisplayHtmlTableTab" class="tablinks" onclick="showResults('resultDisplayHtmlTable'); return false;">Html</button>
+      <button id="resultDisplayWikiTab" class="tablinks" onclick="showResults('resultDisplayWiki'); return false;">Wiki Template</button>
+      <button id="resultDisplayJsonTab" class="tablinks" onclick="showResults('resultDisplayJson'); return false;">Json</button>
+    </div>
+    <div class="resultActions">
+        <button id="copyToClipboardBtn" data-toggle="tooltip" title="Copy to clipboard" onclick="copyToClipboard(activeTab); return false;">Copy to clipboard</button>
+    </div>
+    <div id="resultDisplayHtmlTable" class="tabcontent">&nbsp;</div>
+    <div id="resultDisplayWiki" class="preformatted tabcontent">&nbsp;</div>
+    <div id="resultDisplayJson" class="preformatted tabcontent">&nbsp;</div>
+  </div>
+</div>
+
+<br><br><br>
+</body>
+</html>
