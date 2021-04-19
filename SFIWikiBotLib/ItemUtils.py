@@ -1383,7 +1383,7 @@ def GetItemEffectDamage(item, shipMass=..., amount=...):
             if effectName == 'Radiation Damage':
                 # Radiation is (6 * m * t/3) + (4 * m * t/3) + (2 * m * t/3) Where m is ship mass, t is effect time (using highest stacked time)
                 # This simplifies down to a short  4 * m * t
-                return round(4 * shipMass * effectTime, shipMass)
+                return round(4 * shipMass * effectTime, 2)
             elif effectName == 'Corrosion':
                 # Corrosion damage is time remaining as damage per second. So 15 secs of corrosion with no refresh would be 15 + 14 + 13 ... + 1 damage
                 return (effectTime + 1) * effectTime / 2
@@ -1391,7 +1391,7 @@ def GetItemEffectDamage(item, shipMass=..., amount=...):
                 return round(SmallConstants.effectDamagesData[effectName] * effectTime, 2)
 
     except:
-        pass
+        raise
 
 
 def GetItemEffectDamagePerSecond(item, shipMass=..., amount=...):
