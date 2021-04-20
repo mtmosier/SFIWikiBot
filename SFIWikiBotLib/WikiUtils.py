@@ -40,7 +40,7 @@ wikiCache = Cache(directory=os.path.join(Config.cacheDir, 'cache.wiki'))
 nprPageNameMapping = {
     'Ascendants': 'Ascendant',
     'Andromedans': 'Andromedan',
-    'Church of Megmos': 'Church of Megmos',
+    'The Church of Megmos': 'Church of Megmos',
     'Dartians': 'Dartian',
     'Devimon': 'Devimon',
     'Forkworms': 'Forkworm',
