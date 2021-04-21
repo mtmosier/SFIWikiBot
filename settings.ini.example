@@ -9,7 +9,7 @@ botPassword =
 # These settings are recommended (2021-04-19)
 botUnreleasedRaceList = Enlightened, Face of Space, Robosphere, Chronoduke
 botUnreleasedShipList = Forkworm Abomination, Face of Space
-botUnreleasedSystemList = TBZ, Sol
+botUnreleasedSystemList = TBZ, Sol, Cd
 botBpLocationOverride = White Xandelevium Blaster=Sh-1-4
 #
 # botUnreleasedRaceList =
