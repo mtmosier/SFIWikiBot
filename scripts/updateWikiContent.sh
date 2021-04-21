@@ -7,15 +7,18 @@ echo `date` " - Begin galaxy data update" >> /home/app/app.log
 echo Running updateWikiGalaxyContent.py
 $PYTHON $DIR/updateWikiGalaxyContent.py
 echo `date` " - End galaxy data update" >> /home/app/app.log
+echo
 
 echo `date` " - Begin ship data update" >> /home/app/app.log
 echo Running updateWikiShipContent.py
 $PYTHON $DIR/updateWikiShipContent.py
 echo `date` " - End ship data update" >> /home/app/app.log
+echo
 
 echo `date` " - Begin item data update" >> /home/app/app.log
 echo Running updateWikiItemContent.py
 $PYTHON $DIR/updateWikiItemContent.py
 echo `date` " - End item data update" >> /home/app/app.log
+echo
 
 exit 0
