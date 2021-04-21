@@ -462,8 +462,10 @@ def UpdateWikiShipNavboxTemplates(comment=None):
                     comment = 'Adding new ships to the navbox'
                 try:
                     page.edit(newContent, comment)
+                    if Config.verbose >= 1:  print("Page Updated: {} - {}".format(templatePageName, comment))
                     rtnVal['pagesUpdated'].append(templatePageName)
                 except:
+                    if Config.debug or Config.verbose >= 1:  print("Failed to update: {} - {}".format(templatePageName, comment))
                     rtnVal['pagesFailedToUpdate'].append(templatePageName)
             else:
                 rtnVal['pagesAlreadyUpToDate'].append(templatePageName)
@@ -519,13 +521,13 @@ def UpdateWikiShipDetailedListPagesForPresetList(presetList, comment=None):
 
             if updatesIncluded:
                 try:
-                    myComment = comment
-                    if not myComment:
-                        myComment = "Updating data table{} ({})".format('s' if len(updatesIncluded) != 1 else '', ', '.join(updatesIncluded))
+                    if not comment:
+                        comment = "Updating data table{} ({})".format('s' if len(updatesIncluded) != 1 else '', ', '.join(updatesIncluded))
                     page.edit(content, comment)
-                    # print("Attempting to update", pageName, myComment)
+                    if Config.verbose >= 1:  print("Page Updated: {} - {}".format(pageName, comment))
                     rtnVal['pagesUpdated'].append(pageName)
                 except:
+                    if Config.debug or Config.verbose >= 1:  print("Failed to update: {} - {}".format(pageName, comment))
                     rtnVal['pagesFailedToUpdate'].append(pageName)
                     raise
         else:
@@ -605,15 +607,14 @@ def UpdateWikiEquipmentPagesForPresetList(presetList, comment=None):
 
             if updatesIncluded:
                 try:
-                    myComment = comment
-                    if not myComment:
-                        myComment = "Updating data table{} ({})".format('s' if len(updatesIncluded) != 1 else '', ', '.join(updatesIncluded))
+                    if not comment:
+                        comment = "Updating data table{} ({})".format('s' if len(updatesIncluded) != 1 else '', ', '.join(updatesIncluded))
                     page.edit(content, comment)
-                    if Config.debug:  print("Attempting to update", pageName, myComment)
+                    if Config.verbose >= 1:  print("Page Updated: {} - {}".format(pageName, comment))
                     rtnVal['pagesUpdated'].append(pageName)
                 except:
                     rtnVal['pagesFailedToUpdate'].append(pageName)
-                    if Config.debug:  print("Failed trying to update", pageName, myComment)
+                    if Config.debug or Config.verbose >= 1:  print("Failed to update: {} - {}".format(pageName, comment))
                     raise
         else:
             rtnVal['pagesNotFound'].append(pageName)
@@ -680,8 +681,10 @@ def UpdateWikiNPRPages(comment=None, forceUpdate=False):
                             if not comment:
                                 comment = "Updating data tables with fresh item/ship stats"
                             page.edit(newContent, comment)
+                            if Config.verbose >= 1:  print("Page Updated: {} - {}".format(pageName, comment))
                             rtnVal['pagesUpdated'].append(pageName)
                         except Exception as e:
+                            if Config.debug or Config.verbose >= 1:  print("Failed to update: {} - {}".format(pageName, comment))
                             rtnVal['pagesFailedToUpdate'].append("{} - {}".format(pageName, e))
                     else:
                         rtnVal['pagesFailedToUpdate'].append("{} - Failed to update content".format(pageName))
@@ -802,8 +805,10 @@ def UpdateWikiSkillsPage(comment=None):
                 if not comment:
                     comment = "Updating item lists"
                 page.edit(content, comment)
+                if Config.verbose >= 1:  print("Page Updated: Skills - {}".format(comment))
                 rtnVal['pagesUpdated'].append('Skills')
             except Exception as e:
+                if Config.debug or Config.verbose >= 1:  print("Failed to update: Skills - {}".format(comment))
                 rtnVal['pagesFailedToUpdate'].append("Skills - {}".format(e))
         else:
             rtnVal['pagesAlreadyUpToDate'].append('Skills')
@@ -982,6 +987,7 @@ def UpdateIndividualItemPageByItemRange(itemList, comment=None, allowRetry=True)
                     comment = "Updating {}".format(', '.join(updatesIncluded))
                 # print('Updating page', updatesIncluded)
                 page.edit(content, comment)
+                if Config.verbose >= 1:  print("Page Updated: {} - {}".format(pageName, comment))
                 rtnVal = True
                 time.sleep(Config.pauseAfterSuccessfullyUpdatingWikiPageInSec)
 
@@ -989,8 +995,11 @@ def UpdateIndividualItemPageByItemRange(itemList, comment=None, allowRetry=True)
                 time.sleep(Config.pauseAfterFailingToUpdateWikiPageInSec)
 
                 if allowRetry:
+                    if Config.debug:  print("Retrying update: {} - {}".format(pageName, comment))
                     GetWikiClientSiteObject(True)
                     return UpdateIndividualItemPageByItemRange(itemList, comment, False)
+
+                if Config.debug or Config.verbose >= 1:  print("Failed to update: {} - {}".format(pageName, comment))
                 raise ex
         else:
             time.sleep(Config.pauseAfterSkippingWikiPageUpdateInSec)
@@ -1065,13 +1074,14 @@ def UpdateIndividualShipPage(ship, comment=None, allowRetry=True):
                     content = content.replace(pageSectionList['Game Description']['content'].strip(), newContent)
                     updatesIncluded.append("Game description")
             else:
-                print("Game Description section not found for {} - Unable to update".format(pageName))
+                if Config.verbose >= 1:  print("Game Description section not found for {} - Unable to update".format(pageName))
 
         if updatesIncluded:
             try:
                 if not comment:
                     comment = "Updating {}".format(', '.join(updatesIncluded))
                 page.edit(content, comment)
+                if Config.verbose >= 1:  print("Page Updated: {} - {}".format(pageName, comment))
                 rtnVal = True
                 time.sleep(Config.pauseAfterSuccessfullyUpdatingWikiPageInSec)
 
@@ -1079,8 +1089,11 @@ def UpdateIndividualShipPage(ship, comment=None, allowRetry=True):
                 time.sleep(Config.pauseAfterFailingToUpdateWikiPageInSec)
 
                 if allowRetry:
+                    if Config.debug:  print("Retrying update: {} - {}".format(pageName, comment))
                     GetWikiClientSiteObject(True)
                     return UpdateIndividualShipPage(ship, comment, False)
+
+                if Config.debug or Config.verbose >= 1:  print("Failed to update: {} - {}".format(pageName, comment))
                 raise ex
         else:
             time.sleep(Config.pauseAfterSkippingWikiPageUpdateInSec)
@@ -1146,6 +1159,7 @@ def UpdateStarSystemPage(systemInfo, comment=None, allowRetry=True):
                 if not comment:
                     comment = "Updating {}".format(', '.join(updatesIncluded))
                 page.edit(content, comment)
+                if Config.verbose >= 1:  print("Page Updated: {} - {}".format(pageName, comment))
                 # print(content, '\n\n')
                 rtnVal = True
                 time.sleep(Config.pauseAfterSuccessfullyUpdatingWikiPageInSec)
@@ -1154,8 +1168,10 @@ def UpdateStarSystemPage(systemInfo, comment=None, allowRetry=True):
                 time.sleep(Config.pauseAfterFailingToUpdateWikiPageInSec)
 
                 if allowRetry:
+                    if Config.debug:  print("Retrying update: {} - {}".format(pageName, comment))
                     GetWikiClientSiteObject(True)
                     return UpdateStarSystemPage(systemInfo, comment, False)
+                if Config.debug or Config.verbose >= 1:  print("Failed to update: {} - {}".format(pageName, comment))
                 raise ex
         else:
             time.sleep(Config.pauseAfterSkippingWikiPageUpdateInSec)
@@ -1243,6 +1259,7 @@ def UpdateIndividualPlanetPage(planetName, comment=None, allowRetry=True):
                 if not comment:
                     comment = "Updating {}".format(', '.join(updatesIncluded))
                 page.edit(content, comment)
+                if Config.verbose >= 1:  print("Page Updated: {} - {}".format(pageName, comment))
                 rtnVal = True
                 time.sleep(Config.pauseAfterSuccessfullyUpdatingWikiPageInSec)
 
@@ -1250,8 +1267,11 @@ def UpdateIndividualPlanetPage(planetName, comment=None, allowRetry=True):
                 time.sleep(Config.pauseAfterFailingToUpdateWikiPageInSec)
 
                 if allowRetry:
+                    if Config.debug:  print("Retrying update: {} - {}".format(pageName, comment))
                     GetWikiClientSiteObject(True)
                     return UpdateIndividualPlanetPage(planetName, comment, False)
+
+                if Config.debug or Config.verbose >= 1:  print("Failed to update: {} - {}".format(pageName, comment))
                 raise ex
         else:
             time.sleep(Config.pauseAfterSkippingWikiPageUpdateInSec)
@@ -1295,6 +1315,7 @@ def AddMissingPlanetWikiPage(planetName, comment=None, allowRetry=True):
             if not comment:
                 comment = "Adding planet page {}".format(planetName)
             page.edit(content, comment)
+            if Config.verbose >= 1:  print("Page added: {} - {}".format(pageName, comment))
             rtnVal = True
             time.sleep(Config.pauseAfterSuccessfullyUpdatingWikiPageInSec)
 
@@ -1302,8 +1323,11 @@ def AddMissingPlanetWikiPage(planetName, comment=None, allowRetry=True):
             time.sleep(Config.pauseAfterFailingToUpdateWikiPageInSec)
 
             if allowRetry:
+                if Config.debug:  print("Retrying page addition: {} - {}".format(pageName, comment))
                 GetWikiClientSiteObject(True)
                 return AddMissingPlanetWikiPage(planetName, comment, False)
+
+            if Config.debug or Config.verbose >= 1:  print("Failed to add page: {} - {}".format(pageName, comment))
             raise ex
 
     return rtnVal
@@ -1712,10 +1736,12 @@ def AddMissingItemWikiPages():
             content = ItemUtils.GetItemPageContentForItemRangeList(curItemList)
             try:
                 page.edit(content, 'Adding item page')
+                if Config.verbose >= 1:  print("Page added: {}".format(pageName))
                 rtnVal['pagesAdded'].append(pageName)
                 time.sleep(Config.pauseAfterSuccessfullyUpdatingWikiPageInSec)
 
             except:
+                if Config.debug or Config.verbose >= 1:  print("Failed to add: {}".format(pageName))
                 time.sleep(Config.pauseAfterFailingToUpdateWikiPageInSec)
                 rtnVal['pagesFailedToSave'].append(pageName)
         else:
@@ -1748,10 +1774,12 @@ def AddMissingShipWikiPages():
             content = ShipUtils.GetShipPageContent(ship)
             try:
                 page.edit(content, 'Adding ship page')
+                if Config.verbose >= 1:  print("Page added: {}".format(pageName))
                 rtnVal['pagesAdded'].append(pageName)
                 time.sleep(Config.pauseAfterSuccessfullyUpdatingWikiPageInSec)
 
             except:
+                if Config.debug or Config.verbose >= 1:  print("Failed to add: {}".format(pageName))
                 time.sleep(Config.pauseAfterFailingToUpdateWikiPageInSec)
                 rtnVal['pagesFailedToSave'].append(pageName)
         else:
@@ -1820,6 +1848,7 @@ def UpdateWikiMainShipPage(pageName, shipList, comment=None):
         if not comment:
             comment = 'Updating Ship Lists'
         page.edit(newContent, comment)
+        if Config.verbose >= 1:  print("Page Updated: {} - {}".format(pageName, comment))
         rtnVal = True
 
     return rtnVal
@@ -1869,14 +1898,17 @@ def FixShipPages(replacementList={}, comment=None, shipList=..., allowRetry=True
                     comment = 'Fixing an issue on the ship pages.'
                 try:
                     page.edit(newContent, comment)
+                    if Config.verbose >= 1:  print("Page Updated: {} - {}".format(pageName, comment))
                     rtnVal['pagesUpdated'].append(pageName)
                     time.sleep(Config.pauseAfterSuccessfullyUpdatingWikiPageInSec)
 
                 except mwclient.errors.AssertUserFailedError as ex:
                     time.sleep(Config.pauseAfterFailingToUpdateWikiPageInSec)
                     if allowRetry:
+                        if Config.debug:  print("Retrying update: {} - {}".format(pageName, comment))
                         GetWikiClientSiteObject(True)
                         return FixShipPages(replacementList, comment, shipList, False, rtnVal)
+                    if Config.debug or Config.verbose >= 1:  print("Failed to update: {} - {}".format(pageName, comment))
                     raise ex
             else:
                 rtnVal['pagesAlreadyUpToDate'].append(pageName)
