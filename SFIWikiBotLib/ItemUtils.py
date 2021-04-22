@@ -140,12 +140,16 @@ def DownloadImageForItem(item):
         try:
             url = GetItemImageUrl(item)
             r = requests.get(url)
-            with open(filepath, 'wb') as f:
-                f.write(r.content)
-                print(item['name'] + " Success")
-                rtnVal = True
+            if r.status_code == 200:
+                with open(filepath, 'wb') as f:
+                    f.write(r.content)
+                    if Config.verbose >= 1:  print(item['name'], "- Image saved successfully")
+                    rtnVal = True
+            else:
+                if Config.verbose >= 1:  print("Image not found for item", item['name'])
         except:
             print("{} - failed to save the image\nUrl: [{}]\nLocal path [{}]\n\n".format(item['name'], url, filepath))
+            raise
 
     return rtnVal
 

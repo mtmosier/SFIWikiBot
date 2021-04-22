@@ -173,10 +173,13 @@ def DownloadImageForPlanet(planetName):
         try:
             url = GetPlanetImageUrl(planetName)
             r = requests.get(url)
-            with open(filepath, 'wb') as f:
-                f.write(r.content)
-                print(planetName, "- Success")
-                rtnVal = True
+            if r.status_code == 200:
+                with open(filepath, 'wb') as f:
+                    f.write(r.content)
+                    if Config.verbose >= 1:  print(planetName, "- Image saved successfully")
+                    rtnVal = True
+            else:
+                if Config.verbose >= 1:  print("Image not found for planet", planetName)
         except:
             print("{} - failed to save the image\nUrl: [{}]\nLocal path [{}]\n\n".format(planetName, url, filepath))
             raise
