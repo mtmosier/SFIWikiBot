@@ -112,6 +112,9 @@ def NormalizePageName(input):
 
 
 def GetNprWikiPageByNprName(nprName):
+    if not nprName:  return None
+    if type(nprName) != str:  return None
+
     if nprName.lower() == 'aralien ghost' or nprName.lower() == 'human ghost':
         nprName = 'ghost';
 
@@ -1051,12 +1054,39 @@ def UpdateIndividualShipPage(ship, comment=None, allowRetry=True):
     rtnVal = False
     pageName = ship['name']
 
+    managedCategoryList = [ v.lower() for v in SmallConstants.GetFullShipManagedCategoryList() ]
+
     site = GetWikiClientSiteObject()
     page = site.pages[pageName]
     if page.exists:
         updatesIncluded = []
+        content = page.text().strip()
 
-        content = page.text()
+        shipCatList = ShipUtils.GetCategoryListForShip(ship)
+        shipCatListCmp = [v.lower().strip() for v in shipCatList]
+
+        catChanges = False
+
+        curCatList = []
+        catList = GetCategoryListFromWikiPageContent(content)
+        for catInfo in catList:
+            # Remove any categories which don't apply to this ship
+            catName = catInfo['name'].lower()
+            if catName not in shipCatListCmp and catName in managedCategoryList:
+                content = content.replace(catInfo['content'], '')
+                catChanges = True
+            else:
+                curCatList.append(catInfo['name'].lower())
+
+        for catName in shipCatList:
+            if catName.lower() not in curCatList:
+                content += '\n[[Category:{}]]'.format(catName)
+                catChanges = True
+
+        if catChanges:
+            updatesIncluded.append("Categories")
+
+
         templateList = GetTemplateListFromWikiPageContent(content)
         for template in templateList:
             if template['name'].replace(' ', '_').lower() == 'infobox_ship':
@@ -1064,8 +1094,6 @@ def UpdateIndividualShipPage(ship, comment=None, allowRetry=True):
                 if 'image1' in template['data'] and template['data']['image1']:
                     if 'image1' not in infoBox or not infoBox['image1']:
                         infoBox['image1'] = template['data']['image1']
-                # if 'turrets' in template['data'] and template['data']['turrets'].isnumeric():
-                #     infoBox['turrets'] = template['data']['turrets']
 
                 if GeneralUtils.GenerateDataSignature(infoBox) != GeneralUtils.GenerateDataSignature(template['data']):
                     updatedTemplate = ConvertDictionaryToWikiTemplate('Infobox_Ship', infoBox)

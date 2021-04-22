@@ -84,6 +84,24 @@ def GetNprIdFromName(name):
         return "ghost"
 
 
+def GetFullShipManagedCategoryList():
+    from SFIWikiBotLib import WikiUtils
+
+    rtnList = set()
+    rtnList.add('Ships')
+    rtnList.add('Human Ships')
+    rtnList.add('Aralien Ships')
+    rtnList.add('Restricted Ships')
+    rtnList.add('NPR Ships')
+
+    for race in raceData:
+        nprPageName = WikiUtils.GetNprWikiPageByNprName(race['name'])
+        if nprPageName:
+            rtnList.add(nprPageName)
+
+    return sorted(list(rtnList))
+
+
 def GetFullEffectNameList():
     from SFIWikiBotLib import ItemUtils
     damageTypesToIncludePostfix = ['Electrostatic', 'Explosive', 'Ghostly', 'Heat', 'Laser', 'Photonic', 'Projectile']

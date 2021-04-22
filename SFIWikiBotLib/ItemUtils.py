@@ -306,10 +306,8 @@ def GetWikiInfoboxDataForPrimaryOrSecondary(itemList):
     if displayData != '999':
         infobox['required_skill'] = "{} {}".format(GetItemSkillName(primaryItem), displayData)
 
-    vdata = [ GeneralUtils.NumDisplay(GetDamagePerRoundForItem(i), 1) for i in itemList ]
-    if vdata[0] != '0':
-        if DisplayDamageAsPerSecond(primaryItem):
-            vdata = [ '{}/s'.format(i) for i in vdata ]
+    vdata = [ ItemDisplayStatDamage(i, False, False) for i in itemList ]
+    if vdata[0] is not None and str(vdata[0]) != '0':
         displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
         infobox['damage_per_round'] = displayData
 
@@ -758,7 +756,7 @@ def GetItemShieldEffect(item, includeEffectLevel=False):
 
 def IsItemHidden(item):
     with suppress(KeyError):
-        if SmallConstants.GetNprNameFromId(item['race']) in Config.unreleasedRaceList:
+        if GetRaceForItem(item) in Config.unreleasedRaceList:
             return True
 
     if item['id'] in itemIdListToSkip:
@@ -1222,19 +1220,13 @@ def GetCategoryListForItem(item):
     rtnSet = set()
     itemType = SmallConstants.typeLookup[item['type']].replace('_', ' ').title()
 
-    if item['race'] > 1:
-        try:
-            nprPageName = WikiUtils.GetNprWikiPageByNprName(GetRaceForItem(item))
-            if nprPageName:
-                rtnSet.add(nprPageName)
-        except:
-            print("Unable to get race information for", item['name'])
+    nprPageName = WikiUtils.GetNprWikiPageByNprName(GetRaceForItem(item))
+    if nprPageName:
+        rtnSet.add(nprPageName)
 
-        try:
-            if item['equipCategory'] == 7:
-                rtnSet.add('Ultra Rare')
-        except:
-            pass
+    with suppress(KeyError):
+        if item['equipCategory'] == 7:
+            rtnSet.add('Ultra Rare')
 
 
     if itemType == 'Collectible':
@@ -1256,14 +1248,12 @@ def GetCategoryListForItem(item):
         else:
             rtnSet.add(effect)
 
-    try:
+    with suppress(KeyError):
         if itemType == 'Shield':
             if item['resistExtraEffect'] >= 0:
                 effectName = SmallConstants.effectsData[item['resistExtraEffect']]['name']
                 if effectName:
                     rtnSet.add(effectName)
-    except:
-        pass
 
     if item['name'] == 'Radii Nanite Repair':
         rtnSet.add('Heat')
@@ -1807,7 +1797,7 @@ def GetItemSourceExtended(item, includeLink=False):
         elif IsItemNprExclusive(item):
             source = "NPR Exclusive"
 
-        nprName = SmallConstants.GetNprNameFromId(item['race'])
+        nprName = GetRaceForItem(item)
         if not includeLink:
             source += " ({})".format(nprName)
         else:
@@ -2223,7 +2213,7 @@ def GetDefaultTableInfoByItemType(itemType, weaponType=..., pageType=''):
 
 
 
-def ItemDisplayStatDamage(item, p=...):
+def ItemDisplayStatDamage(item, p=..., includeProjectileDisplay=True):
     damagePerRound = GetDamagePerRoundForItem(item)
 
     additionalClass = ""
@@ -2231,13 +2221,17 @@ def ItemDisplayStatDamage(item, p=...):
         damageType = GetItemDamageType(item)
         if damageType:
             additionalClass += "damageType{}".format(damageType.title())
+    else:
+        return None
 
     rtnVal = damagePerRound
     if DisplayDamageAsPerSecond(item):
         rtnVal = "{}/s".format(rtnVal)
-    amount = GetNumOfDamagingProjectiles(item, True)
-    if amount > 1:
-        rtnVal = "{} x{}".format(rtnVal, amount)
+
+    if includeProjectileDisplay:
+        amount = GetNumOfDamagingProjectiles(item, True)
+        if amount > 1:
+            rtnVal = "{} x{}".format(rtnVal, amount)
 
     if additionalClass:
         rtnVal = '<span class="{}">{}</span>'.format(additionalClass, rtnVal)
@@ -2283,7 +2277,9 @@ def ItemDisplayStatTotalDamagePerVolley(item, p=...):
 
     if not message:  message = ''
     if message or additionalClass:
-        rtnVal = '<span class="itemStatDetails{}" title="{}">{}</span>'.format(additionalClass, message, rtnVal)
+        outputClass = additionalClass.strip()
+        if message:  outputClass = 'itemStatDetails{}'.format(additionalClass)
+        rtnVal = '<span class="{}" title="{}">{}</span>'.format(outputClass, message, rtnVal)
 
     return rtnVal
 
@@ -2360,7 +2356,9 @@ def ItemDisplayStatTotalDps(item, p=...):
 
     if not message:  message = ''
     if message or additionalClass:
-        rtnVal = '<span class="itemStatDetails{}" title="{}">{}</span>'.format(additionalClass, message, rtnVal)
+        outputClass = additionalClass.strip()
+        if message:  outputClass = 'itemStatDetails{}'.format(additionalClass)
+        rtnVal = '<span class="{}" title="{}">{}</span>'.format(outputClass, message, rtnVal)
 
     return rtnVal
 
@@ -2837,7 +2835,7 @@ itemDisplayStatSwitcher = {
     'prop time': (lambda obj, p: "{} sec".format(GeneralUtils.NumDisplay(obj['propulsionEnhanceTime'], 4)) if obj['propulsionEnhanceTime'] > 0 else ""),
     'propulsion': (lambda obj, p: "x{}".format(GeneralUtils.NumDisplay(obj['propulsionEnhance'], 4)) if obj['propulsionEnhance'] > 0 else ""),
     'purchase cost': ItemDisplayStatPurchaseCost,
-    'race': (lambda obj, p: SmallConstants.GetNprNameFromId(obj['race'])),
+    'race': (lambda obj, p: GetRaceForItem(obj)),
     'range': (lambda obj, p: "{}su".format(GeneralUtils.NumDisplay(GetItemRange(obj), 1)) if GetItemRange(obj) else ''),
     'rebuy cost': (lambda obj, p: GeneralUtils.NumDisplay(GetItemAmmoCost(obj), 0, True) if GetItemAmmoCost(obj) > 0 else ""),
     'required_skill': ItemDisplayStatSkillFull,

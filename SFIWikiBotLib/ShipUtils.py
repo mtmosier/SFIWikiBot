@@ -100,6 +100,27 @@ def GetAralienPlayerShipList(sortBy='name'):
     return sorted(GeneralUtils.SearchObjectListUsingRuleset(shipData, ruleSet), key=GetShipSortFunc(sortBy))
 
 
+def GetCategoryListForShip(ship):
+    rtnSet = set()
+
+    nprPageName = WikiUtils.GetNprWikiPageByNprName(GetRaceForShip(ship))
+    if nprPageName:
+        rtnSet.add(nprPageName)
+
+    shipType = GetShipUseCategory(ship)
+    if shipType == 'Human':
+        rtnSet.add('Human Ships')
+        rtnSet.add('Ships')
+    elif shipType == 'Aralien':
+        rtnSet.add('Aralien Ships')
+        rtnSet.add('Ships')
+    elif shipType == 'NPC':
+        rtnSet.add('Restricted Ships')
+    elif shipType == 'NPR':
+        rtnSet.add('NPR Ships')
+
+    return sorted(list(rtnSet))
+
 
 def GetDefaultTableInfo(pageType=''):
     rtnInfo = {
@@ -232,31 +253,32 @@ def GetShipImageUrl(ship):
     return "https://www.benoldinggames.co.uk/sfi/gamedata/icons/Ship/{}.png".format(ship['name'].lower().replace(' ', '%20'))
 
 
+def GetShipUseCategory(ship):
+    if ship in GetHumanPlayerShipList():
+        return 'Human'
+    elif ship in GetAralienPlayerShipList():
+        return 'Aralien'
+    elif ship in GetRestrictedShipList():
+        return 'NPC'
+    elif ship in GetNPRShipList():
+        return 'NPR'
+
 
 def GetShipPageContent(ship):
     if not ship:
         return ''
 
     pageHeader = '__NOTOC__\n'
-    pageFooter = '\n{{Template:Human Ships}}\n{{Template:Aralien Ships}}\n{{Template:Restricted Ships}}\n{{Template:NPR Ships}}\n[[Category:Ships]]\n'
+    pageFooter = '\n{{Template:Human Ships}}\n{{Template:Aralien Ships}}\n{{Template:Restricted Ships}}\n{{Template:NPR Ships}}\n'
 
-    shipType = ''
-    if ship in GetHumanPlayerShipList():
-        pageFooter += '[[Category:Human Ships]]\n'
-        shipType = 'Human'
-    elif ship in GetAralienPlayerShipList():
-        pageFooter += '[[Category:Aralien Ships]]\n'
-        shipType = 'Aralien'
-    elif ship in GetRestrictedShipList():
-        pageFooter += '[[Category:Restricted Ships]]\n'
-        shipType = 'NPC'
-    elif ship in GetNPRShipList():
-        pageFooter += '[[Category:NPR Ships]]\n'
-        shipType = 'NPR'
+
+    shipCatList = GetCategoryListForShip(ship)
+    for catName in shipCatList:
+        pageFooter += '[[Category:{}]]\n'.format(catName)
 
 
     infoBox = GetWikiInfoboxDataForShip(ship)
-
+    shipType = GetShipUseCategory(ship)
 
     introSection = ''
 
