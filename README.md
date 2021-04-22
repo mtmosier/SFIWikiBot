@@ -69,11 +69,11 @@ python3 setup.py install
 **Work in progress**
 
 
-#### Usage
+## Usage
 **Work in progress**
 
 
-#### Pages Maintained
+## Pages Maintained
 - Individual ship pages (Infobox and game description)
 - Individual item pages (Infobox and game description)
 - Individual planet pages (Planet stats and game description)
