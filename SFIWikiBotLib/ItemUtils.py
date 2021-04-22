@@ -2497,7 +2497,7 @@ def ItemDisplayStatName(item, p=...):
 
     itemArticlePage = GetItemWikiArticlePage(item)
     if itemArticlePage:
-        if itemArticlePage == item['name']:
+        if WikiUtils.PageNamesEqual(itemArticlePage, item['name']):
             displayName = '[[{}]]'.format(item['name'])
         else:
             displayName = '[[{}|{}]]'.format(itemArticlePage, item['name'])
@@ -2541,7 +2541,7 @@ def ItemDisplayStatNameAndImage(item, p=...):
     if imageName:
         rtnVal = 'align="center" style="font-size: smaller;" class="{}" | [[File:{}|centre|thumb|60x60px|link={}]]<br/>[[{}{}]]'.format(sourceClass, imageName, pageName, pageName, '' if pageName == itemName else '|{}'.format(itemName))
     else:
-        rtnVal = 'align="center" style="font-size: smaller;" class="{}" | [[{}{}]]'.format(sourceClass, pageName, '' if pageName == itemName else '|{}'.format(itemName))
+        rtnVal = 'align="center" style="font-size: smaller;" class="{}" | [[{}{}]]'.format(sourceClass, pageName, '' if WikiUtils.PageNamesEqual(pageName, itemName) else '|{}'.format(itemName))
 
     return rtnVal
 

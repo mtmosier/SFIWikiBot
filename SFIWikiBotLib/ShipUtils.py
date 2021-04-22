@@ -463,10 +463,9 @@ def UploadImagesToWikiForShipList(shipList):
 def ShipDisplayStatName(ship, p=...):
     displayName = ship['name']
 
-    shipNameList = [ ship['name'] ]
-    shipArticlePage = WikiUtils.GetWikiArticlePageForNameList(shipNameList)
+    shipArticlePage = GetShipWikiPageName(ship)
     if shipArticlePage:
-        if shipArticlePage == ship['name']:
+        if WikiUtils.PageNamesEqual(shipArticlePage, ship['name']):
             displayName = '[[{}]]'.format(ship['name'])
         else:
             displayName = '[[{}|{}]]'.format(shipArticlePage, ship['name'])
@@ -502,7 +501,7 @@ def ShipDisplayStatImageAndName(ship, p=...):
     if imageName:
         rtnVal = 'align="center" style="font-size: smaller" | [[File:{}|centre|thumb|60x60px|link={}]]<br/>[[{}{}]]'.format(imageName, pageName, pageName, '' if pageName == shipName else '|{}'.format(shipName))
     else:
-        rtnVal = 'align="center" style="font-size: smaller" | [[{}{}]]'.format(pageName, '' if pageName == ship['name'] else '|{}'.format(ship['name']))
+        rtnVal = 'align="center" style="font-size: smaller" | [[{}{}]]'.format(pageName, '' if WikiUtils.PageNamesEqual(pageName, ship['name']) else '|{}'.format(ship['name']))
 
     return rtnVal
 
@@ -510,8 +509,7 @@ def ShipDisplayStatImageAndName(ship, p=...):
 def ShipDisplayStatNameHtml(ship, p=...):
     displayName = html.escape(ship['name'])
 
-    shipNameList = [ ship['name'] ]
-    shipArticlePage = WikiUtils.GetWikiArticlePageForNameList(shipNameList)
+    shipArticlePage = GetShipWikiPageName(ship)
     if shipArticlePage:
         displayName = '<a href="{}">{}</a>'.format(
             WikiUtils.GetWikiLink(shipArticlePage),
@@ -541,7 +539,6 @@ def ShipDisplayStatImageAndNameHtml(ship, p=...):
     wikiUrl = WikiUtils.GetWikiLink(pageName)
 
     imageName = GetShipWikiImage(ship)
-    pageName = GetShipWikiPageName(ship)
 
     shipName = ship['name'].replace("Commander Class Escape", "CC E")
     shipName = shipName.replace("Commander Class", "CC")

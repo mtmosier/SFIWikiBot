@@ -103,6 +103,13 @@ def GetPageInfoFromWiki(pageName):
     return pageInformation
 
 
+def PageNamesEqual(i1, i2):
+    return NormalizePageName(i1) == NormalizePageName(i2)
+
+def NormalizePageName(input):
+    input = re.sub('[^a-zA-Z0-9\(\):-]', '_', str(input))
+    return input.lower()
+
 
 def GetNprWikiPageByNprName(nprName):
     if nprName.lower() == 'aralien ghost' or nprName.lower() == 'human ghost':
@@ -458,14 +465,16 @@ def UpdateWikiShipNavboxTemplates(comment=None):
                     newContent = content.replace(template['data']['body'].strip(), bodyContent.strip())
 
             if content != newContent:
-                if not comment:
-                    comment = 'Adding new ships to the navbox'
+                loopComment = comment
+                if not loopComment:
+                    loopComment = 'Adding new ships to the navbox'
+
                 try:
-                    page.edit(newContent, comment)
-                    if Config.verbose >= 1:  print("Page Updated: {} - {}".format(templatePageName, comment))
+                    page.edit(newContent, loopComment)
+                    if Config.verbose >= 1:  print("Page Updated: {} - {}".format(templatePageName, loopComment))
                     rtnVal['pagesUpdated'].append(templatePageName)
                 except:
-                    if Config.debug or Config.verbose >= 1:  print("Failed to update: {} - {}".format(templatePageName, comment))
+                    if Config.debug or Config.verbose >= 1:  print("Failed to update: {} - {}".format(templatePageName, loopComment))
                     rtnVal['pagesFailedToUpdate'].append(templatePageName)
             else:
                 rtnVal['pagesAlreadyUpToDate'].append(templatePageName)
@@ -520,14 +529,16 @@ def UpdateWikiShipDetailedListPagesForPresetList(presetList, comment=None):
                                 rtnVal['pagesAlreadyUpToDate'].append(preset['name'])
 
             if updatesIncluded:
+                loopComment = comment
+                if not loopComment:
+                    loopComment = "Updating data table{} ({})".format('s' if len(updatesIncluded) != 1 else '', ', '.join(updatesIncluded))
+
                 try:
-                    if not comment:
-                        comment = "Updating data table{} ({})".format('s' if len(updatesIncluded) != 1 else '', ', '.join(updatesIncluded))
-                    page.edit(content, comment)
-                    if Config.verbose >= 1:  print("Page Updated: {} - {}".format(pageName, comment))
+                    page.edit(content, loopComment)
+                    if Config.verbose >= 1:  print("Page Updated: {} - {}".format(pageName, loopComment))
                     rtnVal['pagesUpdated'].append(pageName)
                 except:
-                    if Config.debug or Config.verbose >= 1:  print("Failed to update: {} - {}".format(pageName, comment))
+                    if Config.debug or Config.verbose >= 1:  print("Failed to update: {} - {}".format(pageName, loopComment))
                     rtnVal['pagesFailedToUpdate'].append(pageName)
                     raise
         else:
@@ -606,15 +617,17 @@ def UpdateWikiEquipmentPagesForPresetList(presetList, comment=None):
                             if Config.debug:  print("No table found for preset {} ({} || {})".format(preset['name'], ', '.join(validIdList), ', '.join(tblIdList)))
 
             if updatesIncluded:
+                loopComment = comment
+                if not loopComment:
+                    loopComment = "Updating data table{} ({})".format('s' if len(updatesIncluded) != 1 else '', ', '.join(updatesIncluded))
+
                 try:
-                    if not comment:
-                        comment = "Updating data table{} ({})".format('s' if len(updatesIncluded) != 1 else '', ', '.join(updatesIncluded))
-                    page.edit(content, comment)
-                    if Config.verbose >= 1:  print("Page Updated: {} - {}".format(pageName, comment))
+                    page.edit(content, loopComment)
+                    if Config.verbose >= 1:  print("Page Updated: {} - {}".format(pageName, loopComment))
                     rtnVal['pagesUpdated'].append(pageName)
                 except:
                     rtnVal['pagesFailedToUpdate'].append(pageName)
-                    if Config.debug or Config.verbose >= 1:  print("Failed to update: {} - {}".format(pageName, comment))
+                    if Config.debug or Config.verbose >= 1:  print("Failed to update: {} - {}".format(pageName, loopComment))
                     raise
         else:
             rtnVal['pagesNotFound'].append(pageName)
@@ -677,14 +690,16 @@ def UpdateWikiNPRPages(comment=None, forceUpdate=False):
                         newContent = content.replace(m.group(1), curNprContent)
 
                     if newContent != content:
+                        loopComment = comment
+                        if not loopComment:
+                            loopComment = "Updating data tables with fresh item/ship stats"
+
                         try:
-                            if not comment:
-                                comment = "Updating data tables with fresh item/ship stats"
-                            page.edit(newContent, comment)
-                            if Config.verbose >= 1:  print("Page Updated: {} - {}".format(pageName, comment))
+                            page.edit(newContent, loopComment)
+                            if Config.verbose >= 1:  print("Page Updated: {} - {}".format(pageName, loopComment))
                             rtnVal['pagesUpdated'].append(pageName)
                         except Exception as e:
-                            if Config.debug or Config.verbose >= 1:  print("Failed to update: {} - {}".format(pageName, comment))
+                            if Config.debug or Config.verbose >= 1:  print("Failed to update: {} - {}".format(pageName, loopComment))
                             rtnVal['pagesFailedToUpdate'].append("{} - {}".format(pageName, e))
                     else:
                         rtnVal['pagesFailedToUpdate'].append("{} - Failed to update content".format(pageName))
@@ -1894,21 +1909,23 @@ def FixShipPages(replacementList={}, comment=None, shipList=..., allowRetry=True
                 newContent = newContent.replace(searchStr, replaceStr)
 
             if content != newContent:
-                if not comment:
-                    comment = 'Fixing an issue on the ship pages.'
+                loopComment = comment
+                if not loopComment:
+                    loopComment = 'Fixing an issue on the ship pages.'
+
                 try:
-                    page.edit(newContent, comment)
-                    if Config.verbose >= 1:  print("Page Updated: {} - {}".format(pageName, comment))
+                    page.edit(newContent, loopComment)
+                    if Config.verbose >= 1:  print("Page Updated: {} - {}".format(pageName, loopComment))
                     rtnVal['pagesUpdated'].append(pageName)
                     time.sleep(Config.pauseAfterSuccessfullyUpdatingWikiPageInSec)
 
                 except mwclient.errors.AssertUserFailedError as ex:
                     time.sleep(Config.pauseAfterFailingToUpdateWikiPageInSec)
                     if allowRetry:
-                        if Config.debug:  print("Retrying update: {} - {}".format(pageName, comment))
+                        if Config.debug:  print("Retrying update: {} - {}".format(pageName, loopComment))
                         GetWikiClientSiteObject(True)
                         return FixShipPages(replacementList, comment, shipList, False, rtnVal)
-                    if Config.debug or Config.verbose >= 1:  print("Failed to update: {} - {}".format(pageName, comment))
+                    if Config.debug or Config.verbose >= 1:  print("Failed to update: {} - {}".format(pageName, loopComment))
                     raise ex
             else:
                 rtnVal['pagesAlreadyUpToDate'].append(pageName)
@@ -2124,7 +2141,7 @@ def GetMainShipPageTableForShipList(shipList):
         if imageName:
             content += '![[File:{}|centre|thumb|145x145px|link={}]]<p style="text-align:center;">[[{}{}]]</p>\n'.format(imageName, pageName, pageName, '' if pageName == ship['name'] else '|{}'.format(ship['name']))
         else:
-            content += '!<p style="text-align:center;">[[{}{}]]</p>\n'.format(pageName, '' if pageName == ship['name'] else '|{}'.format(ship['name']))
+            content += '!<p style="text-align:center;">[[{}{}]]</p>\n'.format(pageName, '' if PageNamesEqual(pageName, ship['name']) else '|{}'.format(ship['name']))
         idx += 1
 
     if idx % colCount:

@@ -119,7 +119,7 @@ def GenerateDataSignature(data):
         input = NormalizeDict(input)
 
     if type(input) == str:
-        input = input.strip()
+        input = input.strip().replace('\r', '\n')
 
     jsonStr = json.dumps(input, sort_keys=True)
     return hashlib.md5(jsonStr.encode("utf-8")).hexdigest()
@@ -134,7 +134,7 @@ def NormalizeDict(data):
             elif type(v) == list:
                 v = NormalizeList(v)
             else:
-                v = str(v).strip()
+                v = str(v).strip().replace('\r', '\n')
             fixedList[k] = v
         data = fixedList
 
@@ -150,7 +150,7 @@ def NormalizeList(data):
             elif type(v) == list:
                 v = NormalizeList(v)
             else:
-                v = str(v)
+                v = str(v).strip().replace('\r', '\n')
             fixedList.append(v)
         data = fixedList
 
@@ -367,7 +367,7 @@ def AddWikiLinksToText(input, useHtml=False, allowExtraWeaponCheck=True):
             if useHtml:
                 replacementInfo["replacementText"] = '<a href="{}" target="_blank">{}</a>'.format(WikiUtils.GetWikiLink(wikiPage), origPhrase)
             else:
-                replacementInfo["replacementText"] = "[[{}{}]]".format('{}|'.format(wikiPage) if wikiPage.lower() != origPhrase.lower() else '', origPhrase)
+                replacementInfo["replacementText"] = "[[{}{}]]".format('{}|'.format(wikiPage) if not WikiUtils.PageNamesEqual(wikiPage, origPhrase) else '', origPhrase)
             replacementInfo["placeholder"] = "~~placeholder:{}:~~".format(placeholderCount)
             replacementList.append(replacementInfo)
 
