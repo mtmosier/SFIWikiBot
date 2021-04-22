@@ -1,11 +1,6 @@
 # These scripts keep the cache fresh for the website.  Enable if website is in use.
-# */10 *   * * *    /home/app/scripts/refreshCacheShort.py
-# 0    */6 * * *    /home/app/scripts/refreshCacheMed.py
-
-# Perform a regular backup of the wiki site.  Totally optional.
-# 30   3   * * 0    /home/app/scripts/performWikiSiteBackup.py
+# */10 *   * * *    /home/username/SFIWikiBot/scripts/refreshCache.sh wikiData
+# 0    */6 * * *    /home/username/SFIWikiBot/scripts/refreshCache.sh gameData
 
 # Push recent game updates to the wiki.  Requires a bot account to be set up and configured.
-# 0    17  * * *    /home/app/scripts/updateWikiGalaxyContent.py
-# 30   17  * * *    /home/app/scripts/updateWikiShipContent.py
-# 30   18  * * *    /home/app/scripts/updateWikiItemContent.py
+# 0    17  * * *    /home/username/SFIWikiBot/scripts/updateWikiContent.sh
