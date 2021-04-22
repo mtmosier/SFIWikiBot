@@ -641,13 +641,13 @@ def GetWikiInfoboxDataForShield(itemList):
                         infobox['effect'] += '[[:Category:{}|{}]]<br>\n'.format(effectName, effectName)
                     infobox['effect'] += '{}%'.format(displayData)
                 else:
-                    infobox['effect'] = "[[:Category:{}|{}]] {}%".format(effectList[0], effectList[0], displayData)
+                    infobox['effect'] = "[[:Category:{0}|{0}]] {1}%".format(effectList[0], displayData)
     except:
         pass
 
     try:
         if primaryItem['resistExtraEffect'] >= 0:
-            infobox['additional_resistance'] = "[[:Category:{}|]]".format(SmallConstants.effectsData[primaryItem['resistExtraEffect']]['name'])
+            infobox['additional_resistance'] = "[[:Category:{0}|{0}]]".format(SmallConstants.effectsData[primaryItem['resistExtraEffect']]['name'])
     except:
         pass
 
