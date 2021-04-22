@@ -43,7 +43,9 @@ docker run \
     -e "botPassword=abc123" \
     mtmosier/sfiwikibot_siteupdate
 ```
-In order to get a bot username and password visit the wiki [Bot Passwords](https://starfighter-infinity.fandom.com/wiki/Special:BotPasswords) page. **Note: Before running the site update think about whether you should be running it.** [(Read this)](#who-should-use-this)
+In order to get a bot username and password visit the wiki [Bot Passwords](https://starfighter-infinity.fandom.com/wiki/Special:BotPasswords) page. This container is set up to be run as a one-off.  When run it will go through a full site update and then exit out.  In my experience a site update takes about an hour and a half.
+
+**Note: Before running the site update please think about whether you should be running it.** [(Read this)](#who-should-use-this)
 
 
 ## Installation
