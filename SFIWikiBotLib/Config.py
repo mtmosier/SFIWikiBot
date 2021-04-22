@@ -50,7 +50,7 @@ wikiLinkReplacementExclusionList = config('botWikiLinkReplacementExclusionList',
 
 bpLocationOverride = dict(config('botBpLocationOverride', cast=Csv(cast=lambda s: tuple(s.split('='))), default=''))
 
-projectileCountOverrideDefault = 'Sheenite Orbital Ultra Ring=30, Sheenite Orbital Chevron Ring=8'
+projectileCountOverrideDefault = 'Sheenite Orbital Ultra Ring=30, Sheenite Orbital Chevron Ring=8, Church Savior Cloud=15'
 projectileCountOverride = dict(config('botProjectileCountOverride', cast=Csv(cast=lambda s: tuple(s.split('='))), default=projectileCountOverrideDefault))
 projectileCountOverride = { k:int(v) for k, v in projectileCountOverride.items() }
 
