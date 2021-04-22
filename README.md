@@ -10,6 +10,7 @@
 - [Usage](#basic-usage)
 - [Pages Maintained](#pages-maintained)
 
+
 ## Introduction
 
 This is a bot designed to import game data from [Starfighter: Infinity](http://www.starfighterinfinity.com/) and use it to update the [Starfighter: Infinity Wiki](https://starfighter-infinity.fandom.com/wiki/).  Item pages, ship pages, planet pages, and various pages which interact with these are set up to be maintained by the bot by default. ([More complete list here.](#pages-maintained))
@@ -74,14 +75,14 @@ python3 setup.py install
 
 
 ## Pages Maintained
-- Individual ship pages (Infobox and game description)
-- Individual item pages (Infobox and game description)
-- Individual planet pages (Planet stats and game description)
-- Individual star system pages (Planet list)
-- Individual NPR pages (Ship/Item table data)
-- All equipment list pages (Table data)
-- The crafting page (Item table data)
-- The skills page (Item lists)
-- The ship navbox template pages (Human Ships, Aralien Ships, Restricted Ships, NPR Ships)
-- The Human, Aralien and Restricted ship list pages (Ship Listing Tables)
-- The Ships Category page (Detailed Ship Listing)
+- Individual [ship](https://starfighter-infinity.fandom.com/wiki/Starfighter) pages (Infobox and game description)
+- Individual [item](https://starfighter-infinity.fandom.com/wiki/HV_Projectile) pages (Infobox and game description)
+- Individual [planet](https://starfighter-infinity.fandom.com/wiki/Ferenginar) pages (Planet stats and game description)
+- Individual [star system](https://starfighter-infinity.fandom.com/wiki/Alpha_Crucis) pages (Planet list)
+- Individual [NPR](https://starfighter-infinity.fandom.com/wiki/Null_Dwellers) pages (Ship/Item table data)
+- All [equipment list](https://starfighter-infinity.fandom.com/wiki/Category:Equipment) pages (Table data)
+- The [crafting](https://starfighter-infinity.fandom.com/wiki/Crafting) page (Item table data)
+- The [skills](https://starfighter-infinity.fandom.com/wiki/Skills) page (Item lists)
+- The [ship navbox template](https://starfighter-infinity.fandom.com/wiki/Template:Human_Ships) pages (Human Ships, Aralien Ships, Restricted Ships, NPR Ships)
+- The [Human](https://starfighter-infinity.fandom.com/wiki/Category:Human_Ships), [Aralien](https://starfighter-infinity.fandom.com/wiki/Category:Aralien_Ships) and [Restricted](https://starfighter-infinity.fandom.com/wiki/Restricted_Ships) ship list pages (Ship Listing Tables)
+- The [Ships Category](https://starfighter-infinity.fandom.com/wiki/Category:Ships) page (Detailed Ship Listing)
