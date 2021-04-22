@@ -108,7 +108,7 @@ def PageNamesEqual(i1, i2):
 
 def NormalizePageName(input):
     input = re.sub('[^a-zA-Z0-9\(\):-]', '_', str(input))
-    return input.lower()
+    return input
 
 
 def GetNprWikiPageByNprName(nprName):
