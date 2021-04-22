@@ -2224,12 +2224,24 @@ def GetDefaultTableInfoByItemType(itemType, weaponType=..., pageType=''):
 
 
 def ItemDisplayStatDamage(item, p=...):
-    rtnVal = GetDamagePerRoundForItem(item)
+    damagePerRound = GetDamagePerRoundForItem(item)
+
+    additionalClass = ""
+    if GeneralUtils.floatCmp(damagePerRound, '>', 0):
+        damageType = GetItemDamageType(item)
+        if damageType:
+            additionalClass += "damageType{}".format(damageType.title())
+
+    rtnVal = damagePerRound
     if DisplayDamageAsPerSecond(item):
         rtnVal = "{}/s".format(rtnVal)
     amount = GetNumOfDamagingProjectiles(item, True)
     if amount > 1:
         rtnVal = "{} x{}".format(rtnVal, amount)
+
+    if additionalClass:
+        rtnVal = '<span class="{}">{}</span>'.format(additionalClass, rtnVal)
+
     return rtnVal
 
 
@@ -2263,8 +2275,15 @@ def ItemDisplayStatTotalDamagePerVolley(item, p=...):
         else:
             message += '.'
 
-    if message:
-        rtnVal = '<span class="itemStatDetails" title="{}">{}</span>'.format(message, rtnVal)
+    additionalClass = ""
+    if GeneralUtils.floatCmp(GetDamagePerRoundForItem(item), '>', 0):
+        damageType = GetItemDamageType(item)
+        if damageType:
+            additionalClass += " damageType{}".format(damageType.title())
+
+    if not message:  message = ''
+    if message or additionalClass:
+        rtnVal = '<span class="itemStatDetails{}" title="{}">{}</span>'.format(additionalClass, message, rtnVal)
 
     return rtnVal
 
@@ -2333,8 +2352,15 @@ def ItemDisplayStatTotalDps(item, p=...):
         else:
             message += '.'
 
-    if message:
-        rtnVal = '<span class="itemStatDetails" title="{}">{}</span>'.format(message, rtnVal)
+    additionalClass = ""
+    if GeneralUtils.floatCmp(GetDamagePerRoundForItem(item), '>', 0):
+        damageType = GetItemDamageType(item)
+        if damageType:
+            additionalClass += " damageType{}".format(damageType.title())
+
+    if not message:  message = ''
+    if message or additionalClass:
+        rtnVal = '<span class="itemStatDetails{}" title="{}">{}</span>'.format(additionalClass, message, rtnVal)
 
     return rtnVal
 
