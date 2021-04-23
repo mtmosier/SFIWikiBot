@@ -2220,7 +2220,7 @@ def ItemDisplayStatDamage(item, p=..., includeProjectileDisplay=True):
     if GeneralUtils.floatCmp(damagePerRound, '>', 0):
         damageType = GetItemDamageType(item)
         if damageType:
-            additionalClass += "damageType{}".format(damageType.title())
+            additionalClass += "damageType{}".format(damageType.title().replace(' ', ''))
     else:
         return None
 
@@ -2273,7 +2273,7 @@ def ItemDisplayStatTotalDamagePerVolley(item, p=...):
     if GeneralUtils.floatCmp(GetDamagePerRoundForItem(item), '>', 0):
         damageType = GetItemDamageType(item)
         if damageType:
-            additionalClass += " damageType{}".format(damageType.title())
+            additionalClass += " damageType{}".format(damageType.title().replace(' ', ''))
 
     if not message:  message = ''
     if message or additionalClass:
@@ -2352,7 +2352,7 @@ def ItemDisplayStatTotalDps(item, p=...):
     if GeneralUtils.floatCmp(GetDamagePerRoundForItem(item), '>', 0):
         damageType = GetItemDamageType(item)
         if damageType:
-            additionalClass += " damageType{}".format(damageType.title())
+            additionalClass += " damageType{}".format(damageType.title().replace(' ', ''))
 
     if not message:  message = ''
     if message or additionalClass:
