@@ -76,6 +76,12 @@ def mkdirr(path):
 
 
 def floatCmp(v1, c, v2, dec=None):
+    if v1 is None or v2 is None:
+        if c == '!=' or c == '<>' or c == '><':
+            return v1 is not v2
+        elif c == '==':
+            return v1 is v2
+        return False
     if c == '==':
         return math.isclose(v1, v2, rel_tol=1e-04)
     if c == '!=' or c == '<>' or c == '><':
