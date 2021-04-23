@@ -43,6 +43,11 @@ pauseAfterFailingToUpdateWikiPageInSec = config("botPauseAfterFailingToUpdateWik
 pauseAfterSkippingWikiPageUpdateInSec = config("botPauseAfterSkippingWikiPageUpdateInSec", default=1, cast=float)
 
 
+damageTypeIconClassMappingDefault = 'Projectile=fa fa-ellipsis-h, Explosive=fa fa-bomb, Laser=fa fa-asterisk, Heat=fa fa-fire, Repair=fa fa-heartbeat, Electrostatic=fa fa-bolt, Tractor=fa fa-link, Photonic=fa fa-star, RedMist=fa fa-cloud, Cold=fa fa-snowflake'
+damageTypeIconClassMapping = dict(config('botDamageTypeIconClassMapping', cast=Csv(cast=lambda s: tuple(s.split('='))), default=damageTypeIconClassMappingDefault))
+
+effectIconClassMapping = dict(config('botEffectIconClassMapping', cast=Csv(cast=lambda s: tuple(s.split('='))), default=''))
+
 unreleasedRaceList = config('botUnreleasedRaceList', cast=Csv(), default='')
 unreleasedShipList = config('botUnreleasedShipList', cast=Csv(), default='')
 unreleasedSystemList = config('botUnreleasedSystemList', cast=Csv(), default='TBZ')

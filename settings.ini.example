@@ -24,6 +24,9 @@ botBpLocationOverride = White Xandelevium Blaster=Sh-1-4
 # botShipMassForDamageCalculation = 2
 # botTurnMultiplier = 30
 #
+# botDamageTypeIconClassMapping = Projectile=fa fa-ellipsis-h, Explosive=fa fa-bomb, Laser=fa fa-asterisk, Heat=fa fa-fire, Repair=fa fa-heartbeat, Electrostatic=fa fa-bolt, Tractor=fa fa-link, Photonic=fa fa-star, RedMist=fa fa-cloud, Cold=fa fa-snowflake
+# botEffectIconClassMapping =
+#
 # botWikiLinkReplacementExclusionList = Black, Damage, Energy, Ships
 # botProjectileCountOverride = Sheenite Orbital Ultra Ring=30, Sheenite Orbital Chevron Ring=8
 # botWeaponRangeOverride = Sheenite Orbital Ultra Ring=17, Sheenite Orbital Chevron Ring=17, Ascendant Gun Turret=125
