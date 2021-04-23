@@ -276,6 +276,7 @@ def GetWikiInfoboxDataForPrimaryOrSecondary(itemList):
 
     primaryItem = itemList[-1]
     infobox = OrderedDict()
+    damageType = GetItemDamageType(primaryItem)
 
     isBeam = IsBeamWeapon(primaryItem)
     weaponType = SmallConstants.weaponTypeLookup[primaryItem['weaponType']].title()
@@ -306,10 +307,19 @@ def GetWikiInfoboxDataForPrimaryOrSecondary(itemList):
     if displayData != '999':
         infobox['required_skill'] = "{} {}".format(GetItemSkillName(primaryItem), displayData)
 
-    vdata = [ ItemDisplayStatDamage(i, False, False) for i in itemList ]
-    if vdata[0] is not None and str(vdata[0]) != '0':
+
+    # vdata = [ ItemDisplayStatDamage(i, False, False) for i in itemList ]
+    # if vdata[0] is not None and str(vdata[0]) != '0':
+    #     displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
+    #     infobox['damage_per_round'] = displayData
+
+    vdata = [ GeneralUtils.NumDisplay(GetDamagePerRoundForItem(i), 1) for i in itemList ]
+    if vdata[0] != '0':
+        if DisplayDamageAsPerSecond(primaryItem):
+            vdata = [ '{}/s'.format(i) for i in vdata ]
         displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
-        infobox['damage_per_round'] = displayData
+        infobox['damage_per_round'] = '{} {}'.format(displayData, GetDamageTypeIconForItem(primaryItem)).strip()
+
 
     with suppress(ZeroDivisionError):
         if weaponType != 'Large':
@@ -338,10 +348,14 @@ def GetWikiInfoboxDataForPrimaryOrSecondary(itemList):
             displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join([str(v) for v in vdata])
             infobox['amount'] = displayData
 
-    vdata = [ ItemDisplayStatTotalDps(i) for i in itemList ]
+    vdata = [ ItemDisplayStatTotalDps(i, ..., False) for i in itemList ]
     if vdata[0] is not None:
         displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
         if displayData != '0':
+            # if GeneralUtils.floatCmp(GetDamagePerRoundForItem(primaryItem), '>', 0):
+            #     displayData = '{} {}'.format(displayData, GetDamageTypeIconForItem(primaryItem)).strip()
+            # if GeneralUtils.floatCmp(GetItemEffectDamage(primaryItem), '>', 0):
+            #     displayData = '{} {}'.format(displayData, GetEffectIconForItem(primaryItem)).strip()
             infobox['damage_per_second'] = displayData
 
     damageType = GetDamageTypeForItem(primaryItem)
@@ -353,12 +367,15 @@ def GetWikiInfoboxDataForPrimaryOrSecondary(itemList):
             infobox['damage_type'] = damageType
 
 
-    vdata = [ ItemDisplayStatTotalDamagePerVolley(i) for i in itemList ]
+    vdata = [ ItemDisplayStatTotalDamagePerVolley(i, ..., False) for i in itemList ]
     if vdata[0] is not None and vdata[0] != '0':
         displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
+        # if GeneralUtils.floatCmp(GetDamagePerRoundForItem(primaryItem), '>', 0):
+        #     displayData = '{} {}'.format(displayData, GetDamageTypeIconForItem(primaryItem)).strip()
+        # if GeneralUtils.floatCmp(GetItemEffectDamage(primaryItem), '>', 0):
+        #     displayData = '{} {}'.format(displayData, GetEffectIconForItem(primaryItem)).strip()
         if 'damage_per_round' not in infobox or infobox['damage_per_round'] != displayData:
             infobox['total_damage_per_round'] = displayData
-
 
     if primaryItem['energyBased']:
         vdata = [ ItemDisplayStatTotalDpe(i) for i in itemList ]
@@ -1192,6 +1209,19 @@ def GetRaceForItem(item):
 def GetItemDamageType(item):
     with suppress(KeyError):
         return GeneralUtils.CamelCaseToTitleCase(SmallConstants.damageTypeLookup[item['damageType']])
+
+
+def GetDamageTypeIconForItem(item):
+    damageType = GetItemDamageType(item)
+    with suppress(KeyError):
+        return '<span class="damageType{} {}" title="Damage Type: {}"></span>'.format(damageType.title().replace(' ', ''), Config.damageTypeIconClassMapping[damageType.title().replace(' ', '')], damageType)
+    return ''
+
+def GetEffectIconForItem(item):
+    # damageType = GetItemDamageType(item)
+    # with suppress(KeyError):
+    #     return '<span class="damageType{} {}" title="Damage Type: {}"></span>'.format(damageType.title().replace(' ', ''), Config.damageTypeIconClassMapping[damageType.title().replace(' ', '')], damageType)
+    return ''
 
 
 def GetDescriptionForItemRangeList(itemList, enclosureStr=None):
@@ -2216,13 +2246,8 @@ def GetDefaultTableInfoByItemType(itemType, weaponType=..., pageType=''):
 def ItemDisplayStatDamage(item, p=..., includeProjectileDisplay=True):
     damagePerRound = GetDamagePerRoundForItem(item)
 
-    additionalClass = ""
-    if GeneralUtils.floatCmp(damagePerRound, '>', 0):
-        damageType = GetItemDamageType(item)
-        if damageType:
-            additionalClass += "damageType{}".format(damageType.title().replace(' ', ''))
-    else:
-        return None
+    if GeneralUtils.floatCmp(damagePerRound, '==', 0):
+        return ''
 
     rtnVal = damagePerRound
     if DisplayDamageAsPerSecond(item):
@@ -2233,13 +2258,12 @@ def ItemDisplayStatDamage(item, p=..., includeProjectileDisplay=True):
         if amount > 1:
             rtnVal = "{} x{}".format(rtnVal, amount)
 
-    if additionalClass:
-        rtnVal = '<span class="{}">{}</span>'.format(additionalClass, rtnVal)
+    rtnVal = '{} {}'.format(rtnVal, GetDamageTypeIconForItem(item))
 
-    return rtnVal
+    return rtnVal.strip()
 
 
-def ItemDisplayStatTotalDamagePerVolley(item, p=...):
+def ItemDisplayStatTotalDamagePerVolley(item, p=..., includeIcons=False):
     rtnVal = None
     message = None
     totalDamage = 0
@@ -2257,7 +2281,7 @@ def ItemDisplayStatTotalDamagePerVolley(item, p=...):
     totalDamage = GetItemTotalDamagePerVolley(item)
     rtnVal = GeneralUtils.NumDisplay(totalDamage, 2)
     effectDamage = GetItemEffectDamage(item)
-    if effectDamage:
+    if GeneralUtils.floatCmp(effectDamage, '>', 0):
         message = "Includes {} damage from {}".format(GeneralUtils.NumDisplay(effectDamage, 1), effectName)
         if effectName == 'Radiation Damage':
             message += '.\nDamage is approximate depending on the mass of the target ship as well as whether the effect is refreshed. Estimation is for no refresh, ship mass of {}'.format(GeneralUtils.NumDisplay(Config.shipMassForDamageCalculation, 2))
@@ -2269,17 +2293,14 @@ def ItemDisplayStatTotalDamagePerVolley(item, p=...):
         else:
             message += '.'
 
-    additionalClass = ""
-    if GeneralUtils.floatCmp(GetDamagePerRoundForItem(item), '>', 0):
-        damageType = GetItemDamageType(item)
-        if damageType:
-            additionalClass += " damageType{}".format(damageType.title().replace(' ', ''))
+    if message:
+        rtnVal = '<span class="itemStatDetails" title="{}">{}</span>'.format(message, rtnVal)
 
-    if not message:  message = ''
-    if message or additionalClass:
-        outputClass = additionalClass.strip()
-        if message:  outputClass = 'itemStatDetails{}'.format(additionalClass)
-        rtnVal = '<span class="{}" title="{}">{}</span>'.format(outputClass, message, rtnVal)
+    if includeIcons:
+        if GeneralUtils.floatCmp(GetDamagePerRoundForItem(item), '>', 0):
+            rtnVal = '{} {}'.format(rtnVal, GetDamageTypeIconForItem(item)).strip()
+        if GeneralUtils.floatCmp(effectDamage, '>', 0):
+            rtnVal = '{} {}'.format(rtnVal, GetEffectIconForItem(item)).strip()
 
     return rtnVal
 
@@ -2318,7 +2339,7 @@ def ItemDisplayStatDps(item, p=...):
     return GeneralUtils.NumDisplay(GetItemDps(item), 1)
 
 
-def ItemDisplayStatTotalDps(item, p=...):
+def ItemDisplayStatTotalDps(item, p=..., includeIcons=False):
     rtnVal = None
     message = None
     totalDps = 0
@@ -2336,7 +2357,7 @@ def ItemDisplayStatTotalDps(item, p=...):
     totalDps = GetItemDpsIncludingEffectDamage(item)
     rtnVal = GeneralUtils.NumDisplay(totalDps, 1)
     effectDps = GetItemEffectDamagePerSecond(item)
-    if effectDps:
+    if GeneralUtils.floatCmp(effectDps, '>', 0):
         message = "Includes {} dps from {}".format(GeneralUtils.NumDisplay(effectDps, 1), effectName)
         if effectName == 'Radiation Damage':
             message += '.\nDamage is approximate depending on the mass of the target ship. Estimation assumes a target ship mass of {}, with only this weapon applying the effect, firing as often as possible'.format(GeneralUtils.NumDisplay(Config.shipMassForDamageCalculation, 2))
@@ -2348,17 +2369,15 @@ def ItemDisplayStatTotalDps(item, p=...):
         else:
             message += '.'
 
-    additionalClass = ""
-    if GeneralUtils.floatCmp(GetDamagePerRoundForItem(item), '>', 0):
-        damageType = GetItemDamageType(item)
-        if damageType:
-            additionalClass += " damageType{}".format(damageType.title().replace(' ', ''))
+    if message:
+        rtnVal = '<span class="itemStatDetails" title="{}">{}</span>'.format(message, rtnVal)
 
-    if not message:  message = ''
-    if message or additionalClass:
-        outputClass = additionalClass.strip()
-        if message:  outputClass = 'itemStatDetails{}'.format(additionalClass)
-        rtnVal = '<span class="{}" title="{}">{}</span>'.format(outputClass, message, rtnVal)
+    if includeIcons:
+        if GeneralUtils.floatCmp(GetDamagePerRoundForItem(item), '>', 0):
+            rtnVal = '{} {}'.format(rtnVal, GetDamageTypeIconForItem(item)).strip()
+        if GeneralUtils.floatCmp(effectDps, '>', 0):
+            rtnVal = '{} {}'.format(rtnVal, GetEffectIconForItem(item)).strip()
+
 
     return rtnVal
 
