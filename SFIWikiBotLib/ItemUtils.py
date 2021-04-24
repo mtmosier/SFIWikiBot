@@ -2167,7 +2167,7 @@ def GetDefaultTableInfoByItemType(itemType, weaponType=..., pageType=''):
 
         elif weaponType == 2:  # Utility
             rtnInfo['tableHeader'] = 'Utilities'
-            rtnInfo['tableColumnList'] = ['Item','Ammo','EU','Rng','Turn','Effect','Notes','Sk']
+            rtnInfo['tableColumnList'] = ['Item','Dmg','Ammo','EU','Rng','Turn','Effect','Notes','Sk']
 
         elif weaponType == 3:  # Mine
             rtnInfo['tableHeader'] = 'Mines'
