@@ -2586,7 +2586,7 @@ def ItemDisplayStatNameAndImage(item, p=...):
     sourceClass = GetItemSourceClassName(item)
     sourceClass = sourceClass if sourceClass is not None else ""
     if imageName:
-        rtnVal = 'align="center" style="font-size: smaller;" class="{}" | [[File:{}|centre|thumb|60x60px|link={}]]<br/>[[{}{}]]'.format(sourceClass, imageName, pageName, pageName, '' if pageName == itemName else '|{}'.format(itemName))
+        rtnVal = 'align="center" style="font-size: smaller;" class="{}" | [[File:{}|centre|thumb|60x60px|link={}]]<br/>[[{}{}]]'.format(sourceClass, imageName, pageName, pageName, '' if WikiUtils.PageNamesEqual(pageName, itemName) else '|{}'.format(itemName))
     else:
         rtnVal = 'align="center" style="font-size: smaller;" class="{}" | [[{}{}]]'.format(sourceClass, pageName, '' if WikiUtils.PageNamesEqual(pageName, itemName) else '|{}'.format(itemName))
 
