@@ -2632,6 +2632,9 @@ def ItemDisplayStatPurchaseCost(item, p=...):
 def ItemDisplayStatBPLocation(item, p=...):
     rtnVal = ''
 
+    with suppress(AttributeError, KeyError):
+        return Config.bpLocationOverride[item['name']]
+
     if 'micro gate' in item['name'].lower() and not 'local' in item['name'].lower():
         return '1+ Stars in Relevant System'
 
@@ -2644,8 +2647,6 @@ def ItemDisplayStatBPLocation(item, p=...):
 
     craftingData = GetCraftingDataForItem(item)
     if not craftingData:
-        with suppress(AttributeError, KeyError):
-            rtnVal = Config.bpLocationOverride[item['name']]
         return rtnVal
 
     itemIdx = craftingData['items'].index(item['id'])
