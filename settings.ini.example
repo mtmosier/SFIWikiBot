@@ -10,7 +10,7 @@ botPassword =
 botUnreleasedRaceList = Enlightened, Face of Space, Robosphere, Chronoduke
 botUnreleasedShipList = Forkworm Abomination, Face of Space
 botUnreleasedSystemList = TBZ, Sol, Cd
-botBpLocationOverride = White Xandelevium Blaster=Sh-1-4
+botBpLocationOverride = White Xandelevium Blaster=Sh-1-4, Quark Xandelevium Blaster=Obtain Green Xand, Quark Xandelevium Heat Disc=Obtain Green Xand
 #
 # botUnreleasedRaceList =
 # botUnreleasedShipList =
