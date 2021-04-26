@@ -43,7 +43,7 @@ pauseAfterFailingToUpdateWikiPageInSec = config("botPauseAfterFailingToUpdateWik
 pauseAfterSkippingWikiPageUpdateInSec = config("botPauseAfterSkippingWikiPageUpdateInSec", default=1, cast=float)
 
 
-damageTypeIconClassMappingDefault = 'Projectile=fa fa-ellipsis-h, Explosive=fa fa-bomb, Laser=fa fa-asterisk, Heat=fa fa-fire, Repair=fa fa-heartbeat, Electrostatic=fa fa-bolt, Tractor=fa fa-link, Photonic=fa fa-star, RedMist=fa fa-cloud, Cold=fa fa-snowflake'
+damageTypeIconClassMappingDefault = 'Projectile=fas fa-ellipsis-h, Explosive=fas fa-bomb, Laser=fas fa-asterisk, Heat=fas fa-fire, Repair=fas fa-heartbeat, Electrostatic=fas fa-bolt, Tractor=fas fa-link, Photonic=fas fa-sun, RedMist=fas fa-wind, Cold=fas fa-snowflake, Ghostly=fas fa-ghost, EnergyExtraction=fas fa-sign-out-alt, ShieldExtraction=fas fa-sign-out-alt, Combo=fas fa-sign-out-alt, Undefined=fas fa-question-circle, Other=fas fa-question-circle, AmmoHarvest=fas fa-sign-out-alt fa-rotate-270, ShieldHarvest=fas fa-sign-out-alt fa-rotate-270, EnergyHarvest=fas fa-sign-out-alt fa-rotate-270, DartianMining=fas fa-sign-out-alt fa-rotate-270, Null=fas fa-eye-slash'
 damageTypeIconClassMapping = dict(config('botDamageTypeIconClassMapping', cast=Csv(cast=lambda s: tuple(s.split('='))), default=damageTypeIconClassMappingDefault))
 
 effectIconClassMapping = dict(config('botEffectIconClassMapping', cast=Csv(cast=lambda s: tuple(s.split('='))), default=''))
