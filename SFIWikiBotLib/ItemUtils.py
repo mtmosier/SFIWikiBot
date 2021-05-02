@@ -854,7 +854,7 @@ def GetAllItemsSharingItemRange(item, funcItemList=...):
 
     skipVariants = True
     range = GetRangeDataForItem(item, skipVariants)
-    with suppress(KeyError):
+    with suppress(KeyError, TypeError):
         rtnList = []
         for itemId in range['items']:
             if itemDataDict[itemId] in funcItemList:
@@ -1175,7 +1175,7 @@ def GetNumOfDamagingProjectiles(item, isForDisplay=False):
     #     return 1
 
     try:
-        varData = ItemUtils.GetVariantDataForItem(item)
+        varData = GetVariantDataForItem(item)
         match = cloudTypeProjCountRegex.match(varData['descriptionAppend'])
         return int(match.group(1))
     except:
@@ -1247,6 +1247,33 @@ def GetItemDamageType(item):
         return GeneralUtils.CamelCaseToTitleCase(SmallConstants.damageTypeLookup[item['damageType']])
 
 
+def GetShieldEffectIconsForItem(item, type="both"):
+    rtnVal = ""
+    statusList = GetShieldStatusEffectList(item)
+    if type == "both" or type == "positive":
+        for effectName in statusList['positiveEffects']:
+            with suppress(KeyError):
+                className = Config.shieldEffectIconClassMapping[effectName]
+                if className[:6].lower() == '[html]':
+                    iconHtml = className[6:]
+                    rtnVal += '<span class="shieldEffectPositive" title="{}">{}</span>'.format(effectName, iconHtml)
+                else:
+                    rtnVal += '<span class="shieldEffectPositive {}" title="{}"></span>'.format(className, effectName)
+
+    if type == "both" or type == "negative":
+        rtnVal += ' '
+        for effectName in statusList['negativeEffects']:
+            with suppress(KeyError):
+                className = Config.shieldEffectIconClassMapping[effectName]
+                if className[:6].lower() == '[html]':
+                    iconHtml = className[6:]
+                    rtnVal += '<span class="shieldEffectNegative" title="{}">{}</span>'.format(effectName, iconHtml)
+                else:
+                    rtnVal += '<span class="shieldEffectNegative {}" title="{}"></span>'.format(className, effectName)
+
+    return rtnVal.strip()
+
+
 def GetDamageTypeIconForItem(item):
     damageType = GetItemDamageType(item)
     with suppress(KeyError):
@@ -1263,6 +1290,67 @@ def GetEffectIconForItem(item):
     # with suppress(KeyError):
     #     return '<span class="damageType{} {}" title="Damage Type: {}"></span>'.format(damageType.title().replace(' ', ''), Config.damageTypeIconClassMapping[damageType.title().replace(' ', '')], damageType)
     return ''
+
+
+
+def GetShieldStatusEffectList(item):
+    itemType = SmallConstants.typeLookup[item['type']].replace('_WEAPON', '').title()
+
+    rtnList = { 'positiveEffects': set(), 'negativeEffects': set() }
+    if itemType == 'Shield':
+        if item['effect'] > 0:
+            effectName = GetShieldEffectName(item, False)
+            if effectName == 'Tornadian':
+                rtnList['positiveEffects'].add('Projectile')
+                rtnList['negativeEffects'].add('Electrostatic')
+            elif effectName == 'Vampire':
+                rtnList['positiveEffects'].add('Gravity')
+            elif effectName == 'Devimon':
+                rtnList['positiveEffects'].add('Gravity')
+                rtnList['positiveEffects'].add('Heat Resist')
+            elif effectName == 'Enlightened':
+                rtnList['positiveEffects'].add('Heat Resist')
+                rtnList['negativeEffects'].add('Projectile')
+            elif effectName == 'Solarion':
+                rtnList['positiveEffects'].add('Heat Resist')
+                rtnList['negativeEffects'].add('Projectile')
+                rtnList['negativeEffects'].add('Frozen')
+            elif effectName == 'Rock':
+                rtnList['positiveEffects'].add('Explosive')
+                rtnList['negativeEffects'].add('Laser')
+                rtnList['negativeEffects'].add('Photonic')
+            elif effectName == 'Refractive':
+                rtnList['positiveEffects'].add('Laser')
+                rtnList['positiveEffects'].add('Photonic')
+                rtnList['negativeEffects'].add('Explosive')
+            elif effectName == 'Andromedan':
+                rtnList['positiveEffects'].add('Andromedan Stealth')
+                rtnList['negativeEffects'].add('Heat Weakness')
+            elif effectName == 'Anti Gravity':
+                rtnList['positiveEffects'].add('Gravity')
+            elif effectName == 'Anti Nuclear':
+                rtnList['positiveEffects'].add('Nuclear')
+            elif effectName == 'Insulator':
+                rtnList['positiveEffects'].add('Electrostatic')
+            elif effectName == 'Human Ghostly':
+                rtnList['positiveEffects'].add('Ghostly')
+            elif effectName == 'Ascendant':
+                rtnList['positiveEffects'].add('NPR Damage')
+            elif effectName == 'Dark':
+                rtnList['positiveEffects'].add('Gravity')
+                rtnList['positiveEffects'].add('Cold Fusion')
+            else:
+                rtnList['positiveEffects'].add(effectName)
+
+        with suppress(KeyError):
+            if item['resistExtraEffect'] >= 0:
+                effectName = SmallConstants.effectsData[item['resistExtraEffect']]['name']
+                if effectName:
+                    rtnList['positiveEffects'].add(effectName)
+
+    rtnList['positiveEffects'] = sorted(list(rtnList['positiveEffects']))
+    rtnList['negativeEffects'] = sorted(list(rtnList['negativeEffects']))
+    return rtnList
 
 
 def GetDescriptionForItemRangeList(itemList, enclosureStr=None):
@@ -2631,6 +2719,10 @@ def ItemDisplayStatNameAndImage(item, p=...):
     else:
         rtnVal = 'align="center" style="font-size: smaller;" class="{}" | [[{}{}]]'.format(sourceClass, '' if WikiUtils.PageNamesEqual(pageName, itemName) else '{}|'.format(pageName), itemName)
 
+    iconHtml = GetShieldEffectIconsForItem(item)
+    if iconHtml:
+        rtnVal = "{}<br />{}".format(rtnVal, iconHtml)
+
     return rtnVal
 
 
@@ -2651,6 +2743,10 @@ def ItemDisplayStatNameAndImageHtml(item, p=...):
         rtnVal = '<div style="text-align:center; font-size:smaller;" class="{}"><a href="{}"><img src="{}" width="60" height="60" onError="this.onerror = \'\';this.style.visibility=\'hidden\';"><br />{}</a></div>'.format(sourceClass, wikiUrl, iconUrl, itemName)
     else:
         rtnVal = '<div style="text-align:center; font-size:smaller;" class="{}"><a href="{}">{}</a></div>'.format(sourceClass, wikiUrl, itemName)
+
+    iconHtml = GetShieldEffectIconsForItem(item)
+    if iconHtml:
+        rtnVal = "{}<br />{}".format(rtnVal, iconHtml)
 
     return rtnVal
 
