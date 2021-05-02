@@ -43,7 +43,7 @@ pauseAfterFailingToUpdateWikiPageInSec = config("botPauseAfterFailingToUpdateWik
 pauseAfterSkippingWikiPageUpdateInSec = config("botPauseAfterSkippingWikiPageUpdateInSec", default=1, cast=float)
 
 
-shieldEffectIconClassMappingDefault = 'Andromedan Stealth=fas fa-low-vision, Anti Gravity=fab fa-grav, Anti Nuclear=fas fa-radiation, Ascendant=fab fa-android, Beam Refracting=fas fa-slash, Cold Fusion=fas fa-snowflake, Deflector=, Effect Reduce=fas fa-angle-double-down, Electrostatic=fas fa-bolt, Energy Absorb=fas fa-charging-station, Explosive=fas fa-bomb, Freezing=fas fa-icicles, Heat=fas fa-burn, Human Ghostly=fas fa-ghost, Insulator=fas fa-bolt, Laser=fas fa-asterisk, Overdose=fas fa-wind, Photonic=fas fa-sun, Projectile=fas fa-ellipsis-h, Selective Effect Reduce=fas fa-angle-down, Stabiliser Fail=fas fa-fighter-jet fa-rotate-90, Mine Claimer=fas fahands, Mine Sweeper=fas fa-snowplow'
+shieldEffectIconClassMappingDefault = 'Andromedan Stealth=fas fa-low-vision, Gravity=fab fa-grav, Nuclear=fas fa-radiation, NPR Damage=fab fa-android, Beam Refracting=fas fa-slash, Cold Fusion=fas fa-snowflake, Deflector=, Effect Reduce=fas fa-angle-double-down, Electrostatic=fas fa-bolt, Energy Absorb=fas fa-charging-station, Explosive=fas fa-bomb, Frozen=fas fa-icicles, Heat Resist=fas fa-burn, Heat Weakness=fas fa-burn, Ghostly=fas fa-ghost, Laser=fas fa-asterisk, Overdose Resist=fas fa-wind, Photonic=fas fa-sun, Projectile=fas fa-ellipsis-h, Selective Effect Reduce=fas fa-angle-down, Stabiliser Fail=fas fa-fighter-jet fa-rotate-135, Mine Claimer=fas fa-hands, Mine Sweeper=fas fa-snowplow'
 shieldEffectIconClassMapping = dict(config('botShieldEffectIconClassMapping', cast=Csv(cast=lambda s: tuple(s.split('='))), default=shieldEffectIconClassMappingDefault))
 
 
