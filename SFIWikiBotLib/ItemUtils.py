@@ -69,6 +69,40 @@ itemDataPrivate = None
 
 
 
+class ItemPageIter:
+    """Iterator that takes an item list and groups it by item set."""
+
+    def __init__(self, itemList=...):
+        if itemList is ...:
+            itemList = itemData
+        itemList = itemList.copy()
+
+        self.itemPageList = []
+        self.pos = 0
+
+        while len(itemList) > 0:
+            curItemList = GetAllItemsSharingItemRange(itemList[-1], itemList)
+            curItemList = sorted(curItemList, key=GetItemSortFunc())
+            self.itemPageList.append(curItemList)
+
+            for i in curItemList:
+                if i in itemList:  itemList.remove(i)
+
+    def __iter__(self):
+        return self
+
+    def __len__(self):
+        return len(self.itemPageList)
+
+    def __next__(self):
+        idx = self.pos
+        if idx >= len(self.itemPageList):
+            raise StopIteration
+        self.pos += 1
+        return self.itemPageList[idx]
+
+    def reset(self):
+        self.pos = 0
 
 
 def FindAllObjectsRelatedToId(id):
@@ -814,22 +848,24 @@ def GetDamagePerRoundForItem(item):
         pass
 
 
-def GetAllItemsSharingItemRange(item):
+def GetAllItemsSharingItemRange(item, funcItemList=...):
+    if funcItemList is ...:
+        funcItemList = itemData
+
     skipVariants = True
     range = GetRangeDataForItem(item, skipVariants)
-    try:
+    with suppress(KeyError):
         rtnList = []
         for itemId in range['items']:
-            rtnList.append(itemDataDict[itemId])
+            if itemDataDict[itemId] in funcItemList:
+                rtnList.append(itemDataDict[itemId])
 
         if len(rtnList) > 1:
             return rtnList
-    except:
-        pass
 
     nameInfo = SplitNameIntoBaseNameAndItemLevel(item['name'])
     if nameInfo['fullNameMinusLevel'] != item['name']:
-        return [ v for v in itemData if SplitNameIntoBaseNameAndItemLevel(v['name'])['fullNameMinusLevel'] == nameInfo['fullNameMinusLevel']]
+        return [ v for v in funcItemList if SplitNameIntoBaseNameAndItemLevel(v['name'])['fullNameMinusLevel'] == nameInfo['fullNameMinusLevel']]
 
     return [ item ]
 
@@ -1214,7 +1250,12 @@ def GetItemDamageType(item):
 def GetDamageTypeIconForItem(item):
     damageType = GetItemDamageType(item)
     with suppress(KeyError):
-        return '<span class="damageType{} {}" title="Damage Type: {}"></span>'.format(damageType.title().replace(' ', ''), Config.damageTypeIconClassMapping[damageType.title().replace(' ', '')], damageType)
+        className = Config.damageTypeIconClassMapping[damageType.title().replace(' ', '')]
+        if className[:6].lower() == '[html]':
+            iconHtml = className[6:]
+            return '<span class="damageType{}" title="Damage Type: {}">{}</span>'.format(damageType.title().replace(' ', ''), damageType, iconHtml)
+        else:
+            return '<span class="damageType{} {}" title="Damage Type: {}"></span>'.format(damageType.title().replace(' ', ''), className, damageType)
     return ''
 
 def GetEffectIconForItem(item):
