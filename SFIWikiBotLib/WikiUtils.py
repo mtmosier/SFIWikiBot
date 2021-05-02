@@ -724,11 +724,7 @@ def TouchIndividualPagesForAllItems(comment=''):
     rtnVal = True
 
     itemList = [ v for v in ItemUtils.itemData if ItemUtils.GetItemWikiArticlePage(v) and v['type'] > 1 and not ItemUtils.IsItemHidden(v) ]
-    while len(itemList) > 0:
-
-        curItemList = ItemUtils.GetAllItemsSharingItemRange(itemList[-1])
-        curItemList = [ v for v in curItemList if not ItemUtils.IsItemHidden(v) ]
-        curItemList = sorted(curItemList, key=ItemUtils.GetItemSortFunc())
+    for curItemList in ItemUtils.ItemPageIter(itemList):
         primaryItem = curItemList[-1]
 
         pageName = ItemUtils.GetItemWikiArticlePage(primaryItem)
@@ -740,13 +736,10 @@ def TouchIndividualPagesForAllItems(comment=''):
         if page.exists:
             try:
                 page.touch()
-                time.sleep(1)
+                time.sleep(Config.pauseAfterSuccessfullyUpdatingWikiPageInSec)
             except:
                 rtnVal = False
-                time.sleep(2)
-
-        for i in curItemList:
-            if i in itemList:  itemList.remove(i)
+                time.sleep(Config.pauseAfterSkippingWikiPageUpdateInSec)
 
     return rtnVal
 
@@ -847,12 +840,8 @@ def UpdateIndividualPagesForAllItems(comment=''):
     }
 
     itemList = [ v for v in ItemUtils.itemData if ItemUtils.GetItemWikiArticlePage(v) and v['type'] > 1 and not ItemUtils.IsItemHidden(v) ]
-    while len(itemList) > 0:
-        curItemList = ItemUtils.GetAllItemsSharingItemRange(itemList[0])
+    for curItemList in ItemUtils.ItemPageIter(itemList):
         if Config.debug:  print("Got", itemList[0]['name'], 'with', len(curItemList), 'members.')
-
-        curItemList = [ v for v in curItemList if not ItemUtils.IsItemHidden(v) ]
-        curItemList = sorted(curItemList, key=ItemUtils.GetItemSortFunc())
         primaryItem = curItemList[-1]
         nameInfo = ItemUtils.SplitNameIntoBaseNameAndItemLevel(primaryItem['name'])
         if Config.debug:
@@ -863,13 +852,6 @@ def UpdateIndividualPagesForAllItems(comment=''):
             rtnVal['pagesFailedToUpdate'].append(nameInfo['fullNameMinusLevel'])
         else:
             rtnVal['pagesUpdated'].append(nameInfo['fullNameMinusLevel'])
-
-        for i in curItemList:
-            if i in itemList:
-                if Config.debug:  print("Removed", i['name'], 'from the item list.')
-                itemList.remove(i)
-            else:
-                if Config.debug:  print("Cannot remove", i['name'], "from item list.")
 
     return rtnVal
 
@@ -1765,10 +1747,7 @@ def AddMissingItemWikiPages():
     site = GetWikiClientSiteObject()
 
     itemList = [ v for v in ItemUtils.itemData if not ItemUtils.GetItemWikiArticlePage(v) and v['type'] > 1 and not ItemUtils.IsItemHidden(v) ]
-    while len(itemList) > 0:
-        curItemList = ItemUtils.GetAllItemsSharingItemRange(itemList[-1])
-        curItemList = [ v for v in curItemList if not ItemUtils.IsItemHidden(v) ]
-        curItemList = sorted(curItemList, key=ItemUtils.GetItemSortFunc())
+    for curItemList in ItemUtils.ItemPageIter(itemList):
         primaryItem = curItemList[-1]
 
         nameInfo = ItemUtils.SplitNameIntoBaseNameAndItemLevel(primaryItem['name'])
@@ -1790,9 +1769,6 @@ def AddMissingItemWikiPages():
         else:
             rtnVal['pagesAlreadyExist'].append(pageName)
             time.sleep(Config.pauseAfterSkippingWikiPageUpdateInSec)
-
-        for i in curItemList:
-            if i in itemList:  itemList.remove(i)
 
     return rtnVal
 
