@@ -599,23 +599,19 @@ def GetWikiInfoboxDataForEngine(itemList):
     displayData = vdata[0] if len(set(vdata)) == 1 else "x / ".join(vdata)
     infobox['propulsion'] = "{}x".format(displayData)
 
-    try:
+    with suppress(KeyError):
         vdata = [ GeneralUtils.NumDisplay(i['propulsionEnhanceTime'], 3) for i in itemList ]
         displayData = vdata[0] if len(set(vdata)) == 1 else "s / ".join(vdata)
         if displayData != '0':
             infobox['boost_duration'] = "{}s".format(displayData)
-    except:
-        pass
 
-    try:
+    with suppress(KeyError):
         vdata = [ GeneralUtils.NumDisplay(i['propulsionEnhanceCooldown'] * i['propulsionEnhanceTime'], 2) for i in itemList ]
         displayData = vdata[0] if len(set(vdata)) == 1 else "s / ".join(vdata)
         if displayData != '0':
             infobox['boost_cooldown'] = "{}s".format(displayData)
         if infobox['boost_cooldown'] == infobox['boost_duration']:
             del infobox['boost_cooldown']
-    except:
-        pass
 
     vdata = [ GeneralUtils.NumDisplay(i['autoPilotSpeedInc'], 3) for i in itemList ]
     displayData = vdata[0] if len(set(vdata)) == 1 else " / +".join(vdata)
@@ -657,6 +653,13 @@ def GetWikiInfoboxDataForShield(itemList):
     if image:
         infobox['image1'] = image
 
+    effectIcons = GetShieldEffectIconsForItem(primaryItem, "positive")
+    if effectIcons:
+        effectIcons += '&nbsp;&nbsp;'
+    effectIcons += GetShieldEffectIconsForItem(primaryItem, "negative")
+    if effectIcons:
+        infobox['effect_icons'] = effectIcons
+
     vdata = [ GetItemSkillLevel(i) for i in itemList ]
     displayData = str(vdata[0]) if len(set(vdata)) == 1 else " / ".join([str(x) for x in vdata])
     if displayData != '999':
@@ -678,27 +681,23 @@ def GetWikiInfoboxDataForShield(itemList):
     infobox['recharge_delay'] = "{}s".format(displayData)
 
 
-    try:
-        effectList = GetEffectNameListForItem(primaryItem)
-        if effectList:
-            vdata = [ GeneralUtils.NumDisplay(i['effectAmount'] * 100, 0) for i in itemList ]
-            displayData = vdata[0] if len(set(vdata)) == 1 else "% / ".join(vdata)
-            if displayData != '0':
-                if len(effectList) > 1:
-                    infobox['effect'] = ''
-                    for effectName in effectList:
-                        infobox['effect'] += '[[:Category:{}|{}]]<br>\n'.format(effectName, effectName)
-                    infobox['effect'] += '{}%'.format(displayData)
-                else:
-                    infobox['effect'] = "[[:Category:{0}|{0}]] {1}%".format(effectList[0], displayData)
-    except:
-        pass
+    effectList = GetEffectNameListForItem(primaryItem)
+    if effectList:
+        vdata = [ GeneralUtils.NumDisplay(i['effectAmount'] * 100, 0) for i in itemList ]
+        displayData = vdata[0] if len(set(vdata)) == 1 else "% / ".join(vdata)
+        if displayData != '0':
+            if len(effectList) > 1:
+                infobox['effect'] = ''
+                for effectName in effectList:
+                    infobox['effect'] += '[[:Category:{}|{}]]<br>\n'.format(effectName, effectName)
+                infobox['effect'] += '{}%'.format(displayData)
+            else:
+                infobox['effect'] = "[[:Category:{0}|{0}]] {1}%".format(effectList[0], displayData)
 
-    try:
+
+    with suppress(KeyError):
         if primaryItem['resistExtraEffect'] >= 0:
             infobox['additional_resistance'] = "[[:Category:{0}|{0}]]".format(SmallConstants.effectsData[primaryItem['resistExtraEffect']]['name'])
-    except:
-        pass
 
     vdata = [ ItemDisplayStatBPLocation(i) for i in itemList ]
     if vdata[0]:
@@ -2316,7 +2315,7 @@ def GetDefaultTableInfoByItemType(itemType, weaponType=..., pageType=''):
 
     elif itemType == 5:  # Shield
         rtnInfo['tableHeader'] = 'Shields'
-        rtnInfo['tableColumnList'] = ['Item','Maximum Charge Multiplier','Charge Rate','Charge Delay','Secondary Effects','Sk']
+        rtnInfo['tableColumnList'] = ['Item','Maximum Charge Multiplier','Charge Rate','Charge Delay','Effect Icons','Secondary Effects','Sk']
 
     elif itemType == 6:  # Augmentation
         rtnInfo['tableHeader'] = 'Augmentations'
@@ -2719,9 +2718,9 @@ def ItemDisplayStatNameAndImage(item, p=...):
     else:
         rtnVal = 'align="center" style="font-size: smaller;" class="{}" | [[{}{}]]'.format(sourceClass, '' if WikiUtils.PageNamesEqual(pageName, itemName) else '{}|'.format(pageName), itemName)
 
-    iconHtml = GetShieldEffectIconsForItem(item)
-    if iconHtml:
-        rtnVal = "{}<br />{}".format(rtnVal, iconHtml)
+    # iconHtml = GetShieldEffectIconsForItem(item)
+    # if iconHtml:
+    #     rtnVal = "{}<br />{}".format(rtnVal, iconHtml)
 
     return rtnVal
 
@@ -2744,16 +2743,20 @@ def ItemDisplayStatNameAndImageHtml(item, p=...):
     else:
         rtnVal = '<div style="text-align:center; font-size:smaller;" class="{}"><a href="{}">{}</a></div>'.format(sourceClass, wikiUrl, itemName)
 
-    iconHtml = GetShieldEffectIconsForItem(item)
-    if iconHtml:
-        rtnVal = "{}<br />{}".format(rtnVal, iconHtml)
-
     return rtnVal
 
 
 def ItemDisplayStatDamageType(item, p=...):
     dtype = GetItemDamageType(item)
     return dtype if dtype else ''
+
+
+def ItemDisplayStatEffectIcons(item, p=...):
+    rtnVal = GetShieldEffectIconsForItem(item, "positive")
+    if rtnVal:
+        rtnVal += "<br>"
+    rtnVal += GetShieldEffectIconsForItem(item, "negative")
+    return rtnVal
 
 
 def ItemDisplayStatPurchaseCost(item, p=...):
@@ -2956,6 +2959,7 @@ itemDisplayStatSwitcher = {
     'dph': ItemDisplayStatDamage,
     'dps': ItemDisplayStatTotalDps,
     'effect': ItemDisplayStatEffect,
+    'effect icons': ItemDisplayStatEffectIcons,
     'effects': ItemDisplayStatEffect,
     'energy': ItemDisplayStatEnergyRequired,
     'energy usage': ItemDisplayStatEnergyRequired,
@@ -3095,6 +3099,7 @@ itemStatDescriptionSwitcher = {
     'dph': (lambda s, pt: "Base damage per projectile hit"),
     'dps': (lambda s, pt: "Damage per second, including effect damage"),
     'effect': (lambda s, pt: "Status effect applied"),
+    # 'effect icons': (lambda s, pt: ""),
     'effects': (lambda s, pt: "Status effect applied"),
     'energy': (lambda s, pt: "Energy used per shot"),
     'energy usage': (lambda s, pt: "Energy used per shot"),
