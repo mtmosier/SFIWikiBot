@@ -87,18 +87,20 @@ def GetPlanetType(type):
 
 
 def GetPlanetInfoByName(planetName):
+    planetName = planetName.lower()
     for galaxy, galaxyInfo in galaxyData.items():
         for planetInfo in galaxyInfo['planets']:
-            if (planetInfo['name'] == planetName):
+            if (planetInfo['name'].lower() == planetName):
                 return planetInfo
 
 
 def FindPlanet(searchPlanetName):
     resultPlanetInfo = OrderedDict()
+    searchPlanetName = searchPlanetName.lower()
 
     for galaxy, galaxyInfo in galaxyData.items():
         for planetInfo in galaxyInfo['planets']:
-            if (planetInfo['name'] == searchPlanetName):
+            if (planetInfo['name'].lower() == searchPlanetName):
                 resultPlanetInfo["Planet Name"] = planetInfo['name']
                 resultPlanetInfo["Classification"] = GetPlanetType(planetInfo['planetType'])
                 resultPlanetInfo["System Found In"] = GetSystemName(planetInfo['location']['starSystemID'])
@@ -133,6 +135,82 @@ def GetSystemPlanetList(systemPrefix, skipUnreleasedSystems=False):
 
     return resultPlanetList
 
+
+def GetObjectListByName(objectName, skipUnreleasedSystems=False):
+    resultList = []
+    objectName = objectName.lower()
+
+    for objInfo in GetFullObjectList(skipUnreleasedSystems):
+        if objInfo['name'].lower() == objectName:
+            resultList.append(objInfo)
+
+    return resultList
+
+def GetFullObjectList(skipUnreleasedSystems=True):
+    return GetSystemObjectList('all', skipUnreleasedSystems)
+
+def GetSystemObjectList(systemPrefix, skipUnreleasedSystems=True):
+    resultList = []
+    unreleasedSystemList = [ v.lower() for v in Config.unreleasedSystemList ]
+    systemPrefix = systemPrefix.lower()
+
+    for systemInfo in galaxyData.values():
+        if systemPrefix == "all" or systemInfo['prefix'].lower() == systemPrefix:
+            if skipUnreleasedSystems and systemInfo['prefix'].lower() in unreleasedSystemList:
+                continue
+            for objectInfo in systemInfo['otherObjects']:
+                resultList.append(objectInfo)
+
+    return resultList
+
+
+def GetPlanetsAndObjectsAssociatedWithRace(raceOrOrgName):
+    rtnInfo = {
+        'planets': [],
+        'objects': [],
+    }
+    pageName = raceOrOrgName
+    possibleObjectsToCheck = set()
+    stripRegex = re.compile('[^a-zA-Z0-9]')
+
+    content = WikiUtils.GetWikiPageContent(pageName)
+    if content:
+        templateList = WikiUtils.GetTemplateListFromWikiPageContentRecursive(content)
+        for templateInfo in templateList:
+            if templateInfo['name'].lower() == 'nprfooter':
+                with suppress(KeyError):
+                    linkList = WikiUtils.GetWikiLinksFromContent(templateInfo['data']['Associated relics'])
+                    possibleObjectsToCheck.update(linkList.keys())
+
+    possibleObjectsToCheck.update(WikiUtils.GetWikiCategoryMemberList(pageName))
+
+    for searchName in possibleObjectsToCheck:
+        planetInfo = GetPlanetInfoByName(searchName)
+        if planetInfo:
+            rtnInfo['planets'].append(planetInfo)
+            continue
+
+        descFound = []
+        objList = GetObjectListByName(searchName)
+        for objInfo in objList:
+            desc = ''
+            with suppress(KeyError):
+                if objInfo['scanText']:
+                    desc = objInfo['scanText']
+            with suppress(KeyError):
+                if not desc and objInfo['info']:
+                    desc = objInfo['info']
+            # Avoiding a duplicate due to typo
+            if objInfo['name'] == 'Andromeda Gate' and 'Non-the less' in desc:
+                continue
+            desc = stripRegex.sub('', desc).lower()
+            if desc not in descFound:
+                rtnInfo['objects'].append(objInfo)
+                descFound.append(desc)
+
+    rtnInfo['planets'] = sorted(rtnInfo['planets'], key=lambda x: x['name'])
+    rtnInfo['objects'] = sorted(rtnInfo['objects'], key=lambda x: x['name'])
+    return rtnInfo
 
 
 def GetSpawnInformationForRace(raceId):
