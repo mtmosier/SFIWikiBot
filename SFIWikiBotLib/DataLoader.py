@@ -153,6 +153,7 @@ def LoadConstantsData():
     rtnData['raceData'] = LoadDataFromBenOldingJsonp('races')
     rtnData['effectsData'] = LoadDataFromBenOldingJsonp('effects')
     rtnData['skillsData'] = LoadDataFromBenOldingJsonp('skills')
+    rtnData['orgData'] = LoadDataFromBenOldingJsonp('orgs')
 
     lookup = LoadDataFromBenOldingJsonp('lookup')
     rtnData['guidanceLookup'] = lookup['guidance']

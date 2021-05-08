@@ -12,6 +12,7 @@ from SFIWikiBotLib import DataLoader
 
 
 raceData = None
+orgData = None
 skillsData = None
 effectsData = None
 effectLookup = None
@@ -55,6 +56,37 @@ effectDamagesData = {
 # 	"Fast Shield Repair": -20,
 # 	"Energy Recharge": 10,
 }
+
+
+def GetRaceDescriptionById(id):
+    raceData = GetNprInfoById(id)
+    with suppress(KeyError, TypeError):
+        if raceData['info']:
+            return raceData['info']
+
+    orgList = GetOrgInfoListByRaceId(id)
+    for orgData in orgList:
+        with suppress(KeyError):
+            if orgData['intro']:
+                return orgData['intro']
+
+
+
+def GetOrgInfoListByRaceId(id):
+    rtnList = []
+    for org in orgData:
+        if org['race'] == id:
+            if id > 1 or org['joinable']:
+                rtnList.append(org)
+
+    return rtnList
+
+
+
+def GetOrgInfoByName(name):
+    for org in orgData:
+        if org['name'] == name:
+            return org
 
 
 def GetNprInfoById(id):
@@ -159,7 +191,7 @@ def GetFullEffectNameList():
 
 
 def LoadConstantInformation():
-    global raceData, effectsData, skillsData
+    global raceData, orgData, effectsData, skillsData
     global effectLookup, guidanceLookup, fireSideLookup
     global typeLookup, damageTypeLookup, augTypeLookup
     global weaponTypeLookup, spawnTypeLookup, sectorTypeLookup
@@ -176,6 +208,7 @@ def LoadConstantInformation():
     fireSideLookup = rtnInfo["fireSideLookup"] if 'fireSideLookup' in rtnInfo else None
     guidanceLookup = rtnInfo["guidanceLookup"] if 'guidanceLookup' in rtnInfo else None
     raceData = rtnInfo["raceData"] if 'raceData' in rtnInfo else None
+    orgData = rtnInfo["orgData"] if 'orgData' in rtnInfo else None
     sectorTypeLookup = rtnInfo["sectorTypeLookup"] if 'sectorTypeLookup' in rtnInfo else None
     skillsData = rtnInfo["skillsData"] if 'skillsData' in rtnInfo else None
     spawnTypeLookup = rtnInfo["spawnTypeLookup"] if 'spawnTypeLookup' in rtnInfo else None
