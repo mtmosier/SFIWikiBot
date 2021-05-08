@@ -18,6 +18,7 @@ botBpLocationOverride = White Xandelevium Blaster=Sh-1-4, Quark Xandelevium Blas
 # botBpLocationOverride =
 #
 # botCraftingPageName = Crafting
+# botNprPageNameMapping = Ascendants=Ascendant, Andromedans=Andromedan, The Church of Megmos=Church of Megmos, Dartians=Dartian, Forkworms=Forkworm, Ghosts=Ghost, Igni=Igni, Null Dwellers=Null Dweller, Prongworms=Prongworm, Radii=Radii, Red Mist=Red Mist, Relisk=Relisk, Resonites=Resonite, Rodions=Rodion, Sheenites=Sheenite, Solarions=Solarion, Splicers=Splicer, The Gao=The Gao, Tobor=Tobor, Tornadians=Tornadian, Tyraan=Tyraan, Vacuum Flies=Vacuum Fly
 #
 # botMaxWordsInArticleTitleSearch = 4
 # botDefaultDpsTimeframeInSec = 10

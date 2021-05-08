@@ -67,6 +67,10 @@ weaponRangeOverrideDefault = 'Sheenite Orbital Ultra Ring=17, Sheenite Orbital C
 weaponRangeOverride = dict(config('botWeaponRangeOverride', cast=Csv(cast=lambda s: tuple(s.split('='))), default=weaponRangeOverrideDefault))
 weaponRangeOverride = { k:float(v) for k, v in weaponRangeOverride.items() }
 
+nprPageNameMappingDefault = 'Ascendants=Ascendant, Andromedans=Andromedan, The Church of Megmos=Church of Megmos, Dartians=Dartian, Forkworms=Forkworm, Ghosts=Ghost, Igni=Igni, Null Dwellers=Null Dweller, Prongworms=Prongworm, Radii=Radii, Red Mist=Red Mist, Relisk=Relisk, Resonites=Resonite, Rodions=Rodion, Sheenites=Sheenite, Solarions=Solarion, Splicers=Splicer, The Gao=The Gao, Tobor=Tobor, Tornadians=Tornadian, Tyraan=Tyraan, Vacuum Flies=Vacuum Fly'
+nprPageNameMapping = dict(config('botNprPageNameMapping', cast=Csv(cast=lambda s: tuple(s.split('='))), default=nprPageNameMappingDefault))
+nprPageNameMapping = { k:float(v) for k, v in weaponRangeOverride.items() }
+
 subWeaponIDOverrideDefault = 'Cake Bomb=cks, Stinger Cloud=st_1, Sheenite Orbital Ultra Ring=soc, Sheenite Orbital Chevron Ring=soc'
 subWeaponIDOverride = dict(config('botSubWeaponIDOverride', cast=Csv(cast=lambda s: tuple(s.split('='))), default=subWeaponIDOverrideDefault))
 

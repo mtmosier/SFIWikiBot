@@ -36,36 +36,6 @@ wikiCache = Cache(directory=os.path.join(Config.cacheDir, 'cache.wiki'))
 
 
 
-# Wiki page name : NPR name
-nprPageNameMapping = {
-    'Ascendants': 'Ascendant',
-    'Andromedans': 'Andromedan',
-    'The Church of Megmos': 'Church of Megmos',
-    'Dartians': 'Dartian',
-    'Devimon': 'Devimon',
-    'Forkworms': 'Forkworm',
-    'Ghosts': 'Ghost',
-    'Igni': 'Igni',
-    'Null Dwellers': 'Null Dweller',
-    'Prongworms': 'Prongworm',
-    'Radii': 'Radii',
-    'Red Mist': 'Red Mist',
-    'Relisk': 'Relisk',
-    'Resonites': 'Resonite',
-    'Rodions': 'Rodion',
-    'Sheenites': 'Sheenite',
-    'Solarions': 'Solarion',
-    'Splicers': 'Splicer',
-    'The Gao': 'The Gao',
-    'Tobor': 'Tobor',
-    'Tornadians': 'Tornadian',
-    'Tyraan': 'Tyraan',
-    'Vacuum Flies': 'Vacuum Fly',
-}
-
-
-
-
 
 def GetPageInfoFromWiki(pageName):
     pageInformation = {
@@ -118,7 +88,7 @@ def GetNprWikiPageByNprName(nprName):
     if nprName.lower() == 'aralien ghost' or nprName.lower() == 'human ghost':
         nprName = 'ghost';
 
-    for pageName, npr in nprPageNameMapping.items():
+    for pageName, npr in Config.nprPageNameMapping.items():
         if npr.lower() == nprName.lower():
             return pageName
 
@@ -671,8 +641,8 @@ def UpdateWikiNPRPages(comment=None, forceUpdate=False):
 
     site = GetWikiClientSiteObject()
 
-    for pageName in nprPageNameMapping.keys():
-        nprName = nprPageNameMapping[pageName]
+    for pageName in Config.nprPageNameMapping.keys():
+        nprName = Config.nprPageNameMapping[pageName]
 
         page = site.pages[pageName]
         if page.exists:
