@@ -231,7 +231,6 @@ def GetRenderedNprPageItemList(race, nprExclusiveItemList=False):
     return RenderItemPreset(itemPs, includeHtml, includeResultObjList, removeUltraRaresFromResultCount)
 
 
-
 def GetRenderedSkillPageItemList(skillName, additionalClass=None, includeTableHeader=False):
     itemPsJson = '{"name":"Skill Item List","sortBy":"skillLevel","ruleSet":{"condition":"AND","rules":[{"id":"ItemUtils.IsItemHidden","field":"ItemUtils.IsItemHidden","type":"boolean","input":"radio","operator":"equal","value":false},{"id":"ItemUtils.GetItemSkillName","field":"ItemUtils.GetItemSkillName","type":"string","input":"select","operator":"equal","value":"' + skillName + '"},{"id":"ItemUtils.GetItemSkillLevel","field":"ItemUtils.GetItemSkillLevel","type":"integer","input":"number","operator":"greater","value":0},{"id":"ItemUtils.GetItemSource","field":"ItemUtils.GetItemSource","type":"string","input":"select","operator":"not_equal","value":"Rare Drop"},{"condition":"OR","rules":[{"id":"ItemUtils.GetRaceForItem","field":"ItemUtils.GetRaceForItem","type":"string","input":"select","operator":"equal","value":"Humans"},{"id":"ItemUtils.GetRaceForItem","field":"ItemUtils.GetRaceForItem","type":"string","input":"select","operator":"equal","value":"Aralien"}]}],"valid":true},"useCustomTableOptions":1,"tableHeader":"","tableCaption":"","tableClassNames":"wikitable sortable","tableColumnList":["Name","Type","Skill"]}'
     itemPs = json.loads(itemPsJson)
@@ -243,6 +242,26 @@ def GetRenderedSkillPageItemList(skillName, additionalClass=None, includeTableHe
 
     return RenderItemPreset(itemPs)
 
+
+# For those times you only need read access
+def GetWikiPageContent(pageName):
+    site = GetWikiClientSiteObject()
+    page = site.pages[pageName]
+    if not page.exists:
+        return False
+
+    return page.text()
+
+
+def GetWikiCategoryMemberList(catName):
+    site = GetWikiClientSiteObject()
+    cat = site.categories[catName]
+
+    rtnList = []
+    for page in cat.members():
+        rtnList.append(page.name)
+
+    return rtnList
 
 
 def RenderShipPreset(preset, includeHtml=False, includeResultObjList=False, includeTableHeaders=True):
@@ -1413,7 +1432,6 @@ def GetTemplateListFromWikiPageContent(content):
     templateList = []
 
 
-
     resLink = ReplaceWikiLinksWithPlaceholders(content)
     content = resLink['content']
 
@@ -1432,6 +1450,8 @@ def GetTemplateListFromWikiPageContent(content):
             'content': result.group(1),
             'name': '',
             'data': OrderedDict(),
+            # 'placeholderName': '',
+            # 'contentWithPlaceholders': '',
         }
 
         input = input.replace(templateData['content'], '')
@@ -1475,6 +1495,88 @@ def GetTemplateListFromWikiPageContent(content):
     return templateList
 
 
+def GetTemplateListFromWikiPageContentRecursive(content):
+    templateList = []
+    pageholderMap = {}
+
+    resLink = ReplaceWikiLinksWithPlaceholders(content)
+    content = resLink['content']
+
+    resVar = ReplaceWikiVariablesWithPlaceholders(content)
+    content = resVar['content']
+
+    resInvoke = ReplaceModuleInvokationsWithPlaceholders(content)
+    content = resInvoke['content']
+
+    regex = re.compile(r'.*?(\{\{(((?<!\{)\{|[^\{])*?)\}\})', re.S)
+    input = content
+    result = regex.match(input)
+    templateIdx = 0
+    while result:
+        templateData = {
+            'content': result.group(1),
+            'name': '',
+            'data': OrderedDict(),
+            'placeholderName': '^^^TEMPLATE_PLACEHOLDER_{}^^^'.format(templateIdx),
+            'contentWithPlaceholders': result.group(1),
+            'placeholderMap': {},
+        }
+        templateIdx += 1
+
+        if Config.debug:
+            templateData['placeholderMap'].update(pageholderMap)
+            if resInvoke['placeholderMap']:  templateData['placeholderMap'].update(resInvoke['placeholderMap'])
+            if resVar['placeholderMap']:  templateData['placeholderMap'].update(resVar['placeholderMap'])
+            if resLink['placeholderMap']:  templateData['placeholderMap'].update(resLink['placeholderMap'])
+        else:
+            del templateData['placeholderMap']
+
+        input = input.replace(templateData['content'], templateData['placeholderName'])
+
+        templateData['content'] = ReplacePlaceholdersWithWikiContent(templateData['content'], pageholderMap)
+        if resInvoke['placeholderMap']:  templateData['content'] = ReplacePlaceholdersWithWikiContent(templateData['content'], resInvoke['placeholderMap'])
+        if resVar['placeholderMap']:  templateData['content'] = ReplacePlaceholdersWithWikiContent(templateData['content'], resVar['placeholderMap'])
+        if resLink['placeholderMap']:  templateData['content'] = ReplacePlaceholdersWithWikiContent(templateData['content'], resLink['placeholderMap'])
+
+
+        content =result.group(2)
+
+        if '|' in content:
+            dataLines = content.split('|')
+            templateData['name'] = dataLines[0].strip()
+            for i in range(1, len(dataLines)):
+                lineContent = dataLines[i]
+                lineContent = ReplacePlaceholdersWithWikiContent(lineContent, pageholderMap)
+                if resInvoke['placeholderMap']:  lineContent = ReplacePlaceholdersWithWikiContent(lineContent, resInvoke['placeholderMap'])
+                if resVar['placeholderMap']:  lineContent = ReplacePlaceholdersWithWikiContent(lineContent, resVar['placeholderMap'])
+                if resLink['placeholderMap']:  lineContent = ReplacePlaceholdersWithWikiContent(lineContent, resLink['placeholderMap'])
+                lineParts = lineContent.split('=', 1)
+                key = lineParts[0].strip()
+                try:
+                    val = lineParts[1].replace('{{!}}', '|').strip()
+                except:
+                    val = ''
+                templateData['data'][key] = val
+        elif ':' in content:
+            lineContent = content
+            lineContent = ReplacePlaceholdersWithWikiContent(lineContent, pageholderMap)
+            if resInvoke['placeholderMap']:  lineContent = ReplacePlaceholdersWithWikiContent(lineContent, resInvoke['placeholderMap'])
+            if resVar['placeholderMap']:  lineContent = ReplacePlaceholdersWithWikiContent(lineContent, resVar['placeholderMap'])
+            if resLink['placeholderMap']:  lineContent = ReplacePlaceholdersWithWikiContent(lineContent, resLink['placeholderMap'])
+            lineParts = lineContent.split(':', 1)
+            templateData['name'] = lineParts[0].strip()
+            try:
+                templateData['data'][templateData['name']] = lineParts[1].strip()
+            except:
+                pass
+
+        pageholderMap[templateData['placeholderName']] = templateData['contentWithPlaceholders']
+        templateList.append(templateData)
+        result = regex.match(input)
+
+    return templateList
+
+
 def GetCategoryListFromWikiPageContent(content):
     categoryList = []
 
@@ -1492,6 +1594,25 @@ def GetCategoryListFromWikiPageContent(content):
         result = regex.match(input)
 
     return categoryList
+
+
+def GetWikiLinksFromContent(content):
+    wikiLinkList = {}
+    idx = 0
+
+    regex = re.compile(r'.*?\[\[([^\|\]]+)(\|([^\]]*))?\]\]', re.S)
+    result = regex.match(content)
+    while result:
+        idx += len(result.group(0))
+
+        pageName = result.group(1)
+        linkDisplay = result.group(3)
+        if not linkDisplay:  linkDisplay = pageName
+        wikiLinkList[linkDisplay] = pageName
+
+        result = regex.match(content[idx:])
+
+    return wikiLinkList
 
 
 def GetWikiPageSectionsFromContent(content):
