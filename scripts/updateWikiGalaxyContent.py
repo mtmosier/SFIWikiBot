@@ -35,7 +35,7 @@ GalaxyUtils.Initialize()
 WikiUtils.Initialize()
 time.sleep(Config.pauseBetweenContentUpdateStepsInSec)
 
-print('** Upload ship images', datetime.now(tz).strftime("%I:%M %p").lstrip('0'))
+print('** Upload planet images', datetime.now(tz).strftime("%I:%M %p").lstrip('0'))
 WikiUtils.UploadMissingPlanetImages()
 
 print('** Refreshing wiki image cache', datetime.now(tz).strftime("%I:%M %p").lstrip('0'))
