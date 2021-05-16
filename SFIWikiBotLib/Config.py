@@ -57,6 +57,9 @@ unreleasedShipList = config('botUnreleasedShipList', cast=Csv(), default='')
 unreleasedSystemList = config('botUnreleasedSystemList', cast=Csv(), default='TBZ')
 wikiLinkReplacementExclusionList = config('botWikiLinkReplacementExclusionList', cast=Csv(), default='Black, Damage, Energy, Ships')
 
+wikiLinkReplacementOverrideListDefault = 'Black Ships=Ascendants'
+wikiLinkReplacementOverrideList = dict(config('botWikiLinkReplacementOverrideList', cast=Csv(cast=lambda s: tuple(s.split('='))), default=wikiLinkReplacementOverrideListDefault))
+
 bpLocationOverride = dict(config('botBpLocationOverride', cast=Csv(cast=lambda s: tuple(s.split('='))), default=''))
 
 projectileCountOverrideDefault = 'Sheenite Orbital Ultra Ring=30, Sheenite Orbital Chevron Ring=8, Church Savior Cloud=15'
@@ -67,9 +70,11 @@ weaponRangeOverrideDefault = 'Sheenite Orbital Ultra Ring=17, Sheenite Orbital C
 weaponRangeOverride = dict(config('botWeaponRangeOverride', cast=Csv(cast=lambda s: tuple(s.split('='))), default=weaponRangeOverrideDefault))
 weaponRangeOverride = { k:float(v) for k, v in weaponRangeOverride.items() }
 
-nprPageNameMappingDefault = 'Ascendants=Ascendant, Andromedans=Andromedan, The Church of Megmos=Church of Megmos, Dartians=Dartian, Forkworms=Forkworm, Ghosts=Ghost, Igni=Igni, Null Dwellers=Null Dweller, Prongworms=Prongworm, Radii=Radii, Red Mist=Red Mist, Relisk=Relisk, Resonites=Resonite, Rodions=Rodion, Sheenites=Sheenite, Solarions=Solarion, Splicers=Splicer, The Gao=The Gao, Tobor=Tobor, Tornadians=Tornadian, Tyraan=Tyraan, Vacuum Flies=Vacuum Fly'
+mainFactionListDefault = 'Human Alliance=, Alliance Science Corps=Human Alliance\#Alliance Science Corps, Aralien Empire=, Empire Intelligence=Aralien Empire\#Empire Intelligence, Freedom Initiative='
+mainFactionList = dict(config('botMainFactionList', cast=Csv(cast=lambda s: tuple(s.split('='))), default=mainFactionListDefault))
+
+nprPageNameMappingDefault = 'Ascendants=Ascendant, Andromedans=Andromedan, Dartians=Dartian, Forkworms=Forkworm, Ghosts=Ghost, Igni=Igni, Null Dwellers=Null Dweller, Prongworms=Prongworm, Radii=Radii, Red Mist=Red Mist, Relisk=Relisk, Resonites=Resonite, Rodions=Rodion, Sheenites=Sheenite, Solarions=Solarion, Splicers=Splicer, The Church of Megmos=Church of Megmos, The Gao=The Gao, Tobor=Tobor, Tornadians=Tornadian, Tyraan=Tyraan, Vacuum Flies=Vacuum Fly'
 nprPageNameMapping = dict(config('botNprPageNameMapping', cast=Csv(cast=lambda s: tuple(s.split('='))), default=nprPageNameMappingDefault))
-nprPageNameMapping = { k:float(v) for k, v in weaponRangeOverride.items() }
 
 subWeaponIDOverrideDefault = 'Cake Bomb=cks, Stinger Cloud=st_1, Sheenite Orbital Ultra Ring=soc, Sheenite Orbital Chevron Ring=soc'
 subWeaponIDOverride = dict(config('botSubWeaponIDOverride', cast=Csv(cast=lambda s: tuple(s.split('='))), default=subWeaponIDOverrideDefault))

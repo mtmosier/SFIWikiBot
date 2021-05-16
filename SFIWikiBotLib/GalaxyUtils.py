@@ -164,7 +164,7 @@ def GetSystemObjectList(systemPrefix, skipUnreleasedSystems=True):
     return resultList
 
 
-def GetPlanetsAndObjectsAssociatedWithRace(raceOrOrgName):
+def GetPlanetsAndObjectsAssociatedWithRaceOrOrg(raceOrOrgName):
     rtnInfo = {
         'planets': [],
         'objects': [],
@@ -200,9 +200,15 @@ def GetPlanetsAndObjectsAssociatedWithRace(raceOrOrgName):
             with suppress(KeyError):
                 if not desc and objInfo['info']:
                     desc = objInfo['info']
-            # Avoiding a duplicate due to typo
+
+            # Avoiding duplicates due to typos
             if objInfo['name'] == 'Andromeda Gate' and 'Non-the less' in desc:
                 continue
+            if objInfo['name'] == 'Splicer Station' and 'live among the stars.The squat, grumpy,' in desc:
+                continue
+            if objInfo['name'] == 'Red Mist Station' and 'crestline,' in desc:
+                continue
+
             desc = stripRegex.sub('', desc).lower()
             if desc not in descFound:
                 rtnInfo['objects'].append(objInfo)

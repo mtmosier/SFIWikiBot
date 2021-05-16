@@ -18,7 +18,8 @@ botBpLocationOverride = White Xandelevium Blaster=Sh-1-4, Quark Xandelevium Blas
 # botBpLocationOverride =
 #
 # botCraftingPageName = Crafting
-# botNprPageNameMapping = Ascendants=Ascendant, Andromedans=Andromedan, The Church of Megmos=Church of Megmos, Dartians=Dartian, Forkworms=Forkworm, Ghosts=Ghost, Igni=Igni, Null Dwellers=Null Dweller, Prongworms=Prongworm, Radii=Radii, Red Mist=Red Mist, Relisk=Relisk, Resonites=Resonite, Rodions=Rodion, Sheenites=Sheenite, Solarions=Solarion, Splicers=Splicer, The Gao=The Gao, Tobor=Tobor, Tornadians=Tornadian, Tyraan=Tyraan, Vacuum Flies=Vacuum Fly
+# botNprPageNameMapping = Ascendants=Ascendant, Andromedans=Andromedan, Dartians=Dartian, Forkworms=Forkworm, Ghosts=Ghost, Igni=Igni, Null Dwellers=Null Dweller, Prongworms=Prongworm, Radii=Radii, Red Mist=Red Mist, Relisk=Relisk, Resonites=Resonite, Rodions=Rodion, Sheenites=Sheenite, Solarions=Solarion, Splicers=Splicer, The Church of Megmos=Church of Megmos, The Gao=The Gao, Tobor=Tobor, Tornadians=Tornadian, Tyraan=Tyraan, Vacuum Flies=Vacuum Fly
+# botMainFactionList = Human Alliance=, Alliance Science Corps=Human Alliance\#Alliance Science Corps, Aralien Empire=, Empire Intelligence=Aralien Empire\#Empire Intelligence, Freedom Initiative=
 #
 # botMaxWordsInArticleTitleSearch = 4
 # botDefaultDpsTimeframeInSec = 10
@@ -29,6 +30,7 @@ botBpLocationOverride = White Xandelevium Blaster=Sh-1-4, Quark Xandelevium Blas
 # botDamageTypeIconClassMapping = Projectile=fas fa-ellipsis-h, Explosive=fas fa-bomb, Laser=fas fa-asterisk, Heat=fas fa-fire, Repair=fas fa-heartbeat, Electrostatic=fas fa-bolt, Tractor=fas fa-link, Photonic=fas fa-sun, RedMist=fas fa-wind, Cold=fas fa-snowflake, Ghostly=fas fa-ghost, EnergyExtraction=fas fa-sign-out-alt, ShieldExtraction=fas fa-sign-out-alt, Combo=fas fa-sign-out-alt, Undefined=fas fa-question-circle, Other=fas fa-question-circle, AmmoHarvest=fas fa-sign-out-alt fa-rotate-270, ShieldHarvest=fas fa-sign-out-alt fa-rotate-270, EnergyHarvest=fas fa-sign-out-alt fa-rotate-270, DartianMining=fas fa-sign-out-alt fa-rotate-270, Null=[html]&#8709;
 # botEffectIconClassMapping =
 #
+# botWikiLinkReplacementOverrideList = Black Ships=Ascendants
 # botWikiLinkReplacementExclusionList = Black, Damage, Energy, Ships
 # botProjectileCountOverride = Sheenite Orbital Ultra Ring=30, Sheenite Orbital Chevron Ring=8
 # botWeaponRangeOverride = Sheenite Orbital Ultra Ring=17, Sheenite Orbital Chevron Ring=17, Ascendant Gun Turret=125

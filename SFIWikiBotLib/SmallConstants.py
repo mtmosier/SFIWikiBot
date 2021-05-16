@@ -59,6 +59,7 @@ effectDamagesData = {
 
 
 def GetRaceDescriptionById(id):
+    if id == 'ghost':  id = GetNprIdFromName('Human Ghost')
     raceData = GetNprInfoById(id)
     with suppress(KeyError, TypeError):
         if raceData['info']:
@@ -112,7 +113,7 @@ def GetNprIdFromName(name):
         if GeneralUtils.NormalizeString(race['name']) == nprName:
             return race['race']
 
-    if name.find("ghost") >= 0:
+    if nprName.find("ghost") >= 0:
         return "ghost"
 
 

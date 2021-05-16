@@ -75,6 +75,10 @@ def mkdirr(path):
     os.makedirs(path, exist_ok=True)
 
 
+def CleanupImportedText(input):
+    return input.replace("\u00e2\u20ac\u0153", '"').replace("\u00e2\u20ac?", '"').replace('â€™', "'").strip()
+
+
 def floatCmp(v1, c, v2, dec=None):
     if v1 is None or v2 is None:
         if c == '!=' or c == '<>' or c == '><':
@@ -125,7 +129,7 @@ def GenerateDataSignature(data):
         input = NormalizeDict(input)
 
     if type(input) == str:
-        input = input.strip().replace('\r', '\n')
+        input = input.replace('\r', '').replace('\n', '').strip()
 
     jsonStr = json.dumps(input, sort_keys=True)
     return hashlib.md5(jsonStr.encode("utf-8")).hexdigest()
@@ -140,7 +144,7 @@ def NormalizeDict(data):
             elif type(v) == list:
                 v = NormalizeList(v)
             else:
-                v = str(v).strip().replace('\r', '\n')
+                v = str(v).replace('\r', '').strip()
             fixedList[k] = v
         data = fixedList
 
@@ -156,7 +160,7 @@ def NormalizeList(data):
             elif type(v) == list:
                 v = NormalizeList(v)
             else:
-                v = str(v).strip().replace('\r', '\n')
+                v = str(v).replace('\r', '').strip()
             fixedList.append(v)
         data = fixedList
 
@@ -341,13 +345,18 @@ def SplitTextIntoPhrases(input, maxPhrase):
 # SplitNameIntoBaseNameAndItemLevel(input)
     # return { 'name': name, 'fullNameMinusLevel': fullNameMinusLevel, 'levelDisplay': levelDisplayOrig, 'levelIdx': levelIdx, 'namePostfix': postfix }
 
-def AddWikiLinksToText(input, useHtml=False, allowExtraWeaponCheck=True):
+def AddWikiLinksToText(input, useHtml=False, allowExtraWeaponCheck=True, additionalReplacementOverrides=None):
     from SFIWikiBotLib import WikiUtils
     from SFIWikiBotLib import Config
     from SFIWikiBotLib import ItemUtils
 
     includeStemming = True
     normalizedReplacementExclusionList = [ NormalizeString(v, includeStemming) for v in Config.wikiLinkReplacementExclusionList ]
+    normalizedReplacementOverrideList = { NormalizeString(k, includeStemming):NormalizeString(v, includeStemming) for k, v in Config.wikiLinkReplacementOverrideList.items() }
+    if type(additionalReplacementOverrides) == dict:
+        for k, v in additionalReplacementOverrides.items():
+            normalizedReplacementOverrideList[NormalizeString(k, includeStemming)] = NormalizeString(v, includeStemming)
+
     phraseList = SplitTextIntoPhrases(input, Config.maxWordsInArticleTitleSearch)
     replacementList = []
     replacementInfo = {}
@@ -357,6 +366,8 @@ def AddWikiLinksToText(input, useHtml=False, allowExtraWeaponCheck=True):
         normalizedPhrase = NormalizeString(origPhrase, includeStemming)
         if normalizedPhrase in normalizedReplacementExclusionList:
             continue
+        if normalizedPhrase in normalizedReplacementOverrideList:
+            normalizedPhrase = normalizedReplacementOverrideList[normalizedPhrase]
 
         nameList = [ normalizedPhrase ]
         if allowExtraWeaponCheck:
@@ -373,7 +384,7 @@ def AddWikiLinksToText(input, useHtml=False, allowExtraWeaponCheck=True):
             if useHtml:
                 replacementInfo["replacementText"] = '<a href="{}" target="_blank">{}</a>'.format(WikiUtils.GetWikiLink(wikiPage), origPhrase)
             else:
-                replacementInfo["replacementText"] = "[[{}{}]]".format('{}|'.format(wikiPage) if not WikiUtils.PageNamesEqual(wikiPage, origPhrase) else '', origPhrase)
+                replacementInfo["replacementText"] = WikiUtils.GetWikiTextLink(wikiPage, origPhrase)
             replacementInfo["placeholder"] = "~~placeholder:{}:~~".format(placeholderCount)
             replacementList.append(replacementInfo)
 

@@ -49,4 +49,7 @@ time.sleep(Config.pauseBetweenContentUpdateStepsInSec)
 print('** Update star system pages', datetime.now(tz).strftime("%I:%M %p").lstrip('0'))
 WikiUtils.UpdateStarSystemPages(comment)
 
+print('** Update lore page', datetime.now(tz).strftime("%I:%M %p").lstrip('0'))
+WikiUtils.UpdateLorePage(comment)
+
 print('** Exit', datetime.now(tz).strftime("%I:%M %p").lstrip('0'))

@@ -1547,6 +1547,202 @@ def GetTemplateListFromWikiPageContentRecursive(content):
     return templateList
 
 
+
+def GetWikiTextLink(wikiPageName, linkText=...):
+    if linkText is ...:  linkText = wikiPageName
+    wikiPageName = wikiPageName.replace(' ', '_')
+    return '[[{}{}]]'.format('' if PageNamesEqual(wikiPageName, linkText) else wikiPageName+'|', linkText)
+
+def GetLoreblurbTemplateDataForRaceOrOrgCodexEntry(raceOrOrgName, wikiPageName, desc, wikiLinkOverride=None):
+    if not wikiLinkOverride:
+        wikiLinkOverride = wikiPageName
+
+    data = {
+        'loreSubjectLinkName': wikiLinkOverride,
+        'loreSubjectName': '{} Codex Entry'.format(raceOrOrgName),
+        'loreText': desc.strip() if desc else '',
+    }
+    data['loreText'] = GeneralUtils.AddWikiLinksToText(GeneralUtils.CleanupImportedText(data['loreText']))
+    return data
+
+def GetLoreblurbTemplateDataForPlanet(planetInfo):
+    data = {
+        'loreSubjectLinkName': planetInfo['name'].strip(),
+        'loreSubjectName': planetInfo['name'].strip(),
+        'loreText': planetInfo['info'].strip() if planetInfo['info'] else '',
+    }
+    data['loreText'] = GeneralUtils.AddWikiLinksToText(GeneralUtils.CleanupImportedText(data['loreText']))
+    return data
+
+def GetLoreblurbTemplateDataForObject(objectInfo):
+    data = {
+        'loreSubjectLinkName': objectInfo['name'].strip(),
+        'loreSubjectName': objectInfo['name'].strip(),
+        'loreText': objectInfo['scanText'].strip() if objectInfo['scanText'] else (objectInfo['info'].strip() if objectInfo['info'] else ''),
+    }
+    data['loreText'] = GeneralUtils.AddWikiLinksToText(GeneralUtils.CleanupImportedText(data['loreText']))
+    return data
+
+
+def GetLoreTemplateDataForRaceOrOrg(raceOrOrgName, wikiPageName=None, wikiLinkOverride=None):
+    from SFIWikiBotLib import GalaxyUtils
+
+    if not wikiPageName:
+        wikiPageName = raceOrOrgName
+
+    if not wikiLinkOverride:
+        wikiLinkOverride = wikiPageName
+
+    data = {
+        'LoreCategory': wikiPageName,
+        'loreCategoryIntro': 'This category contains information regarding lore related to the {}.'.format(GetWikiTextLink(wikiLinkOverride, wikiPageName)),
+        'planetsLore': '',
+        'objectsLore': '',
+        'codexLore': '',
+        'miscLore': '',
+    }
+
+    desc = ''
+    raceId = SmallConstants.GetNprIdFromName(raceOrOrgName)
+    if raceId:
+        desc = SmallConstants.GetRaceDescriptionById(raceId)
+    if not desc:
+        orgInfo = SmallConstants.GetOrgInfoByName(raceOrOrgName)
+        if orgInfo:
+            desc = orgInfo['intro']
+    loreBlurb = GetLoreblurbTemplateDataForRaceOrOrgCodexEntry(raceOrOrgName, wikiPageName, desc, wikiLinkOverride)
+    if loreBlurb['loreText']:
+        data['codexLore'] = ConvertDictionaryToWikiTemplate('Loreblurb', loreBlurb, False)
+
+    raceObjData = GalaxyUtils.GetPlanetsAndObjectsAssociatedWithRaceOrOrg(wikiPageName)
+    for planetInfo in raceObjData['planets']:
+        loreBlurb = GetLoreblurbTemplateDataForPlanet(planetInfo)
+        if loreBlurb['loreText']:
+            data['planetsLore'] += ConvertDictionaryToWikiTemplate('Loreblurb', loreBlurb, False)
+        else:
+            if Config.verbose > 0:  print("Skipping planet", planetInfo['name'], 'due to lack of lore')
+
+    for objectInfo in raceObjData['objects']:
+        loreBlurb = GetLoreblurbTemplateDataForObject(objectInfo)
+        if loreBlurb['loreText']:
+            data['objectsLore'] += ConvertDictionaryToWikiTemplate('Loreblurb', loreBlurb, False)
+        else:
+            if Config.verbose > 0:  print("Skipping object", objectInfo['name'], 'due to lack of lore')
+
+    return data
+
+
+def GetWikiContentsForLorePage():
+    content = ''
+    for orgName, orgLink in Config.mainFactionList.items():
+        loreData = GetLoreTemplateDataForRaceOrOrg(orgName, orgName, orgLink)
+        content += ConvertDictionaryToWikiTemplate('Lore', loreData, False)
+        content += "\n\n"
+
+    for wikiPageName, nprName in Config.nprPageNameMapping.items():
+        if nprName in Config.unreleasedRaceList:
+            continue
+        loreData = GetLoreTemplateDataForRaceOrOrg(nprName, wikiPageName)
+        content += ConvertDictionaryToWikiTemplate('Lore', loreData, False)
+        content += "\n\n"
+
+    return content
+
+
+
+
+
+
+
+def UpdateLorePage(comment=None, allowRetry=True):
+    from SFIWikiBotLib import GalaxyUtils
+    rtnVal = False
+    pageName = 'Lore'
+
+
+    site = GetWikiClientSiteObject()
+    page = site.pages[pageName]
+    if page.exists:
+        updatesIncluded = []
+
+        testOrgNameList = [ v.strip().lower() for v in Config.mainFactionList.keys() ]
+        testRaceWikiPageList = [ v.strip().lower() for v in Config.nprPageNameMapping.keys() ]
+
+        content = page.text()
+        templateList = GetTemplateListFromWikiPageContentRecursive(content)
+
+        for template in templateList:
+            if template['name'].lower() == 'lore':
+
+                with suppress(KeyError):
+                    testLoreCategory = template['data']['LoreCategory'].strip().lower()
+                    loreData = None
+
+                    for orgName, orgLink in Config.mainFactionList.items():
+                        if orgName.strip().lower() == testLoreCategory:
+                            loreData = GetLoreTemplateDataForRaceOrOrg(orgName, orgName, orgLink)
+                            break
+
+                    if not loreData:
+                        for wikiPageName, nprName in Config.nprPageNameMapping.items():
+                            if wikiPageName.strip().lower() == testLoreCategory:
+                                loreData = GetLoreTemplateDataForRaceOrOrg(nprName, wikiPageName)
+
+                    if not loreData:
+                        if Config.debug or Config.verbose >= 1:
+                            print("Lore for", template['data']['LoreCategory'], "could not be matched to an existing organization or race. Skipping.")
+                        continue
+
+                    if 'miscLore' in template['data'] and template['data']['miscLore']:
+                        loreData['miscLore'] = template['data']['miscLore']
+
+                    if GeneralUtils.GenerateDataSignature(loreData) != GeneralUtils.GenerateDataSignature(template['data']):
+                        # if template['data']['LoreCategory'] == 'Alliance Science Corps':
+                        #     td = dict(template['data'])
+                        #     pp(td)
+                        #     print("\n-------------------\n\n")
+                        #     pp(loreData)
+                        #     return
+                        updatedTemplate = ConvertDictionaryToWikiTemplate('Lore', loreData, False)
+                        updatedTemplate = updatedTemplate.strip()
+                        newContent = content.replace(template['content'].strip(), updatedTemplate)
+                        if newContent and newContent != content:
+                            content = newContent
+                            updatesIncluded.append(template['data']['LoreCategory'])
+                        else:
+                            if Config.debug:  print("Lore content update failed for", template['data']['LoreCategory'])
+
+        if updatesIncluded:
+            try:
+                if not comment:
+                    comment = "Updating {}".format(', '.join(updatesIncluded))
+                page.edit(content, comment)
+                if Config.verbose >= 1:  print("Page Updated: Lore -", comment)
+                rtnVal = True
+                time.sleep(Config.pauseAfterSuccessfullyUpdatingWikiPageInSec)
+
+            except mwclient.errors.AssertUserFailedError as ex:
+                time.sleep(Config.pauseAfterFailingToUpdateWikiPageInSec)
+
+                if allowRetry:
+                    if Config.debug or Config.verbose >= 1:  print("Retrying update: Lore -", comment)
+                    GetWikiClientSiteObject(True)
+                    return UpdateLorePage(comment, False)
+
+                if Config.debug or Config.verbose >= 1:  print("Failed to update: Lore -", comment)
+                raise ex
+        else:
+            time.sleep(Config.pauseAfterSkippingWikiPageUpdateInSec)
+
+    else:
+        if Config.debug or Config.verbose >= 1:  print("Lore page not found")
+
+    return rtnVal
+
+
+
+
+
 def GetCategoryListFromWikiPageContent(content):
     categoryList = []
 
@@ -2248,11 +2444,13 @@ def GetMainShipPageTableForShipList(shipList):
 
 
 
-def ConvertDictionaryToWikiTemplate(templateName, templateData):
+def ConvertDictionaryToWikiTemplate(templateName, templateData, escapeTemplateData=True):
     rtnVal = "{{" + templateName + "\n"
     for key, val in templateData.items():
         res = ReplaceWikiLinksWithPlaceholders(str(val))
-        val = ReplacePlaceholdersWithWikiContent(res['content'].replace('|', '{{!}}'), res['placeholderMap'])
+        valContent = res['content']
+        if escapeTemplateData:  valContent = valContent.replace('|', '{{!}}')
+        val = ReplacePlaceholdersWithWikiContent(valContent, res['placeholderMap'])
         rtnVal += "| {} = {}\n".format(key, val)
 
     rtnVal += "}}\n"
