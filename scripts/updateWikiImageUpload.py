@@ -22,6 +22,7 @@ if not site.logged_in:
 
 comment = None
 
+
 # Make sure we're working with fresh data
 print('** Refreshing all cache', datetime.now(tz).strftime("%I:%M %p").lstrip('0'))
 WikiUtils.RefreshWikiImageCache()
@@ -31,19 +32,20 @@ DataLoader.RefreshPrivateData()
 SmallConstants.LoadConstantInformation()
 ItemUtils.Initialize()
 ShipUtils.Initialize()
-GalaxyUtils.Initialize()
 WikiUtils.Initialize()
 time.sleep(Config.pauseBetweenContentUpdateStepsInSec)
 
 
-print('** Update/add planet pages', datetime.now(tz).strftime("%I:%M %p").lstrip('0'))
-WikiUtils.UpdateIndividualPagesForAllPlanets(comment)
+print('** Upload planet images', datetime.now(tz).strftime("%I:%M %p").lstrip('0'))
+WikiUtils.UploadMissingPlanetImages()
+
+print('** Upload item images', datetime.now(tz).strftime("%I:%M %p").lstrip('0'))
+WikiUtils.UploadMissingItemImages()
+
+print('** Upload ship images', datetime.now(tz).strftime("%I:%M %p").lstrip('0'))
+WikiUtils.UploadMissingShipImages()
+
+
+print('** Refreshing wiki image cache', datetime.now(tz).strftime("%I:%M %p").lstrip('0'))
+WikiUtils.RefreshWikiImageCache()
 time.sleep(Config.pauseBetweenContentUpdateStepsInSec)
-
-print('** Update star system pages', datetime.now(tz).strftime("%I:%M %p").lstrip('0'))
-WikiUtils.UpdateStarSystemPages(comment)
-
-print('** Update lore page', datetime.now(tz).strftime("%I:%M %p").lstrip('0'))
-WikiUtils.UpdateLorePage(comment)
-
-print('** Exit', datetime.now(tz).strftime("%I:%M %p").lstrip('0'))

@@ -34,12 +34,6 @@ ShipUtils.Initialize()
 WikiUtils.Initialize()
 time.sleep(Config.pauseBetweenContentUpdateStepsInSec)
 
-print('** Upload item images', datetime.now(tz).strftime("%I:%M %p").lstrip('0'))
-WikiUtils.UploadMissingItemImages()
-
-print('** Refreshing wiki image cache', datetime.now(tz).strftime("%I:%M %p").lstrip('0'))
-WikiUtils.RefreshWikiImageCache()
-time.sleep(Config.pauseBetweenContentUpdateStepsInSec)
 
 print('** Add missing item pages', datetime.now(tz).strftime("%I:%M %p").lstrip('0'))
 res = WikiUtils.AddMissingItemWikiPages()

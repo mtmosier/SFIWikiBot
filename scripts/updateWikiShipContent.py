@@ -22,6 +22,7 @@ if not site.logged_in:
 
 comment = None
 
+
 # Make sure we're working with fresh data
 print('** Refreshing all cache', datetime.now(tz).strftime("%I:%M %p").lstrip('0'))
 WikiUtils.RefreshWikiImageCache()
@@ -34,12 +35,6 @@ ShipUtils.Initialize()
 WikiUtils.Initialize()
 time.sleep(Config.pauseBetweenContentUpdateStepsInSec)
 
-print('** Upload ship images', datetime.now(tz).strftime("%I:%M %p").lstrip('0'))
-WikiUtils.UploadMissingShipImages()
-
-print('** Refreshing wiki image cache', datetime.now(tz).strftime("%I:%M %p").lstrip('0'))
-WikiUtils.RefreshWikiImageCache()
-time.sleep(Config.pauseBetweenContentUpdateStepsInSec)
 
 print('** Add missing ship pages', datetime.now(tz).strftime("%I:%M %p").lstrip('0'))
 res = WikiUtils.AddMissingShipWikiPages()
