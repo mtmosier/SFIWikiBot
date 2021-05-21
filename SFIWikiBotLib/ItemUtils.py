@@ -969,13 +969,15 @@ def SplitNameIntoBaseNameAndItemLevel(input):
 def IsBeamWeapon(item):
     if "id" in item and item['id'] in beamWeaponOverrideIdList:
         return True
-    if "initSpeed" in item and item['initSpeed'] > 0:
+    if "initSpeed" in item and GeneralUtils.floatCmp(item['initSpeed'], '>', 0):
         return False
-    if "maxSpeed" in item and item['maxSpeed'] > 0:
+    if "maxSpeed" in item and GeneralUtils.floatCmp(item['maxSpeed'], '>', 0):
         return False
-    if "guidance" not in item or item['guidance'] != 1:
+    if "guidance" not in item or GeneralUtils.floatCmp(item['guidance'], '!=', 1):
         return False
-    if "life" not in item or item['life'] > 1:
+    if "life" not in item or GeneralUtils.floatCmp(item['life'], '>', 1):
+        return False
+    if "lockingRange" not in item or GeneralUtils.floatCmp(item['lockingRange'], '>', 100):
         return False
     return True
 
