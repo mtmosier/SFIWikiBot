@@ -1671,6 +1671,63 @@ def UpdateLorePage(comment=None, allowRetry=True):
         content = page.text()
         templateList = GetTemplateListFromWikiPageContentRecursive(content)
 
+
+        priorTemplate = False
+        for orgName, orgLink in Config.mainFactionList.items():
+            orgFound = False
+            testOrgName = orgName.strip().lower()
+            firstTemplate = False
+            for template in templateList:
+                if template['name'].lower() == 'lore':
+                    if not firstTemplate:
+                        firstTemplate = template
+
+                    if testOrgName == template['data']['LoreCategory'].strip().lower():
+                        orgFound = True
+                        break
+
+            if not orgFound:
+                loreData = GetLoreTemplateDataForRaceOrOrg(orgName, orgName, orgLink)
+                newContent = ConvertDictionaryToWikiTemplate('Lore', loreData, False)
+
+                updatesIncluded.append("{} [add]".format(orgName))
+                if priorTemplate:
+                    content = content.replace(priorTemplate['content'].strip(), "{}\n\n\n{}".format(priorTemplate['content'].strip(), newContent.strip()))
+                else:
+                    content = content.replace(firstTemplate['content'].strip(), "{}\n\n\n{}".format(newContent.strip(), firstTemplate['content'].strip()))
+                templateList = GetTemplateListFromWikiPageContentRecursive(content)
+            else:
+                priorTemplate = template
+
+        for wikiPageName, nprName in Config.nprPageNameMapping.items():
+            if nprName in Config.unreleasedRaceList:
+                continue
+            raceFound = False
+            testPageName = wikiPageName.strip().lower()
+            firstTemplate = False
+            for template in templateList:
+                if template['name'].lower() == 'lore':
+                    if not firstTemplate:
+                        firstTemplate = template
+
+                    if testPageName == template['data']['LoreCategory'].strip().lower():
+                        raceFound = True
+                        break
+
+            if not raceFound:
+                loreData = GetLoreTemplateDataForRaceOrOrg(nprName, wikiPageName)
+                newContent = ConvertDictionaryToWikiTemplate('Lore', loreData, False)
+
+                updatesIncluded.append("{} [add]".format(nprName))
+                if priorTemplate:
+                    content = content.replace(priorTemplate['content'].strip(), "{}\n\n\n{}".format(priorTemplate['content'].strip(), newContent.strip()))
+                else:
+                    content = content.replace(priorTemplate['content'].strip(), "{}\n\n\n{}".format(newContent.strip(), priorTemplate['content'].strip()))
+                templateList = GetTemplateListFromWikiPageContentRecursive(content)
+            else:
+                priorTemplate = template
+
+
         for template in templateList:
             if template['name'].lower() == 'lore':
 
