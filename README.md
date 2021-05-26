@@ -5,9 +5,11 @@
 - [Quick Start (Docker)](#quick-start-docker)
 - [Manual Installation](#manual-installation)
     - [Requirements](#requirements)
-    - [Local Install](#local-install)
+    - [Library Install](#library-install)
     - [Configuration](#configuration)
-- [Usage](#basic-usage)
+- [Usage](#usage)
+    - [Wiki Site Update](#wiki-site-update)
+    - [Item / Ship Data Filtering Website](#item--ship-data-filtering-website)
 - [Pages Maintained](#pages-maintained)
 
 
