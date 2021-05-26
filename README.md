@@ -55,7 +55,7 @@ In order to get a bot username and password visit the wiki [Bot Passwords](https
 <a name="manual-installation"></a>
 ## Manual Installation
 
-#### Requirements
+### Requirements
 Python 3.5+ is required to run the bot.
 
 A list of external modules needed can be found in requirements.txt. These can be installed via:
@@ -65,7 +65,7 @@ pip3 install --trusted-host pypi.python.org -r requirements.txt
 ```
 
 
-#### Library Install
+### Library Install
 
 The main portion of the code installs as a module.
 ```bash
@@ -74,7 +74,7 @@ python3 setup.py install
 ```
 
 
-#### Configuration
+### Configuration
 
 By default the settings file will be looked for at **/etc/sfWikiBot/settings.ini**, followed by your current working directory.  It's suggested that you take the included **settings.ini.minExample**, (or **settings.ini.example** if you prefer) edit as needed, and copy it to **/etc/sfWikiBot/settings.ini**.
 
@@ -83,7 +83,7 @@ Note that the **botUsername** and **botPassword** settings are only needed if pe
 
 ## Usage
 
-#### Wiki Site Update ####
+### Wiki Site Update
 
 When you run the update script the latest exported game data will be downloaded from the [Ben Olding Games](http://www.benoldinggames.co.uk/) website, which will be used to update the [Starfighter: Infinity Wiki](https://starfighter-infinity.fandom.com/wiki/Starfighter:_Infinity_Wiki). **([Learn More](#who-should-use-this))**
 
@@ -110,7 +110,7 @@ crontab ~/.crontab
 Executing the above (after updating the file path) will add a cron job running the Wiki update script every 6 hours.
 
 
-#### Item / Ship Data Filtering Website ####
+### Item / Ship Data Filtering Website
 
 The website portion of this software is provided via [Passenger](https://www.phusionpassenger.com/).
 
