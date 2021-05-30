@@ -12,6 +12,7 @@ from contextlib import suppress
 from SFIWikiBotLib import DataLoader
 from SFIWikiBotLib import Config
 from SFIWikiBotLib import WikiUtils
+from SFIWikiBotLib import GeneralUtils
 
 galaxyData = None
 gatesAndWormHoles = None
@@ -91,6 +92,7 @@ def GetPlanetInfoByName(planetName):
     for galaxy, galaxyInfo in galaxyData.items():
         for planetInfo in galaxyInfo['planets']:
             if (planetInfo['name'].lower() == planetName):
+                planetInfo['info'] = GeneralUtils.CleanupImportedText(planetInfo['info'])
                 return planetInfo
 
 
@@ -106,7 +108,7 @@ def FindPlanet(searchPlanetName):
                 resultPlanetInfo["System Found In"] = GetSystemName(planetInfo['location']['starSystemID'])
                 resultPlanetInfo["Sector Location (X-X)"] = "{}-{}".format(planetInfo['location']['x'], planetInfo['location']['y'])
                 resultPlanetInfo["Discoverer"] = planetInfo['discoveredBy']
-                resultPlanetInfo["Description"] = planetInfo['info']
+                resultPlanetInfo["Description"] = GeneralUtils.CleanupImportedText(planetInfo['info'])
                 resultPlanetInfo["Location (Shorthand)"] = GetDisplayLocation(planetInfo['location'])
                 resultPlanetInfo["Diameter (km)"] = GetPlanetDiameter(planetInfo['scale'])
                 resultPlanetInfo["Water Present"] = "Yes" if planetInfo['hasWater'] else "No"

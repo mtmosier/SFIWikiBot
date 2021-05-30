@@ -1243,8 +1243,8 @@ def UpdateIndividualPlanetPage(planetName, comment=None, allowRetry=True):
                 if 'Trivia' in template['data'] and template['data']['Trivia']:
                     templateData['Trivia'] = template['data']['Trivia']
                 if 'Description' in templateData and templateData['Description']:
-                    templateData['Description'] = templateData['Description'].replace("\n\n", "\n")
-                    templateData['Description'] = templateData['Description'].replace("\n", "<br/>\n")
+                    #templateData['Description'] = templateData['Description'].replace("\n\n", "\n")
+                    templateData['Description'] = templateData['Description'].replace("\n", "<br/>")
                 elif 'Description' in template['data'] and template['data']['Description']:
                     templateData['Description'] = template['data']['Description']
 
