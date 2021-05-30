@@ -76,7 +76,11 @@ def mkdirr(path):
 
 
 def CleanupImportedText(input):
-    return input.replace("\u00e2\u20ac\u0153", '"').replace("\u00e2\u20ac?", '"').replace('â€™', "'").strip()
+    return input.replace("\u00e2\u20ac\u0153", '"') \
+                .replace("\u00e2\u20ac?", '"') \
+                .replace('â€™', "'") \
+                .replace('\r\n', '\n') \
+                .strip()
 
 
 def floatCmp(v1, c, v2, dec=None):
@@ -389,7 +393,7 @@ def AddWikiLinksToText(input, useHtml=False, allowExtraWeaponCheck=True, additio
             replacementList.append(replacementInfo)
 
             placeholderCount += 1
-            input = re.sub('\\b{}\\b'.format(re.escape(replacementInfo["originalText"])), replacementInfo["placeholder"], input, 0, re.I)
+            input = re.sub(r'\b{}\b'.format(re.escape(replacementInfo["originalText"])), replacementInfo["placeholder"], input, 0, re.I)
 
     for replacementInfo in replacementList:
         input = re.sub(re.escape(replacementInfo["placeholder"]), replacementInfo["replacementText"], input, 0, re.I)
