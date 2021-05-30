@@ -10,10 +10,11 @@ import math
 import hashlib
 from html.parser import HTMLParser
 from collections import OrderedDict
+from contextlib import suppress
 from nltk.stem import PorterStemmer
 
 
-
+stemmer = PorterStemmer()
 # levelUpBase = 246
 
 
@@ -258,10 +259,11 @@ def FixJson(input):
 
 
 def NormalizeString(str, includeStemming=False):
-    try:
+    with suppress(AttributeError):
         str = str.lower()
-    except:
-        pass
+        # if includeStemming:
+        #     str = StemSentence(str)
+
     return str
 
 
@@ -318,7 +320,7 @@ def ConvertListToHtmlTable(tableData, tableHeader = None, tableTitle = None, tab
 
 
 # def stemSentence(sentence):
-#     token_words=word_tokenize(sentence)
+#     token_words = nltk.word_tokenize(sentence)
 #     token_words
 #     stem_sentence=[]
 #     for word in token_words:
@@ -328,12 +330,22 @@ def ConvertListToHtmlTable(tableData, tableHeader = None, tableTitle = None, tab
 #
 # tokens = nltk.word_tokenize(sentence)
 
+
 # def ReplaceWikiLinksWithPlaceholders(content):
 # def ReplacePlaceholdersWithWikiLinks(content, placeholderMap):
 # def GetWikiLink(input):
 # def GetWikiArticlePageForNameList(nameList, finalRedirect=False):
 # def GetWikiArticlePageList():
 
+
+
+def StemSentence(input):
+    input = re.sub(r'[^a-zA-Z0-9\(\):-]', " ", input)
+    inputWordList = re.split(r'\s+', input)
+    stemmedWordList = [];
+    for iword in inputWordList:
+        stemmedWordList.append(stemmer.stem(iword))
+    return ' '.join(stemmedWordList).strip()
 
 def SplitTextIntoPhrases(input, maxPhrase):
     input = re.sub(r'[^a-zA-Z0-9\(\):-]', " ", input)
@@ -348,6 +360,10 @@ def SplitTextIntoPhrases(input, maxPhrase):
 
 # SplitNameIntoBaseNameAndItemLevel(input)
     # return { 'name': name, 'fullNameMinusLevel': fullNameMinusLevel, 'levelDisplay': levelDisplayOrig, 'levelIdx': levelIdx, 'namePostfix': postfix }
+
+
+def RemoveWikiLinksFromText(input):
+    return re.sub(r'\[\[([^\]|]+\|)?([^\]]+)\]\]', r'\2', input)
 
 def AddWikiLinksToText(input, useHtml=False, allowExtraWeaponCheck=True, additionalReplacementOverrides=None):
     from SFIWikiBotLib import WikiUtils
@@ -399,105 +415,6 @@ def AddWikiLinksToText(input, useHtml=False, allowExtraWeaponCheck=True, additio
         input = re.sub(re.escape(replacementInfo["placeholder"]), replacementInfo["replacementText"], input, 0, re.I)
 
     return input
-
-
-
-# statUpdateUtils.addWikiLinksToText = function(input) {
-#     var phraseList = statUpdateUtils.splitTextIntoPhrases(input, Config.maxWordsInArticleTitleSearch);
-#     var replacementList = [];
-#     var replacementInfo = {};
-#     var placeholderCount = 0;
-#
-#     for (var pIdx in phraseList) {
-#         var origPhrase = phraseList[pIdx];
-#         var normalizedPhrase = statUpdateUtils.getStemmedAndNormalizedString(origPhrase);
-#         var wIdx = statUpdateUtils.normalizedWikiPageList.indexOf(normalizedPhrase);
-#         if (wIdx >= 0) {
-#             var url = mw.util.wikiGetlink(statUpdateUtils.wikiPageList[wIdx]);
-#             replacementInfo = {};
-#             replacementInfo["originalHtml"] = origPhrase;
-#             replacementInfo["replacementHtml"] = "<a href=\"" + url + "\" title=\"" + statUpdateUtils.escapeHtml(statUpdateUtils.wikiPageList[wIdx]) + "\">" + statUpdateUtils.escapeHtml(origPhrase) + "</a>";
-#             replacementInfo["placeholder"] = "~~placeholder:" + placeholderCount + ":~~";
-#             replacementList.push(replacementInfo);
-#             placeholderCount++;
-#
-#             var regExp = new RegExp(statUpdateUtils.escapeRegExp(replacementInfo["originalHtml"]), 'g');
-#             input = input.replace(regExp, replacementInfo["placeholder"]);
-#         }
-#     }
-#
-#     for (var idx in replacementList) {
-#         replacementInfo = replacementList[idx];
-#         var regExp = new RegExp(statUpdateUtils.escapeRegExp(replacementInfo["placeholder"]), 'g');
-#         input = input.replace(regExp, replacementInfo["replacementHtml"]);
-#     }
-#
-#     return input;
-# };
-#
-#
-# statUpdateUtils.getStemmedAndNormalizedString = function(input) {
-#     var stringMapping = statUpdateUtils.getStemmedAndNormalizedStringMapping(input);
-#     return stringMapping.map(function(i){return i.normalizedWord;}).join(" ");
-# };
-#
-#
-# statUpdateUtils.getStemmedAndNormalizedStringMapping = function(input) {
-#     var inputWordList = input.split(/\b/);
-#
-#     var wordMapping = [];
-#     var count = 0;
-#     var start = false;
-#     var curWord = "";
-#     var first = true;
-#     var wordInfo = {};
-#
-#     for (var idx in inputWordList) {
-#         var word = inputWordList[idx];
-#         if (word.search(/^[^a-zA-Z0-9'\-]+$/) === 0) {
-#             if (count > 0) {
-#                 wordInfo = {};
-#                 wordInfo.origWord = inputWordList.slice(start, start + count).join("");
-#                 wordInfo.normalizedWord = curWord.toLowerCase();
-#                 if (statUpdateUtils.normalizedExactMatchWordList.indexOf(wordInfo.normalizedWord) == -1)
-#                     wordInfo.normalizedWord = statUpdateUtils.stemWord(wordInfo.normalizedWord);
-#                 wordMapping.push(wordInfo);
-#             }
-#
-#             start = false;
-#             count = 0;
-#             curWord = "";
-#             continue;
-#         }
-#         if (word.search(/^['\-]+$/) === 0) {
-#             if (start === false)  start = parseInt(idx);
-#             count++;
-#             continue;
-#         }
-#
-#         if (start === false)  start = parseInt(idx);
-#         curWord += word;
-#         count++;
-#     }
-#
-#     if (count > 0) {
-#         wordInfo = {};
-#         wordInfo.origWord = inputWordList.slice(start, start + count + 1).join("");
-#         wordInfo.normalizedWord = curWord.toLowerCase();
-#         if (statUpdateUtils.normalizedExactMatchWordList.indexOf(wordInfo.normalizedWord) == -1)
-#             wordInfo.normalizedWord = statUpdateUtils.stemWord(wordInfo.normalizedWord);
-#         wordMapping.push(wordInfo);
-#     }
-#
-#     return wordMapping;
-# };
-
-
-
-
-
-
-
 
 
 
