@@ -1565,6 +1565,7 @@ def GetLoreblurbTemplateDataForRaceOrOrgCodexEntry(raceOrOrgName, wikiPageName, 
     data['loreText'] = GeneralUtils.AddWikiLinksToText(GeneralUtils.CleanupImportedText(data['loreText']))
     return data
 
+
 def GetLoreblurbTemplateDataForPlanet(planetInfo):
     data = {
         'loreSubjectLinkName': planetInfo['name'].strip(),
@@ -1574,12 +1575,24 @@ def GetLoreblurbTemplateDataForPlanet(planetInfo):
     data['loreText'] = GeneralUtils.AddWikiLinksToText(GeneralUtils.CleanupImportedText(data['loreText']))
     return data
 
-def GetLoreblurbTemplateDataForObject(objectInfo):
+
+def GetLoreblurbTemplateDataForObject(objectInfo, pullDescriptonFromWikiIfEmpty=True):
     data = {
         'loreSubjectLinkName': objectInfo['name'].strip(),
         'loreSubjectName': objectInfo['name'].strip(),
         'loreText': objectInfo['scanText'].strip() if objectInfo['scanText'] else (objectInfo['info'].strip() if objectInfo['info'] else ''),
     }
+
+    if pullDescriptonFromWikiIfEmpty and not data['loreText']:
+        content = GetWikiPageContent(data['loreSubjectLinkName'])
+        templateList = GetTemplateListFromWikiPageContent(content)
+        for templateInfo in templateList:
+            if templateInfo['name'] == 'Object' and templateInfo['data']['Object Name'].lower() == data['loreSubjectName'].lower():
+                loreText = GeneralUtils.RemoveWikiLinksFromText(templateInfo['data']['Description'])
+                testText = GeneralUtils.StripTags(loreText.lower()).strip()
+                if loreText and testText != 'none' and testText != 'no description':
+                    data['loreText'] = loreText
+
     data['loreText'] = GeneralUtils.AddWikiLinksToText(GeneralUtils.CleanupImportedText(data['loreText']))
     return data
 
@@ -2345,6 +2358,11 @@ def GetWikiImageForNameList(nameList):
 
     return None
 
+
+
+#
+# I need a version of this function which compares against a stemmed list of article page names
+#
 
 def GetWikiArticlePageForNameList(nameList, finalRedirect=False):
     rtnVal = None
