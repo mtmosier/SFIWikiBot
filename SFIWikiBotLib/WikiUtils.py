@@ -1080,15 +1080,16 @@ def UpdateIndividualShipPage(ship, comment=None, allowRetry=True):
                     else:
                         print("Unable to get new content for {}".format(ship['name']))
 
-        if 'description' in ship and ship['description'].strip():
-            pageSectionList = GetWikiPageSectionsFromContent(content)
-            if 'Game Description' in pageSectionList and pageSectionList['Game Description']:
-                newContent = "{}\n''{}''".format(pageSectionList['Game Description']['nameContent'].strip(), ShipUtils.GetShipDescription(ship)).strip()
-                if pageSectionList['Game Description']['content'].strip() != newContent.strip():
-                    content = content.replace(pageSectionList['Game Description']['content'].strip(), newContent)
-                    updatesIncluded.append("Game description")
-            else:
-                if Config.verbose >= 1:  print("Game Description section not found for {} - Unable to update".format(pageName))
+        if 'race' in ship and ship['race'] < 2:
+            if 'description' in ship and ship['description'].strip():
+                pageSectionList = GetWikiPageSectionsFromContent(content)
+                if 'Game Description' in pageSectionList and pageSectionList['Game Description']:
+                    newContent = "{}\n''{}''".format(pageSectionList['Game Description']['nameContent'].strip(), ShipUtils.GetShipDescription(ship)).strip()
+                    if pageSectionList['Game Description']['content'].strip() != newContent.strip():
+                        content = content.replace(pageSectionList['Game Description']['content'].strip(), newContent)
+                        updatesIncluded.append("Game description")
+                else:
+                    if Config.verbose >= 1:  print("Game Description section not found for {} - Unable to update".format(pageName))
 
         if updatesIncluded:
             try:
