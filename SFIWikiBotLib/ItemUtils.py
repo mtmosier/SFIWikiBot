@@ -1519,33 +1519,22 @@ def GetItemEffectDamagePerSecond(item, shipMass=..., amount=...):
 
     totalDamage = 0
     numShotsToTest = None
-    try:
-        if item['fireRate'] > 0:
+    with suppress(KeyError):
+        if 'weaponType' in item and item['weaponType'] == 5:
+            fireRate = 60
+        elif 'fireRate' in item and GeneralUtils.floatCmp(item['fireRate'], '>', 0):
             fireRate = item['fireRate']
-            if fireRate <= 1:
-                # For items which fire multiple times a second test over the course of 5 seconds
-                numShotsToTest = 5 / fireRate
-            elif fireRate <= 5:
-                # For items which fire more often than once a second but less than 5 times per second, do a 20 second test
-                numShotsToTest = 20 / fireRate
-            else:
-                # For anything else we're going to test 5 shots flat
-                numShotsToTest = 5
-
-            # 15 shots is our max
-            numShotsToTest = int(min(numShotsToTest, 15))
-            if not item['energyBased'] and GeneralUtils.floatCmp(item['ammoOrEnergyUsage'], '>', 0):
-                numShotsToTest = int(min(numShotsToTest, item['ammoOrEnergyUsage']))
         else:
-            # Beam type weapon
-            numShotsToTest = 15
+            # No fire rate probably means beam type weapon
             fireRate = 1 # For effect purposes, beams are applied at a rate of 1 per second
 
-    except:
-        if Config.debug:
-            raise
+        if item['energyBased']:
+            numShotsToTest = int(100 / item['ammoOrEnergyUsage'])
+        else:
+            numShotsToTest = int(item['ammoOrEnergyUsage'])
 
-    # if Config.debug:  print("shots to test", numShotsToTest)
+    if Config.debug:  print("GetItemEffectDamagePerSecond: shots to test", numShotsToTest)
+    if Config.debug:  print("GetItemEffectDamagePerSecond: fire rate in use", fireRate)
 
     try:
         if numShotsToTest and item['effect'] >= 0:
