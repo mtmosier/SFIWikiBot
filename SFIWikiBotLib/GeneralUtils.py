@@ -261,8 +261,8 @@ def FixJson(input):
 def NormalizeString(str, includeStemming=False):
     with suppress(AttributeError):
         str = str.lower()
-        # if includeStemming:
-        #     str = StemSentence(str)
+        if includeStemming:
+            str = StemSentence(str)
 
     return str
 
@@ -371,6 +371,7 @@ def AddWikiLinksToText(input, useHtml=False, allowExtraWeaponCheck=True, additio
     from SFIWikiBotLib import ItemUtils
 
     includeStemming = True
+    lowercaseReplacementExactMatchList = [ v.lower().replace('_', ' ') for v in Config.wikiLinkReplacementExactMatchRequiredList ]
     normalizedReplacementExclusionList = [ NormalizeString(v, includeStemming) for v in Config.wikiLinkReplacementExclusionList ]
     normalizedReplacementOverrideList = { NormalizeString(k, includeStemming):NormalizeString(v, includeStemming) for k, v in Config.wikiLinkReplacementOverrideList.items() }
     if type(additionalReplacementOverrides) == dict:
@@ -389,13 +390,14 @@ def AddWikiLinksToText(input, useHtml=False, allowExtraWeaponCheck=True, additio
         if normalizedPhrase in normalizedReplacementOverrideList:
             normalizedPhrase = normalizedReplacementOverrideList[normalizedPhrase]
 
-        nameList = [ normalizedPhrase ]
+
+        nameList = [ origPhrase ]
         if allowExtraWeaponCheck:
             altNameInfo = ItemUtils.SplitNameIntoBaseNameAndItemLevel(origPhrase)
             if altNameInfo['fullNameMinusLevel'].lower() != normalizedPhrase.lower():
                 altName = NormalizeString(altNameInfo['fullNameMinusLevel'], includeStemming)
                 if altName not in normalizedReplacementExclusionList:
-                    nameList.append(altName)
+                    nameList.append(altNameInfo['fullNameMinusLevel'])
 
         wikiPage = WikiUtils.GetWikiArticlePageForNameList(nameList)
         if wikiPage:

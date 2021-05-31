@@ -2020,9 +2020,9 @@ def RefreshWikiImageCache():
 
 
 def RefreshWikiPageCache():
-    data = GetWikiArticlePageList.__wrapped__()
+    data = GetNormalizedWikiArticlePageMapping.__wrapped__()
     if len(data) > 250:  # Sanity check - Do not overwrite with truncated data
-        wikiCache.set(('WikiUtils.GetWikiArticlePageList',), data, expire=Config.wikiImageAndPageListTtl)
+        wikiCache.set(('WikiUtils.GetNormalizedWikiArticlePageMapping',), data, expire=Config.wikiImageAndPageListTtl)
 
 
 def UploadImageListToWiki(imageList):
@@ -2364,7 +2364,7 @@ def GetWikiImageForNameList(nameList):
 # I need a version of this function which compares against a stemmed list of article page names
 #
 
-def GetWikiArticlePageForNameList(nameList, finalRedirect=False):
+def GetWikiArticlePageForNameListOrig(nameList, finalRedirect=False):
     rtnVal = None
     try:
         primaryItemNameList = nameList
@@ -2386,13 +2386,59 @@ def GetWikiArticlePageForNameList(nameList, finalRedirect=False):
             if wikiPage in primaryItemNameList:
                 rtnVal = wikiPage
             if not rtnVal:
-                wikiPageLower = wikiPage.lower()
-                if wikiPageLower in primaryItemNameList:
+                wikiPageNorm = wikiPage.lower()
+                if wikiPageNorm in primaryItemNameList:
                     rtnVal = wikiPage
-                elif wikiPageLower in altItemNameList:
+                elif wikiPageNorm in altItemNameList:
                     rtnVal = wikiPage
     except:
         pass
+
+    if rtnVal and finalRedirect:
+        site = GetWikiClientSiteObject()
+        page = site.pages[rtnVal]
+        redirect = GetWikiPageRedirect(page.text())
+        if redirect:
+            rtnVal = redirect
+
+    return rtnVal
+
+
+def GetWikiArticlePageForNameList(nameList, finalRedirect=False):
+    rtnVal = None
+    testExactMatchList = [ v.lower().replace('_', ' ') for v in Config.wikiLinkReplacementExactMatchRequiredList ]
+
+    primaryItemNameList = nameList
+    altItemNameList = []
+    for name in nameList:
+        name = name.lower().replace('_', ' ')
+        if name not in testExactMatchList:
+            normalizedName = GeneralUtils.NormalizeString(name, True)
+            if normalizedName not in testExactMatchList:
+                name = normalizedName
+        if name not in primaryItemNameList:
+            primaryItemNameList.append(name)
+
+        altName = name.replace(' ', '_')
+        if altName not in altItemNameList:
+            altItemNameList.append(altName)
+        altName = name.replace(' ', '')
+        if altName not in altItemNameList:
+            altItemNameList.append(altName)
+        altName = name.replace(' ', '-')
+        if altName not in altItemNameList:
+            altItemNameList.append(altName)
+
+    wikiPageMap = GetNormalizedWikiArticlePageMapping()
+    for normalizedWikiPage, wikiPage in wikiPageMap.items():
+        if wikiPage in primaryItemNameList:
+            rtnVal = wikiPage
+        if not rtnVal:
+            if normalizedWikiPage in primaryItemNameList:
+                rtnVal = wikiPage
+            elif normalizedWikiPage in altItemNameList:
+                rtnVal = wikiPage
+
 
     if rtnVal and finalRedirect:
         site = GetWikiClientSiteObject()
@@ -2477,15 +2523,23 @@ def GetWikiImageFileList():
     return imageList
 
 
-@wikiCache.memoize(expire=Config.wikiImageAndPageListTtl)
 def GetWikiArticlePageList():
+    return list(GetNormalizedWikiArticlePageMapping().values())
+
+@wikiCache.memoize(expire=Config.wikiImageAndPageListTtl)
+def GetNormalizedWikiArticlePageMapping():
     site = GetWikiClientSiteObject()
+    testExactMatchList = [ v.lower().replace('_', ' ') for v in Config.wikiLinkReplacementExactMatchRequiredList ]
 
-    pageList = []
+    pageMap = {}
     for page in site.allpages():
-        pageList.append(page.normalize_title(page.page_title))
+        pageName = page.normalize_title(page.page_title)
+        pageKey = pageName.lower().replace('_', ' ')
+        if pageKey not in testExactMatchList:
+            pageKey = GeneralUtils.NormalizeString(pageName, True)
+        pageMap[pageKey] = pageName
 
-    return pageList
+    return pageMap
 
 
 
