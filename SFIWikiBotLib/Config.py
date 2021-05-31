@@ -55,10 +55,11 @@ effectIconClassMapping = dict(config('botEffectIconClassMapping', cast=Csv(cast=
 unreleasedRaceList = config('botUnreleasedRaceList', cast=Csv(), default='')
 unreleasedShipList = config('botUnreleasedShipList', cast=Csv(), default='')
 unreleasedSystemList = config('botUnreleasedSystemList', cast=Csv(), default='TBZ')
-wikiLinkReplacementExclusionList = config('botWikiLinkReplacementExclusionList', cast=Csv(), default='Black, Damage, Energy, Ships')
 
+wikiLinkReplacementExclusionList = config('botWikiLinkReplacementExclusionList', cast=Csv(), default='Black, Damage, Energy, Ships')
 wikiLinkReplacementOverrideListDefault = 'Black Ships=Ascendants'
 wikiLinkReplacementOverrideList = dict(config('botWikiLinkReplacementOverrideList', cast=Csv(cast=lambda s: tuple(s.split('='))), default=wikiLinkReplacementOverrideListDefault))
+wikiLinkReplacementExactMatchRequiredList = config('botWikiLinkReplacementExactMatchRequiredList', cast=Csv(), default='Ascendance, Lives, Conqueror, Devastator, Mining, Recharger, Dephase, Dephaser')
 
 bpLocationOverride = dict(config('botBpLocationOverride', cast=Csv(cast=lambda s: tuple(s.split('='))), default=''))
 

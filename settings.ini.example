@@ -31,7 +31,9 @@ botBpLocationOverride = White Xandelevium Blaster=Sh-1-4, Quark Xandelevium Blas
 # botEffectIconClassMapping =
 #
 # botWikiLinkReplacementOverrideList = Black Ships=Ascendants
-# botWikiLinkReplacementExclusionList = Black, Damage, Energy, Ships
+# botWikiLinkReplacementExclusionList = Black, Damage, Energy, Ships, Live
+# botWikiLinkReplacementExactMatchRequiredList = Ascendance, Lives, Conqueror, Devastator, Mining, Recharger, Dephase, Dephaser
+#
 # botProjectileCountOverride = Sheenite Orbital Ultra Ring=30, Sheenite Orbital Chevron Ring=8
 # botWeaponRangeOverride = Sheenite Orbital Ultra Ring=17, Sheenite Orbital Chevron Ring=17, Ascendant Gun Turret=125
 # botSubWeaponIDOverride = Cake Bomb=cks, Stinger Cloud=st_1, Sheenite Orbital Ultra Ring=soc, Sheenite Orbital Chevron Ring=soc
