@@ -373,10 +373,14 @@ def AddWikiLinksToText(input, useHtml=False, allowExtraWeaponCheck=True, additio
     includeStemming = True
     lowercaseReplacementExactMatchList = [ v.lower().replace('_', ' ') for v in Config.wikiLinkReplacementExactMatchRequiredList ]
     normalizedReplacementExclusionList = [ NormalizeString(v, includeStemming) for v in Config.wikiLinkReplacementExclusionList ]
-    normalizedReplacementOverrideList = { NormalizeString(k, includeStemming):NormalizeString(v, includeStemming) for k, v in Config.wikiLinkReplacementOverrideList.items() }
+    # normalizedReplacementOverrideList = { NormalizeString(k, includeStemming):NormalizeString(v, includeStemming) for k, v in Config.wikiLinkReplacementOverrideList.items() }
+    normalizedReplacementOverrideList = {}
     if type(additionalReplacementOverrides) == dict:
         for k, v in additionalReplacementOverrides.items():
             normalizedReplacementOverrideList[NormalizeString(k, includeStemming)] = NormalizeString(v, includeStemming)
+
+    lowercaseNonStemmedReplacementOverrideList = { k.lower().replace('_', ' '):v.lower().replace('_', ' ') for k, v in Config.wikiLinkReplacementOverrideList.items() }
+
 
     phraseList = SplitTextIntoPhrases(input, Config.maxWordsInArticleTitleSearch)
     replacementList = []
@@ -384,20 +388,32 @@ def AddWikiLinksToText(input, useHtml=False, allowExtraWeaponCheck=True, additio
     placeholderCount = 0
 
     for origPhrase in phraseList:
-        normalizedPhrase = NormalizeString(origPhrase, includeStemming)
+        normalizedPhrase = origPhrase.lower().replace('_', ' ')
+        for s, r in lowercaseNonStemmedReplacementOverrideList.items():
+            normalizedPhrase = normalizedPhrase.replace(s, r)
+
+        if normalizedPhrase not in lowercaseReplacementExactMatchList:
+            normalizedPhraseTmp = NormalizeString(normalizedPhrase, includeStemming)
+            if normalizedPhraseTmp not in lowercaseReplacementExactMatchList:
+                normalizedPhrase = normalizedPhraseTmp
+
         if normalizedPhrase in normalizedReplacementExclusionList:
             continue
         if normalizedPhrase in normalizedReplacementOverrideList:
             normalizedPhrase = normalizedReplacementOverrideList[normalizedPhrase]
 
-
         nameList = [ origPhrase ]
+        if normalizedPhrase not in nameList:
+            nameList.append(normalizedPhrase)
+
         if allowExtraWeaponCheck:
             altNameInfo = ItemUtils.SplitNameIntoBaseNameAndItemLevel(origPhrase)
-            if altNameInfo['fullNameMinusLevel'].lower() != normalizedPhrase.lower():
-                altName = NormalizeString(altNameInfo['fullNameMinusLevel'], includeStemming)
-                if altName not in normalizedReplacementExclusionList:
-                    nameList.append(altNameInfo['fullNameMinusLevel'])
+            altNameLower = altNameInfo['fullNameMinusLevel'].lower().replace('_', ' ')
+            if altNameLower != origPhrase.lower().replace('_', ' '):
+                if altNameLower in ItemUtils.itemBaseNameList:
+                    altName = NormalizeString(altNameInfo['fullNameMinusLevel'], includeStemming)
+                    if altName not in normalizedReplacementExclusionList:
+                        nameList.append(altNameInfo['fullNameMinusLevel'])
 
         wikiPage = WikiUtils.GetWikiArticlePageForNameList(nameList)
         if wikiPage:
@@ -412,6 +428,7 @@ def AddWikiLinksToText(input, useHtml=False, allowExtraWeaponCheck=True, additio
 
             placeholderCount += 1
             input = re.sub(r'\b{}\b'.format(re.escape(replacementInfo["originalText"])), replacementInfo["placeholder"], input, 0, re.I)
+
 
     for replacementInfo in replacementList:
         input = re.sub(re.escape(replacementInfo["placeholder"]), replacementInfo["replacementText"], input, 0, re.I)

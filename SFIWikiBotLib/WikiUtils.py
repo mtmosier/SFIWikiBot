@@ -2423,12 +2423,6 @@ def GetWikiArticlePageForNameList(nameList, finalRedirect=False):
         altName = name.replace(' ', '_')
         if altName not in altItemNameList:
             altItemNameList.append(altName)
-        altName = name.replace(' ', '')
-        if altName not in altItemNameList:
-            altItemNameList.append(altName)
-        altName = name.replace(' ', '-')
-        if altName not in altItemNameList:
-            altItemNameList.append(altName)
 
     wikiPageMap = GetNormalizedWikiArticlePageMapping()
     for normalizedWikiPage, wikiPage in wikiPageMap.items():

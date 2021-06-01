@@ -67,6 +67,7 @@ itemCraftableData = None
 itemDataPublic = None
 itemDataPrivate = None
 
+itemBaseNameList = []
 
 
 class ItemPageIter:
@@ -3200,7 +3201,7 @@ def GetItemSortFunc(sortBy="Default"):
 # Begin Data Initialization Functions
 
 def PrepareItemDataPrimaryList():
-    global itemDataDict, itemData
+    global itemDataDict, itemData, itemBaseNameList
 
     itemDataDict = {}
 
@@ -3209,6 +3210,11 @@ def PrepareItemDataPrimaryList():
     for item in itemDataPublic:
         item['__dataSource'] = 'public'
         itemDataDict[item['id']] = item
+
+        nameParts = SplitNameIntoBaseNameAndItemLevel(item['name'])
+        nameLower = nameParts['fullNameMinusLevel'].lower().replace('_', ' ')
+        if not nameLower in itemBaseNameList:
+            itemBaseNameList.append(nameLower)
 
     #  itemDataPrivate is updated often, often updated when the game is patched
     for item in itemDataPrivate.values():
@@ -3219,6 +3225,11 @@ def PrepareItemDataPrimaryList():
                 item['__bugfixActive'] = True
                 item['race'] = 25
             itemDataDict[item['id']] = item
+
+            nameParts = SplitNameIntoBaseNameAndItemLevel(item['name'])
+            nameLower = nameParts['fullNameMinusLevel'].lower().replace('_', ' ')
+            if not nameLower in itemBaseNameList:
+                itemBaseNameList.append(nameLower)
 
     #  Generate the item data list from the data dictionary
     itemData = [ v for k,v in itemDataDict.items() ]
