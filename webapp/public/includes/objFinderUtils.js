@@ -428,12 +428,55 @@ function areSpoilersActiveInRuleset(ruleSet) {
     return spoilersActive;
 }
 
+function hideRaceSpoilersInFilters() {
+    var i = 0;
+    var elem = $('.rule-filter-container [name=builder-basic_rule_' + i + '_filter]');
+    while (elem.length) {
+        if (elem.val() == 'ItemUtils.GetRaceForItem' || elem.val() == 'ShipUtils.GetRaceForShip') {
+            var valElem = $('.rule-value-container [name=builder-basic_rule_' + i + '_value_0]');
+            try {
+                for (var j = 0; j < unreleasedRaceList.length; j++) {
+                    valElem.find('option:contains("' + unreleasedRaceList[j] + '")').text('-- Spoiler --');
+                }
+            } catch(e) {}
+        }
+        i++;
+        elem = $('.rule-filter-container [name=builder-basic_rule_' + i + '_filter]');
+    }
+}
+
+function showRaceSpoilersInFilters() {
+    var i = 0;
+    var elem = $('.rule-filter-container [name=builder-basic_rule_' + i + '_filter]');
+    while (elem.length) {
+        if (elem.val() == 'ItemUtils.GetRaceForItem' || elem.val() == 'ShipUtils.GetRaceForShip') {
+            var valElem = $('.rule-value-container [name=builder-basic_rule_' + i + '_value_0]');
+            valElem.find('option:contains("-- Spoiler --")').each(function(){
+                $(this).text($(this).val());
+            });
+        }
+        i++;
+        elem = $('.rule-filter-container [name=builder-basic_rule_' + i + '_filter]');
+    }
+}
+
 
 $( document ).ready(function() {
     if (window.location.pathname.indexOf('shipFinder') != -1) {
         var defaultRuleset = {"condition":"AND","rules":[{"id":"ShipUtils.IsShipHidden","field":"ShipUtils.IsShipHidden","type":"boolean","input":"radio","operator":"equal","value":false}],"valid":true};
     } else {
         var defaultRuleset = {"condition":"AND","rules":[{"id":"ItemUtils.IsItemHidden","field":"ItemUtils.IsItemHidden","type":"boolean","input":"radio","operator":"equal","value":false}],"valid":true};
+    }
+
+    var spoilerFreeFilters = JSON.parse(JSON.stringify(filterList));
+    for (var i = 0; i < spoilerFreeFilters.length; i++) {
+        if (spoilerFreeFilters[i].label == 'Race') {
+            for (var j = 0; j < spoilerFreeFilters[i].values.length; j++) {
+                if (unreleasedRaceList.includes(spoilerFreeFilters[i].values[j])) {
+                    spoilerFreeFilters[i].values[j] = "-- Spoiler --";
+                }
+            }
+        }
     }
 
     var queryBuilderConfig = {
@@ -452,15 +495,14 @@ $( document ).ready(function() {
         if (ruleSet && ruleSet.valid) {
             var spoilersActive = areSpoilersActiveInRuleset(ruleSet);
             if (spoilersActive === false) {
-                console.log("No spoilers here!");
                 $("#spoilerAlert").hide();
+                hideRaceSpoilersInFilters();
             } else {
-                console.log("Here there be dragons...");
+                // Here there be dragons...
                 $("#spoilerAlert").show();
+                showRaceSpoilersInFilters();
             }
         }
-
-        console.log(ruleSet);
     });
 
 	//*** SET UP BUTTON ACTIONS

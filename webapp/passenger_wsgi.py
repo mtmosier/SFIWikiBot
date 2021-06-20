@@ -108,6 +108,13 @@ def application(environ, start_response):
             headerList.append(('Content-Type', responseContentType))
             responseBody = "var filterList = {};".format(result)
 
+    elif path == '/js/getUnreleasedRaceList':
+        from SFIWikiBotLib import Config
+        response = '200 OK'
+        responseContentType = 'application/javascript'
+        headerList.append(('Content-Type', responseContentType))
+        responseBody = "var unreleasedRaceList = {};".format(json.dumps(Config.unreleasedRaceList))
+
     elif path == '/RefreshData':
         ItemUtils.Initialize()
         ShipUtils.Initialize()
