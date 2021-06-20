@@ -163,6 +163,7 @@ def GetFullEffectNameList():
     rtnList.add("Collectable")  # For removal / correction purposes only
     rtnList.add("Seasonal Items")
     rtnList.add("Andromedan Stealth")
+    rtnList.add("Stealth - Andromedan")
     rtnList.add("Cold Fusion Resist")
     rtnList.add("Electrostatic Weakness")
     rtnList.add("Explosive Resist")
