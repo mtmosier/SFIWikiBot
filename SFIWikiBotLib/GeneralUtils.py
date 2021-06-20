@@ -211,7 +211,9 @@ def stripTrailingZerosFromNumStr(input):
     return input
 
 
-def RoundToSignificantAmount(input, smallValue=False, allowDec=False):
+def RoundToSignificantAmount(input, smallValue=False, allowDec=False, largeValue=False):
+    if largeValue and input >= 10000:
+        return NumDisplay(NormalRound(input / 1000) * 1000, 0)
     if input >= 500:
         return NumDisplay(NormalRound(input / 100) * 100, 0)
     if smallValue and input >= 100:  # Used for ammo cost
