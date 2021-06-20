@@ -16,7 +16,7 @@ from SFIWikiBotLib import GeneralUtils
 
 galaxyData = None
 gatesAndWormHoles = None
-
+mineralData = None
 
 
 def GetPlanetDiameter(scale):
@@ -325,6 +325,14 @@ def UploadImagesToWikiForPlanetList(planetList):
 
 
 
+def GetMineralInfoById(id):
+    id = id.lower()
+    for mineralInfo in mineralData.values():
+        if mineralInfo['id'].lower() == id:
+            return mineralInfo
+
+
+
 
 
 def Initialize():
@@ -332,9 +340,10 @@ def Initialize():
 
 
 def LoadGalaxyInformation():
-    global galaxyData, gatesAndWormHoles
+    global galaxyData, gatesAndWormHoles, mineralData
     galaxyData = DataLoader.LoadSystemDataFromBenOldingWebsite()
     gatesAndWormHoles = DataLoader.LoadGateDataFromBenOldingWebsite()
+    mineralData = DataLoader.LoadMineralDataFromBenOldingWebsite()
 
     return True
 
