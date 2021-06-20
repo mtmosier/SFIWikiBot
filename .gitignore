@@ -1,5 +1,6 @@
 test
 settings.ini
+regressionTesting
 
 # Python created files/directories
 __pycache__
