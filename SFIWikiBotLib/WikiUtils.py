@@ -847,6 +847,7 @@ def UpdateIndividualPagesForAllItems(comment=''):
 
 def UpdateIndividualItemPageByItemRange(itemList, comment=None, allowRetry=True):
     from SFIWikiBotLib import ItemUtils
+    from SFIWikiBotLib import GalaxyUtils
     rtnVal = False
 
     if not itemList:
@@ -947,10 +948,34 @@ def UpdateIndividualItemPageByItemRange(itemList, comment=None, allowRetry=True)
 
                 gameDescription = "\n\n".join(ItemUtils.GetDescriptionForItemRangeList(itemList, "''"))
                 if gameDescription.strip() != template['data']['gameDescription'].strip():
-                    replacementTemplate = template['data']
                     replacementTemplate['gameDescription'] = gameDescription
                     updateTemplate = True
                     updatesIncluded.append("Game description")
+
+
+                craftingContent = ''
+                for item in itemList:
+                    recipe = ItemUtils.GetItemCraftingRecipe(item)
+                    if recipe:
+                        craftingContent += '<div class="craftingRecipe">\n<div class="craftingRecipeLine">\n'
+                        if len(itemList) > 1:
+                            nameInfo = ItemUtils.SplitNameIntoBaseNameAndItemLevel(item['name'])
+                            craftingContent += '<span class="craftingLevelInfo">Level {} - </span>\n'.format(nameInfo['levelDisplay'])
+                        craftingContent += '<span class="craftingCreditInfo">Credits: {}</span>\n</div>\n'.format(GeneralUtils.NumDisplay(recipe['creditCost'], 0, True))
+                        craftingContent += '<div class="craftingRecipeLine">\n'
+                        for mineralId, mineralCost in recipe['ingredientList'].items():
+                            mineralInfo = GalaxyUtils.GetMineralInfoById(mineralId)
+                            craftingContent += '<span class="craftingIngredient">[[File:Mineral {}.png|30x30px]]{}: <span class="craftingIngredientAmount">{}</span></span>\n'.format(mineralId, mineralInfo['name'], GeneralUtils.NumDisplay(mineralCost, 0, True))
+                        craftingContent += '</div>\n'
+
+                if craftingContent:
+                    craftingContent = '<div class="craftingWrapper">\n{}</div>\n'.format(craftingContent)
+
+                    if 'craftingRecipe' not in template['data'] or craftingContent.strip() != template['data']['craftingRecipe'].strip():
+                        replacementTemplate['craftingRecipe'] = craftingContent
+                        updateTemplate = True
+                        updatesIncluded.append("Crafting Recipe")
+
 
                 if updateTemplate:
                     templateContent = ConvertDictionaryToWikiTemplate(template['name'], replacementTemplate)
@@ -2447,7 +2472,7 @@ def GetWikiArticlePageForNameList(nameList, finalRedirect=False):
 
 
 
-def CreateWikiSiteBackup(includeImages=True, includeTemplates=True, subDirName=None):
+def CreateWikiSiteBackup(subDirName=None, includeImages=True, includeTemplates=True, includeCssJs=True, includeLuaModules=True):
     backupFilepath = os.path.join(siteBackupPath, date.today().isoformat() if not subDirName else subDirName)
     os.makedirs(backupFilepath, exist_ok=True)
 
@@ -2459,7 +2484,37 @@ def CreateWikiSiteBackup(includeImages=True, includeTemplates=True, subDirName=N
         templateBackupFilepath = os.path.join(backupFilepath, 'templates')
         os.makedirs(templateBackupFilepath, exist_ok=True)
 
+    if includeCssJs:
+        cssJsBackupFilepath = os.path.join(backupFilepath, 'includes')
+        os.makedirs(cssJsBackupFilepath, exist_ok=True)
+
+    if includeLuaModules:
+        luaModulesBackupFilepath = os.path.join(backupFilepath, 'modules')
+        os.makedirs(luaModulesBackupFilepath, exist_ok=True)
+
     site = GetWikiClientSiteObject()
+
+    if includeCssJs:
+        for page in site.allpages(namespace=8):
+            fname = urllib.parse.quote(page.normalize_title(page.name.replace('MediaWiki:', '')), '')
+            fpath = os.path.join(cssJsBackupFilepath, fname)
+            if not os.path.isfile(fpath):
+                with open(fpath, 'w') as f:
+                    f.write(page.text())
+                    time.sleep(0.75)
+            else:
+                time.sleep(0.25)
+
+    if includeLuaModules:
+        for page in site.allpages(namespace=828):
+            fname = urllib.parse.quote(page.normalize_title(page.name.replace('Module:', '')), '')
+            fpath = os.path.join(luaModulesBackupFilepath, fname)
+            if not os.path.isfile(fpath):
+                with open(fpath, 'w') as f:
+                    f.write(page.text())
+                    time.sleep(0.75)
+            else:
+                time.sleep(0.25)
 
     if includeTemplates:
         for page in site.allpages(namespace=10):
@@ -2600,18 +2655,23 @@ def ConvertListToWikiTable(tableData, tableHeader = None, tableTitle = None, tab
         for row in tableData:
             values = "|-\n"
             headings = ""
-            if first:
-                headings += "|-\n"
 
             idx = 0
-            for key, val in row.items():
+            if type(row) == list:
+                for val in row:
+                    values += "| " + str(val) + "\n"
+                    idx += 1
+            else:
                 if first:
-                    if tableColumnTitleList and len(tableColumnTitleList) > idx and tableColumnTitleList[idx]:
-                        headings += '! <span title="{}">{}</span>\n'.format(tableColumnTitleList[idx], key)
-                    else:
-                        headings += "! " + key + "\n"
-                values += "| " + str(val) + "\n"
-                idx += 1
+                    headings += "|-\n"
+                for key, val in row.items():
+                    if first:
+                        if tableColumnTitleList and len(tableColumnTitleList) > idx and tableColumnTitleList[idx]:
+                            headings += '! <span title="{}">{}</span>\n'.format(tableColumnTitleList[idx], key)
+                        else:
+                            headings += "! " + key + "\n"
+                    values += "| " + str(val) + "\n"
+                    idx += 1
 
             rtnVal += headings
             rtnVal += values

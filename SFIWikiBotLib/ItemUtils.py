@@ -1326,7 +1326,7 @@ def GetShieldStatusEffectList(item):
                 rtnList['positiveEffects'].add('Photonic')
                 rtnList['negativeEffects'].add('Explosive')
             elif effectName == 'Andromedan':
-                rtnList['positiveEffects'].add('Andromedan Stealth')
+                rtnList['positiveEffects'].add('Stealth - Andromedan')
                 rtnList['negativeEffects'].add('Heat Weakness')
             elif effectName == 'Anti Gravity':
                 rtnList['positiveEffects'].add('Gravity')
@@ -1441,7 +1441,7 @@ def GetCategoryListForItem(item):
     if 'Shield Repair' in rtnSet:
         rtnSet.add('Shield Recharge')
 
-    stealthEffectList = ['Hidden by Smoke', 'Light Bending Stealth', 'Transparent Stealth', 'Absorbing Stealth', 'Reflecting Stealth', 'Andromedan Stealth']
+    stealthEffectList = ['Hidden by Smoke', 'Light Bending Stealth', 'Transparent Stealth', 'Absorbing Stealth', 'Reflecting Stealth', 'Stealth - Andromedan']
     for sn in stealthEffectList:
         if sn in rtnSet:
             rtnSet.add('Stealth')
@@ -1718,7 +1718,7 @@ def GetEffectNameListForItem(item):
                     rtnList.add('Photonic Resist')
                     rtnList.add('Explosive Weakness')
                 elif effectName == 'Andromedan':
-                    rtnList.add('Andromedan Stealth')
+                    rtnList.add('Stealth - Andromedan')
                     rtnList.add('Heat Weakness')
                 elif effectName == 'Dark':
                     rtnList.add('Anti Gravity')
@@ -2124,6 +2124,8 @@ def GetItemEffectTime(item):
 
 
 def GetItemPurchasePrice(item):
+    if 'weaponType' in item and item['weaponType'] == 5:
+        return int(GeneralUtils.RoundToSignificantAmount(item['price'] * itemPurchasePriceModifier, False, False, True))
     return int(GeneralUtils.RoundToSignificantAmount(item['price'] * itemPurchasePriceModifier))
 
 
@@ -2143,6 +2145,40 @@ def GetWeaponEffectName(item):
     except:
         pass
     return effect
+
+
+def GetItemCraftingRecipe(item):
+    """Determine the crafting cost for an item and return a dictionary with the values"""
+    rtnInfo = {
+        'creditCost': 0,
+        'ingredientList': {},
+    }
+    smallValue = True
+
+    itemCraftingData = GetCraftingDataForItem(item)
+    if itemCraftingData:
+        rtnInfo['creditCost'] = GetCraftingCreditCostForItem(item)
+        for ingredient in itemCraftingData['ingredients']:
+            qty = ingredient['quantityRequired'] * (1 + (item['level'] * 0.333334))
+            rtnInfo['ingredientList'][ingredient['mineralID']] = GeneralUtils.RoundToSignificantAmount(qty, smallValue)
+        return rtnInfo
+
+
+def GetCraftingCreditCostForItem(item):
+    item = GetAllItemsSharingItemRange(item)[0]
+    itemCraftingData = GetCraftingDataForItem(item)
+    if itemCraftingData:
+        priceMult = 0.281
+        amountToAddPerIngredient = 150
+
+        price = GetItemPurchasePrice(item)
+        mineralCount = len(itemCraftingData['ingredients'])
+        calculatedValue = price * priceMult + (amountToAddPerIngredient * mineralCount)
+
+        smallValue = True
+        allowDec = False
+        largeValue = True
+        return GeneralUtils.RoundToSignificantAmount(calculatedValue, smallValue, allowDec, largeValue)
 
 
 def GetShieldEffectName(item, includeEffectLevel=False):
