@@ -374,13 +374,94 @@ function resetFloatingTableHeaders() {
 }
 
 
+function areSpoilersActiveInRuleset(ruleSet) {
+    var spoilersActive;
+
+    if (ruleSet.condition == "OR" && ruleSet.rules.length == 1) {
+        ruleSet.condition = "AND";  //*** Treat a single rule as an and section
+    }
+
+    var nonHiddenRulesFound = false;
+    var hiddenRulesFound = false;
+    for (var i = 0; i < ruleSet.rules.length; i++) {
+        rule = ruleSet.rules[i];
+        if (rule.rules) {
+            nonHiddenRulesFound = true;
+            var r = areSpoilersActiveInRuleset(rule);
+            if (ruleSet.condition == "AND") {
+                if (r === true) {
+                    spoilersActive = true;
+                } else if (r === false) {
+                    spoilersActive = false;
+                    break;
+                }
+            } else {
+                if (r === true) {
+                    spoilersActive = true;
+                    break;
+                }
+            }
+        } else if (rule.id == 'ItemUtils.IsItemHidden' || rule.id == 'ShipUtils.IsShipHidden') {
+            hiddenRulesFound = true;
+            if (ruleSet.condition == "AND") {
+                if (rule.value === true) {
+                    spoilersActive = true;
+                } else  {
+                    spoilersActive = false;
+                    break;
+                }
+            } else {
+                if (rule.value === true) {
+                    spoilersActive = true;
+                    break;
+                }
+            }
+        } else {
+            nonHiddenRulesFound = true;
+        }
+    }
+
+    if (ruleSet.condition == "OR" && spoilersActive === undefined)
+        if (hiddenRulesFound && !nonHiddenRulesFound)
+            spoilersActive = false;
+
+    return spoilersActive;
+}
+
+
 $( document ).ready(function() {
+    if (window.location.pathname.indexOf('shipFinder') != -1) {
+        var defaultRuleset = {"condition":"AND","rules":[{"id":"ShipUtils.IsShipHidden","field":"ShipUtils.IsShipHidden","type":"boolean","input":"radio","operator":"equal","value":false}],"valid":true};
+    } else {
+        var defaultRuleset = {"condition":"AND","rules":[{"id":"ItemUtils.IsItemHidden","field":"ItemUtils.IsItemHidden","type":"boolean","input":"radio","operator":"equal","value":false}],"valid":true};
+    }
+
     var queryBuilderConfig = {
     	'plugins': [ 'bt-tooltip-errors' ],
     	'filters': filterList,
-    	'rules': null,
+    	'rules': defaultRuleset,
     };
 	$('#builder-basic').queryBuilder(queryBuilderConfig);
+    $('#builder-basic').on('rulesChanged.queryBuilder', function(e) {
+        var ruleSet;
+        var spoilersActive;
+        try {
+            ruleSet = $('#builder-basic').queryBuilder('getRules');
+        } catch (e) {}
+
+        if (ruleSet && ruleSet.valid) {
+            var spoilersActive = areSpoilersActiveInRuleset(ruleSet);
+            if (spoilersActive === false) {
+                console.log("No spoilers here!");
+                $("#spoilerAlert").hide();
+            } else {
+                console.log("Here there be dragons...");
+                $("#spoilerAlert").show();
+            }
+        }
+
+        console.log(ruleSet);
+    });
 
 	//*** SET UP BUTTON ACTIONS
 	$('.reset').on('click', function() {
@@ -388,7 +469,7 @@ $( document ).ready(function() {
 
         hidePresetOptions();
 
-        $('#builder-'+target).queryBuilder('reset');
+        $('#builder-'+target).queryBuilder('setRules', defaultRuleset);
         $("#useCustomTableOptions").prop('checked', false);
         hideCustomTableOptions();
         $("#tableHeader").val("");

@@ -546,6 +546,7 @@ def GetFilterListForItemFinder(params):
         'type': 'boolean',
         'input': 'radio',
         'values': {True: 'Yes', False: 'No'},
+        'operators': [ 'equal' ],
     })
     filterList.append({
         'id': 'ItemUtils.IsItemNprExclusive',
@@ -746,6 +747,7 @@ def GetFilterListForShipFinder(params):
         'type': 'boolean',
         'input': 'radio',
         'values': {True: 'Yes', False: 'No'},
+        'operators': [ 'equal' ],
     })
     filterList.append({
         'id': 'id',
