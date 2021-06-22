@@ -36,9 +36,14 @@ def GetDisplayLocation(location):
 
 
 def GetSystemName(id):
+    with suppress(TypeError):
+        return GetSystemInfo(id)['name']
+
+
+def GetSystemInfo(id):
     for galaxy, galaxyInfo in galaxyData.items():
         if galaxyInfo['id'] == id + 1:
-            return galaxyInfo['name']
+            return galaxyInfo
 
 
 def GetSystemByPrefix(prefix):
@@ -64,7 +69,7 @@ def GetSystemPrefixList():
 
 def GetSystemList(skipUnreleasedSystems=True):
     unreleasedSystemList = [ v.lower() for v in Config.unreleasedSystemList ]
-    return [ v for v in galaxyData.values() if v['prefix'].lower() not in unreleasedSystemList ]
+    return [ v for v in galaxyData.values() if not skipUnreleasedSystems or v['prefix'].lower() not in unreleasedSystemList ]
 
 
 

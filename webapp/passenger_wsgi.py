@@ -119,7 +119,7 @@ def application(environ, start_response):
         ItemUtils.Initialize()
         ShipUtils.Initialize()
         GalaxyUtils.Initialize()
-        SmallConstants.LoadConstantInformation()
+        SmallConstants.Initialize()
 
         response = '200 OK'
         responseContentType = 'text/html'

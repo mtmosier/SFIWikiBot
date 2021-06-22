@@ -7,6 +7,7 @@ import json
 import os
 import re
 from contextlib import suppress
+from SFIWikiBotLib import Config
 from SFIWikiBotLib import GeneralUtils
 from SFIWikiBotLib import DataLoader
 
@@ -192,6 +193,60 @@ def GetFullEffectNameList():
     return sorted(list(rtnList))
 
 
+
+def Initialize():
+    from SFIWikiBotLib import GalaxyUtils
+
+    LoadConstantInformation()
+
+    if Config.unreleasedSystemListIsDynamic \
+        or (len(Config.unreleasedSystemList) == 1 \
+            and ('dynamic' == Config.unreleasedSystemList[0].lower() \
+                or 'auto' == Config.unreleasedSystemList[0].lower() \
+            ) \
+        ):
+
+        unreleasedSystemList = ['TBZ']
+        for systemInfo in GalaxyUtils.GetSystemList(False):
+            if systemInfo['state'] == 0:
+                unreleasedSystemList.append(systemInfo['prefix'])
+
+        if Config.debug:  print("Setting unreleased system list to ", unreleasedSystemList)
+        Config.unreleasedSystemList = unreleasedSystemList
+        Config.unreleasedSystemListIsDynamic = True
+
+
+    if Config.unreleasedRaceListIsDynamic \
+        or (len(Config.unreleasedRaceList) == 1 \
+            and ('dynamic' == Config.unreleasedRaceList[0].lower() \
+                or 'auto' == Config.unreleasedRaceList[0].lower() \
+            ) \
+        ):
+
+        from SFIWikiBotLib import GalaxyUtils
+
+        unreleasedRaceList = []
+        for raceInfo in raceData:
+            if raceInfo['race'] > 1:
+                raceSpawnFound = False
+                raceOrgId = GetOrgInfoListByRaceId(raceInfo['race'])[0]['id']
+                for systemInfo in GalaxyUtils.GetSystemList():
+                    if systemInfo['prefix'] == 'TBZ':  continue
+                    for spawn in systemInfo['otherRaceSpawns']:
+                        if spawn['orgID'] == raceOrgId:
+                            raceSpawnFound = True
+                            break
+                    if raceSpawnFound:  break
+
+                if not raceSpawnFound:
+                    unreleasedRaceList.append(raceInfo['name'])
+
+        if Config.debug:  print("Setting unreleased race list to ", unreleasedRaceList)
+        Config.unreleasedRaceList = unreleasedRaceList
+        Config.unreleasedRaceListIsDynamic = True
+
+
+
 def LoadConstantInformation():
     global raceData, orgData, effectsData, skillsData
     global effectLookup, guidanceLookup, fireSideLookup
@@ -223,4 +278,4 @@ def LoadConstantInformation():
     return True
 
 
-LoadConstantInformation()
+Initialize()

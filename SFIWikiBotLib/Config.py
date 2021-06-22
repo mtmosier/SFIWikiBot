@@ -52,9 +52,11 @@ damageTypeIconClassMapping = dict(config('botDamageTypeIconClassMapping', cast=C
 
 effectIconClassMapping = dict(config('botEffectIconClassMapping', cast=Csv(cast=lambda s: tuple(s.split('='))), default=''))
 
-unreleasedRaceList = config('botUnreleasedRaceList', cast=Csv(), default='')
 unreleasedShipList = config('botUnreleasedShipList', cast=Csv(), default='')
-unreleasedSystemList = config('botUnreleasedSystemList', cast=Csv(), default='TBZ')
+unreleasedSystemList = config('botUnreleasedSystemList', cast=Csv(), default='Auto')
+unreleasedSystemListIsDynamic = False
+unreleasedRaceList = config('botUnreleasedRaceList', cast=Csv(), default='Auto')
+unreleasedRaceListIsDynamic = False
 
 wikiLinkReplacementExclusionList = config('botWikiLinkReplacementExclusionList', cast=Csv(), default='Black, Damage, Energy, Ships')
 wikiLinkReplacementOverrideListDefault = 'Black Ship=Ascendant, Fork worm=Forkworm, Mini bomb=Minibomb'
