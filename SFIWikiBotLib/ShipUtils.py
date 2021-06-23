@@ -250,7 +250,7 @@ def GetShipDescription(ship, useHtmlForLinks=False):
 
 
 def GetShipImageUrl(ship):
-    return "https://www.benoldinggames.co.uk/sfi/gamedata/icons/Ship/{}.png".format(ship['name'].lower().replace(' ', '%20'))
+    return "https://www.benoldinggames.co.uk/sfi/gamedata/icons/allitems/{}.png".format(ship['name'].lower().replace(' ', '%20'))
 
 
 def GetShipUseCategory(ship):
