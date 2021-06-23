@@ -58,7 +58,7 @@ unreleasedSystemListIsDynamic = False
 unreleasedRaceList = config('botUnreleasedRaceList', cast=Csv(), default='Auto')
 unreleasedRaceListIsDynamic = False
 
-wikiLinkReplacementExclusionList = config('botWikiLinkReplacementExclusionList', cast=Csv(), default='Black, Damage, Energy, Ships')
+wikiLinkReplacementExclusionList = config('botWikiLinkReplacementExclusionList', cast=Csv(), default='Black, Damage, Energy, Ships, Skinned')
 wikiLinkReplacementOverrideListDefault = 'Black Ship=Ascendant, Fork worm=Forkworm, Mini bomb=Minibomb'
 wikiLinkReplacementOverrideList = dict(config('botWikiLinkReplacementOverrideList', cast=Csv(cast=lambda s: tuple(s.split('='))), default=wikiLinkReplacementOverrideListDefault))
 wikiLinkReplacementExactMatchRequiredListDefault = 'Ascendance, Lives, Conqueror, Devastator, Mining, Craft, Recharger, Dephase, Dephaser, Destroyer, Gatherer, Organic, Organics, Organism, Organisms, Refus, Defender, Engineering, Utilize, Experience, Disheartener, Accumulator, Hunted'
