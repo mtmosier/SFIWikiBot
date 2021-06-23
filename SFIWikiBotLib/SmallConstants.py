@@ -223,8 +223,6 @@ def Initialize():
             ) \
         ):
 
-        from SFIWikiBotLib import GalaxyUtils
-
         unreleasedRaceList = []
         for raceInfo in raceData:
             if raceInfo['race'] > 1:
