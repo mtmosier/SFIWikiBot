@@ -1944,7 +1944,7 @@ def GetItemSourceExtended(item, includeLink=False):
         source = "Purchased ([[:Category:Seasonal_Items|Seasonal]])"
     elif 'buyable' in item and item['buyable']:
         source = "Purchased"
-    elif 'race' in item and item['race'] <= 1 and item['name'] != 'Micro Gate TBZ' and (GetItemBPLocation(item)):
+    elif 'race' in item and item['race'] <= 1 and item['name'] != 'Micro Gate TBZ' and GetItemBPLocation(item):
         source = "Crafted"
         if includeLink and Config.craftingPageName:
             if source != Config.craftingPageName:
@@ -2134,7 +2134,7 @@ def GetItemBPLocation(item):
     with suppress(AttributeError, KeyError):
         return Config.bpLocationOverride[item['name']]
 
-    rtnVal = 'N/A'
+    rtnVal = ''
     craftingData = GetCraftingDataForItem(item)
     if craftingData:
         if 'isSystemMicroGate' in craftingData and craftingData['isSystemMicroGate']:
@@ -2146,7 +2146,9 @@ def GetItemBPLocation(item):
 
     with suppress(KeyError):
         loc = item['__extData']['blueprintlocation']
-        if loc.lower() != 'not yet available':
+        if loc.lower() == 'not yet available':
+            rtnVal = 'N/A'
+        else:
             rtnVal = loc
 
     m = locRegex.match(rtnVal)
@@ -3309,7 +3311,7 @@ def Initialize():
     rarePlayerRaceDropIdList = [ GetItemByName(n)['id'] for n in rarePlayerRaceDropList ]
 
     for item in itemData:
-        if 'Micro Gate' not in item['name'] and GetItemBPLocation(item) == 'N/A':
+        if GetItemBPLocation(item) == 'N/A':
             itemIdListToSkip.append(item['id'])
             continue
 
