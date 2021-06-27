@@ -900,6 +900,13 @@ def GetCraftingDataForItem(item):
     for k,v in itemCraftableData.items():
         if item['id'] in v['items']:
             return v
+
+    if 'micro gate' in item['name'].lower() and 'loca' not in item['name'].lower():
+        prefix = item['name'].split(' ')[-1]
+        systemInfo = GalaxyUtils.GetSystemByPrefix(prefix)
+        if systemInfo:
+            return GalaxyUtils.GetCraftingRecipeForSystem(systemInfo)
+
     return None
 
 
@@ -2168,6 +2175,9 @@ def GetCraftingCreditCostForItem(item):
     item = GetAllItemsSharingItemRange(item)[0]
     itemCraftingData = GetCraftingDataForItem(item)
     if itemCraftingData:
+        if 'creditCost' in itemCraftingData:
+            return itemCraftingData['creditCost']
+
         priceMult = 0.281
         amountToAddPerIngredient = 150
 
@@ -2803,9 +2813,6 @@ def ItemDisplayStatBPLocation(item, p=...):
     with suppress(AttributeError, KeyError):
         return Config.bpLocationOverride[item['name']]
 
-    if 'micro gate' in item['name'].lower() and not 'local' in item['name'].lower():
-        return '1+ Stars in Relevant System'
-
     with suppress(KeyError):
         loc = item['__extData']['blueprintlocation']
         if loc.lower() == 'not yet available':
@@ -2865,7 +2872,7 @@ def ItemDisplayStatObtainHtml(item, p=...):
 def ItemDisplayStatDestination(item, p=...):
     rtnVal = ""
 
-    if 'micro gate' in item['name'].lower():
+    if 'micro gate' in item['name'].lower() and 'local' not in item['name'].lower():
         prefix = item['name'].split(' ')[-1]
         systemName = GalaxyUtils.GetSystemNameByPrefix(prefix)
         rtnVal = systemName
@@ -2883,7 +2890,7 @@ def ItemDisplayStatDestination(item, p=...):
 def ItemDisplayStatDestinationHtml(item, p=...):
     rtnVal = ""
 
-    if 'micro gate' in item['name'].lower():
+    if 'micro gate' in item['name'].lower() and 'local' not in item['name'].lower():
         prefix = item['name'].split(' ')[-1]
         systemName = GalaxyUtils.GetSystemNameByPrefix(prefix)
         rtnVal = systemName

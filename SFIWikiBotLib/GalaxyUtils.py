@@ -337,7 +337,48 @@ def GetMineralInfoById(id):
             return mineralInfo
 
 
+def GetMineralInfoByBaseId(id):
+    for mineralInfo in mineralData.values():
+        if mineralInfo['baseID'] == id:
+            return mineralInfo
 
+
+def GetCraftingRecipeForSystem(systemInfo):
+    recipe = {
+        'levels': 1,
+        'locations': 'Earn 1+ stars in ' + systemInfo['name'],
+        'ingredients': [],
+        'creditCost': 1750 + systemInfo['id'] * 250,
+    }
+    lessMineral = GetMineralInfoByBaseId(systemInfo['lessMineral'])
+    moreMineral = GetMineralInfoByBaseId(systemInfo['moreMineral'])
+
+    ingredient = { 'name': '', 'mineralID': 'R_Ni', 'quantityRequired': 0 }
+    if moreMineral['id'] == 'Ni' or systemInfo['prefix'] == 'DTr':
+        ingredient['quantityRequired'] = (500 + systemInfo['requiredLevel']) * (systemInfo['id'])
+        ingredient['mineralID'] = 'Ni'
+    else:
+        ingredient['quantityRequired'] = (300 + systemInfo['requiredLevel']) * (systemInfo['id'] - 1)
+
+    nickelMineral = GetMineralInfoById(ingredient['mineralID'])
+    ingredient['quantityRequired'] = int(GeneralUtils.RoundToSignificantAmount(ingredient['quantityRequired']))
+    ingredient['name'] = '{} x {}'.format(GeneralUtils.NumDisplay(ingredient['quantityRequired'], 0, True), nickelMineral['name'])
+    recipe['ingredients'].append(ingredient)
+
+    ingredient = { 'name': '', 'mineralID': lessMineral['id'], 'quantityRequired': 0 }
+    ingredient['quantityRequired'] = int(GeneralUtils.RoundToSignificantAmount(75 + systemInfo['requiredLevel'] * 20))
+    ingredient['name'] = '{} x {}'.format(GeneralUtils.NumDisplay(ingredient['quantityRequired'], 0, True), lessMineral['name'])
+    recipe['ingredients'].append(ingredient)
+
+    ingredient = { 'name': '', 'mineralID': 'R_' + moreMineral['id'], 'quantityRequired': 0 }
+    ingredient['quantityRequired'] = int(GeneralUtils.RoundToSignificantAmount(500 + systemInfo['requiredLevel'] * 10))
+    ingredient['name'] = '{} x {}'.format(GeneralUtils.NumDisplay(ingredient['quantityRequired'], 0, True), moreMineral['name'])
+    recipe['ingredients'].append(ingredient)
+
+    if systemInfo['state'] == 2:
+        recipe['creditCost'] = 35000 + systemInfo['id'] * 5000
+
+    return recipe
 
 
 def Initialize():
