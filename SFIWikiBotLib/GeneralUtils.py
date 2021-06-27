@@ -18,7 +18,7 @@ stemmer = PorterStemmer()
 # levelUpBase = 246
 
 
-def RoundToMeaningful(input, smallValue=False, allowDec=False):
+def RoundToMeaningful(input):
     if input >= 1000000:
         return NumDisplay(NormalRound(input / 50000) * 50000, 0)
     if input >= 10000:
