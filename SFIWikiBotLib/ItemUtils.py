@@ -2144,12 +2144,13 @@ def GetItemBPLocation(item):
         if len(craftingData['locations']) > itemIdx:
             rtnVal = craftingData['locations'][itemIdx]
 
-    with suppress(KeyError):
-        loc = item['__extData']['blueprintlocation']
-        if loc.lower() == 'not yet available':
-            rtnVal = 'N/A'
-        else:
-            rtnVal = loc
+    if not rtnVal:
+        with suppress(KeyError):
+            loc = item['__extData']['blueprintlocation']
+            if loc.lower() == 'not yet available':
+                rtnVal = 'N/A'
+            else:
+                rtnVal = loc
 
     m = locRegex.match(rtnVal)
     if m:
