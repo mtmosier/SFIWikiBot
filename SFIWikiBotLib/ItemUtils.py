@@ -1128,8 +1128,12 @@ def DisplayDamageAsPerSecond(item):
     return False
 
 
-cloudTypeProjCountRegex = re.compile(r'.* fires (\d+) \[subWeapon\]s', re.I)
 def GetNumOfDamagingProjectiles(item, isForDisplay=False):
+    f = GetNumOfDamagingProjectiles
+    if "cloudTypeProjCountRegex" not in f.__dict__:
+        f.cloudTypeProjCountRegex = re.compile(r'.* fires (\d+) \[subWeapon\]s', re.I)
+    cloudTypeProjCountRegex = f.cloudTypeProjCountRegex
+
     try:
         if item['augType'] == 15:
             subWeapon = GetItemSubWeapon(item)
@@ -1940,7 +1944,7 @@ def GetItemSourceExtended(item, includeLink=False):
         source = "Purchased ([[:Category:Seasonal_Items|Seasonal]])"
     elif 'buyable' in item and item['buyable']:
         source = "Purchased"
-    elif 'race' in item and item['race'] <= 1 and item['name'] != 'Micro Gate TBZ' and (ItemDisplayStatBPLocation(item) or "Micro Gate" in item['name']):
+    elif 'race' in item and item['race'] <= 1 and item['name'] != 'Micro Gate TBZ' and (GetItemBPLocation(item)):
         source = "Crafted"
         if includeLink and Config.craftingPageName:
             if source != Config.craftingPageName:
@@ -1975,7 +1979,7 @@ def GetItemSource(item):
         source = "Purchased (Seasonal)"
     elif 'buyable' in item and item['buyable']:
         source = "Purchased"
-    elif 'race' in item and item['race'] <= 1 and item['name'] != 'Micro Gate TBZ' and (ItemDisplayStatBPLocation(item) or "Micro Gate" in item['name']):
+    elif 'race' in item and item['race'] <= 1 and item['name'] != 'Micro Gate TBZ' and (GetItemBPLocation(item)):
         source = "Crafted"
     elif 'race' in item and item['race'] > 1:
         source = "Rare Drop"
@@ -2118,6 +2122,38 @@ def GetItemAugType(item):
         pass
 
     return augType
+
+
+
+def GetItemBPLocation(item):
+    f = GetItemBPLocation
+    if "locRegex" not in f.__dict__:
+        f.locRegex = re.compile(r'^([A-Z][a-zA-Z0-9]*-[0-9]+-[0-9]+) \(')
+    locRegex = f.locRegex
+
+    with suppress(AttributeError, KeyError):
+        return Config.bpLocationOverride[item['name']]
+
+    rtnVal = 'N/A'
+    craftingData = GetCraftingDataForItem(item)
+    if craftingData:
+        if 'isSystemMicroGate' in craftingData and craftingData['isSystemMicroGate']:
+            itemIdx = 0
+        else:
+            itemIdx = craftingData['items'].index(item['id'])
+        if len(craftingData['locations']) > itemIdx:
+            rtnVal = craftingData['locations'][itemIdx]
+
+    with suppress(KeyError):
+        loc = item['__extData']['blueprintlocation']
+        if loc.lower() != 'not yet available':
+            rtnVal = loc
+
+    m = locRegex.match(rtnVal)
+    if m:
+        rtnVal = m.group(1)
+
+    return rtnVal
 
 
 def GetItemEffectTime(item):
@@ -2808,30 +2844,15 @@ def ItemDisplayStatPurchaseCost(item, p=...):
 
 
 def ItemDisplayStatBPLocation(item, p=...):
-    rtnVal = ''
+    loc = GetItemBPLocation(item)
+    loc = GeneralUtils.AddWikiLinksToText(loc, False, False, { 'Stars': False })
+    return loc
 
-    with suppress(AttributeError, KeyError):
-        return Config.bpLocationOverride[item['name']]
 
-    with suppress(KeyError):
-        loc = item['__extData']['blueprintlocation']
-        if loc.lower() == 'not yet available':
-            return 'N/A'
-        if loc:
-            return loc.split(' ')[0]
-
-    craftingData = GetCraftingDataForItem(item)
-    if not craftingData:
-        return rtnVal
-
-    itemIdx = craftingData['items'].index(item['id'])
-    if len(craftingData['locations']) > itemIdx:
-        rtnVal = craftingData['locations'][itemIdx]
-        rtnVal = rtnVal.split(' ')[0]
-    else:
-        rtnVal = 'N/A'
-
-    return rtnVal
+def ItemDisplayStatBPLocationHtml(item, p=...):
+    loc = GetItemBPLocation(item)
+    loc = GeneralUtils.AddHtmlLinksToText(loc, True, False, { 'Stars': False })
+    return loc
 
 
 def ItemDisplayStatSpeed(item, p=...):
@@ -3074,6 +3095,7 @@ itemDisplayStatSwitcherHtml['type'] = ItemDisplayStatItemTypeHtml
 itemDisplayStatSwitcherHtml['item'] = ItemDisplayStatNameAndImageHtml
 itemDisplayStatSwitcherHtml['effect'] = ItemDisplayStatEffectHtml
 itemDisplayStatSwitcherHtml['effects'] = ItemDisplayStatEffectHtml
+itemDisplayStatSwitcherHtml['bp location'] = ItemDisplayStatBPLocationHtml
 itemDisplayStatSwitcherHtml['notes'] = (lambda obj, p: GetItemDescription(obj, useHtmlForLinks=True))
 itemDisplayStatSwitcherHtml['secondary effects'] = (lambda obj, p: GetItemDescription(obj, useHtmlForLinks=True))
 
@@ -3287,7 +3309,7 @@ def Initialize():
     rarePlayerRaceDropIdList = [ GetItemByName(n)['id'] for n in rarePlayerRaceDropList ]
 
     for item in itemData:
-        if 'Micro Gate' not in item['name'] and ItemDisplayStatBPLocation(item) == 'N/A':
+        if 'Micro Gate' not in item['name'] and GetItemBPLocation(item) == 'N/A':
             itemIdListToSkip.append(item['id'])
             continue
 

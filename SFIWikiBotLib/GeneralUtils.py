@@ -342,21 +342,41 @@ def ConvertListToHtmlTable(tableData, tableHeader = None, tableTitle = None, tab
 
 
 def StemSentence(input):
-    input = re.sub(r'[^a-zA-Z0-9\(\):-]', " ", input)
-    inputWordList = re.split(r'\s+', input)
+    f = StemSentence
+    if "stripRegex" not in f.__dict__:
+        f.stripRegex = re.compile(r'[^a-zA-Z0-9\(\):-]')
+    stripRegex = f.stripRegex
+
+    if "splitRegex" not in f.__dict__:
+        f.splitRegex = re.compile(r'\s+')
+    splitRegex = f.splitRegex
+
+    input = stripRegex.sub(" ", input)
+    inputWordList = splitRegex.split(input)
     stemmedWordList = [];
     for iword in inputWordList:
         stemmedWordList.append(stemmer.stem(iword))
     return ' '.join(stemmedWordList).strip()
 
+
 def SplitTextIntoPhrases(input, maxPhrase):
-    input = re.sub(r'[^a-zA-Z0-9\(\):-]', " ", input)
-    inputWordList = re.split(r'\s+', input)
+    f = SplitTextIntoPhrases
+    if "stripRegex" not in f.__dict__:
+        f.stripRegex = re.compile(r'[^a-zA-Z0-9\(\):-]')
+    stripRegex = f.stripRegex
+
+    if "splitRegex" not in f.__dict__:
+        f.splitRegex = re.compile(r'\s+')
+    splitRegex = f.splitRegex
+
+    input = stripRegex.sub(" ", input)
+    inputWordList = splitRegex.split(input)
     phraseList = [];
     for plen in range(maxPhrase, 0, -1):
-        for sIdx in range(0, len(inputWordList) - plen):
+        for sIdx in range(0, len(inputWordList) - plen + 1):
             phrase = ' '.join(inputWordList[sIdx:sIdx+plen]).strip()
             phraseList.append(phrase)
+
     return phraseList
 
 
@@ -379,7 +399,8 @@ def AddWikiLinksToText(input, useHtml=False, allowExtraWeaponCheck=True, additio
     normalizedReplacementOverrideList = {}
     if type(additionalReplacementOverrides) == dict:
         for k, v in additionalReplacementOverrides.items():
-            normalizedReplacementOverrideList[NormalizeString(k, includeStemming)] = NormalizeString(v, includeStemming)
+            if not v:  normalizedReplacementExclusionList.append(NormalizeString(k, includeStemming))
+            else:      normalizedReplacementOverrideList[NormalizeString(k, includeStemming)] = NormalizeString(v, includeStemming)
 
     lowercaseNonStemmedReplacementOverrideList = { k.lower().replace('_', ' '):v.lower().replace('_', ' ') for k, v in Config.wikiLinkReplacementOverrideList.items() }
 

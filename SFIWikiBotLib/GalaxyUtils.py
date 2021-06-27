@@ -172,13 +172,17 @@ def GetSystemObjectList(systemPrefix, skipUnreleasedSystems=True):
 
 
 def GetPlanetsAndObjectsAssociatedWithRaceOrOrg(raceOrOrgName):
+    f = GetPlanetsAndObjectsAssociatedWithRaceOrOrg
+    if "stripRegex" not in f.__dict__:
+        f.stripRegex = re.compile('[^a-zA-Z0-9]')
+    stripRegex = f.stripRegex
+
     rtnInfo = {
         'planets': [],
         'objects': [],
     }
     pageName = raceOrOrgName
     possibleObjectsToCheck = set()
-    stripRegex = re.compile('[^a-zA-Z0-9]')
 
     content = WikiUtils.GetWikiPageContent(pageName)
     if content:
@@ -227,9 +231,12 @@ def GetPlanetsAndObjectsAssociatedWithRaceOrOrg(raceOrOrgName):
 
 
 def GetSpawnInformationForRace(raceId):
+    f = GetSpawnInformationForRace
+    if "p" not in f.__dict__:
+        f.p = re.compile(r'.* ([a-z]{1,4}-\d{1,3}-\d{1,3}) ', re.I)
+    p = f.p
 
-    # Show Ascendant location spawns
-    p = re.compile(r'.* ([a-z]{1,4}-\d{1,3}-\d{1,3}) ', re.I)
+    # Show race location spawns
     spawnList = []
     locList = []
     for k,sys in galaxyData.items():
@@ -346,9 +353,10 @@ def GetMineralInfoByBaseId(id):
 def GetCraftingRecipeForSystem(systemInfo):
     recipe = {
         'levels': 1,
-        'locations': 'Earn 1+ stars in ' + systemInfo['name'],
+        'locations': [ 'Earn 1+ stars in ' + systemInfo['name'] ],
         'ingredients': [],
         'creditCost': 1750 + systemInfo['id'] * 250,
+        'isSystemMicroGate': True,
     }
     lessMineral = GetMineralInfoByBaseId(systemInfo['lessMineral'])
     moreMineral = GetMineralInfoByBaseId(systemInfo['moreMineral'])
