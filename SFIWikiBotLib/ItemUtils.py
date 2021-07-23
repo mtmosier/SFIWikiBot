@@ -346,14 +346,14 @@ def GetWikiInfoboxDataForPrimaryOrSecondary(itemList):
     # vdata = [ ItemDisplayStatDamage(i, False, False) for i in itemList ]
     # if vdata[0] is not None and str(vdata[0]) != '0':
     #     displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
-    #     infobox['damage_per_round'] = displayData
+    #     infobox['damage_per_volley'] = displayData
 
     vdata = [ GeneralUtils.NumDisplay(GetDamagePerRoundForItem(i), 1) for i in itemList ]
     if vdata[0] != '0':
         if DisplayDamageAsPerSecond(primaryItem):
             vdata = [ '{}/s'.format(i) for i in vdata ]
         displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
-        infobox['damage_per_round'] = '{} {}'.format(displayData, GetDamageTypeIconForItem(primaryItem)).strip()
+        infobox['damage_per_volley'] = '{} {}'.format(displayData, GetDamageTypeIconForItem(primaryItem)).strip()
 
 
     with suppress(ZeroDivisionError):
@@ -377,7 +377,7 @@ def GetWikiInfoboxDataForPrimaryOrSecondary(itemList):
                     displayData = str(vdata[0]) if len(set(vdata)) == 1 else " / ".join(vdata)
                     infobox['fire_rate'] = "1 per {} sec".format(displayData)
 
-    if 'damage_per_round' in infobox:
+    if 'damage_per_volley' in infobox:
         vdata = [ GetNumOfDamagingProjectiles(i, True) for i in itemList ]
         if vdata[-1] > 1:
             displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join([str(v) for v in vdata])
@@ -409,8 +409,8 @@ def GetWikiInfoboxDataForPrimaryOrSecondary(itemList):
         #     displayData = '{} {}'.format(displayData, GetDamageTypeIconForItem(primaryItem)).strip()
         # if GeneralUtils.floatCmp(GetItemEffectDamage(primaryItem), '>', 0):
         #     displayData = '{} {}'.format(displayData, GetEffectIconForItem(primaryItem)).strip()
-        if 'damage_per_round' not in infobox or infobox['damage_per_round'] != displayData:
-            infobox['total_damage_per_round'] = displayData
+        if 'damage_per_volley' not in infobox or infobox['damage_per_volley'] != displayData:
+            infobox['total_damage_per_volley'] = displayData
 
     if primaryItem['energyBased']:
         vdata = [ ItemDisplayStatTotalDpe(i) for i in itemList ]
