@@ -136,6 +136,13 @@ def GetFullShipManagedCategoryList():
     return sorted(list(rtnList))
 
 
+def GetFullItemManagedCategoryList():
+    categoryList = set(GetFullEffectNameList())
+    categoryList.add('Energy Based')
+    categoryList.add('Ammo Based')
+    return sorted(list(categoryList))
+
+
 def GetFullEffectNameList():
     from SFIWikiBotLib import ItemUtils
     damageTypesToIncludePostfix = ['Electrostatic', 'Explosive', 'Ghostly', 'Heat', 'Laser', 'Photonic', 'Projectile']

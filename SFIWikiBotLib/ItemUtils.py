@@ -250,7 +250,7 @@ def GetItemPageContentForItemRangeList(itemList, existingPageValues={}):
     if sourceClass:
         name = '<span class="{}">{}</span>'.format(sourceClass, nameInfo['fullNameMinusLevel'])
     else:
-        name = splitItemName['fullNameMinusLevel']
+        name = nameInfo['fullNameMinusLevel']
 
 
     infoBox = GetWikiInfoboxDataForItemRangeList(itemList)
@@ -346,15 +346,27 @@ def GetWikiInfoboxDataForPrimaryOrSecondary(itemList):
     # vdata = [ ItemDisplayStatDamage(i, False, False) for i in itemList ]
     # if vdata[0] is not None and str(vdata[0]) != '0':
     #     displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
-    #     infobox['damage_per_volley'] = displayData
+    #     infobox['damage_per_round'] = displayData
 
-    vdata = [ GeneralUtils.NumDisplay(GetDamagePerRoundForItem(i), 1) for i in itemList ]
-    if vdata[0] != '0':
-        if DisplayDamageAsPerSecond(primaryItem):
-            vdata = [ '{}/s'.format(i) for i in vdata ]
-        displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
-        infobox['damage_per_volley'] = '{} {}'.format(displayData, GetDamageTypeIconForItem(primaryItem)).strip()
+    if not DisplayDamageAsPerHit(primaryItem):
+        vdata = [ GeneralUtils.NumDisplay(GetDamagePerRoundForItem(i), 1) for i in itemList ]
+        if vdata[0] != '0':
+            if DisplayDamageAsPerSecond(primaryItem):
+                vdata = [ '{}/s'.format(i) for i in vdata ]
+            displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
+            infobox['damage_per_round'] = '{} {}'.format(displayData, GetDamageTypeIconForItem(primaryItem)).strip()
+    else:
+        vdata = [ GeneralUtils.NumDisplay(GetDamagePerRoundForItem(i), 1) for i in itemList ]
+        if vdata[0] != '0':
+            vdata = [ '{}/hit'.format(i) for i in vdata ]
+            displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
+            infobox['damage_per_hit'] = '{} {}'.format(displayData, GetDamageTypeIconForItem(primaryItem)).strip()
 
+        with suppress(ZeroDivisionError, TypeError):
+            vdata = [ GeneralUtils.NumDisplay(GetItemTotalHitCount(i) / GetItemLife(i), 1) for i in itemList ]
+            if vdata[0] != '0':
+                displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
+                infobox['hits_per_second'] = displayData
 
     with suppress(ZeroDivisionError):
         if weaponType != 'Large':
@@ -377,21 +389,22 @@ def GetWikiInfoboxDataForPrimaryOrSecondary(itemList):
                     displayData = str(vdata[0]) if len(set(vdata)) == 1 else " / ".join(vdata)
                     infobox['fire_rate'] = "1 per {} sec".format(displayData)
 
-    if 'damage_per_volley' in infobox:
+    if 'damage_per_round' in infobox:
         vdata = [ GetNumOfDamagingProjectiles(i, True) for i in itemList ]
         if vdata[-1] > 1:
             displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join([str(v) for v in vdata])
             infobox['amount'] = displayData
 
-    vdata = [ ItemDisplayStatTotalDps(i, ..., False) for i in itemList ]
-    if vdata[0] is not None:
-        displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
-        if displayData != '0':
-            # if GeneralUtils.floatCmp(GetDamagePerRoundForItem(primaryItem), '>', 0):
-            #     displayData = '{} {}'.format(displayData, GetDamageTypeIconForItem(primaryItem)).strip()
-            # if GeneralUtils.floatCmp(GetItemEffectDamage(primaryItem), '>', 0):
-            #     displayData = '{} {}'.format(displayData, GetEffectIconForItem(primaryItem)).strip()
-            infobox['damage_per_second'] = displayData
+    if not DisplayDamageAsPerSecond(primaryItem) or 'damage_per_round' not in infobox:
+        vdata = [ ItemDisplayStatTotalDps(i, ..., False) for i in itemList ]
+        if vdata[0] is not None:
+            displayData = vdata[0] if len(set(vdata)) == 1 else " / ".join(vdata)
+            if displayData != '0':
+                # if GeneralUtils.floatCmp(GetDamagePerRoundForItem(primaryItem), '>', 0):
+                #     displayData = '{} {}'.format(displayData, GetDamageTypeIconForItem(primaryItem)).strip()
+                # if GeneralUtils.floatCmp(GetItemEffectDamage(primaryItem), '>', 0):
+                #     displayData = '{} {}'.format(displayData, GetEffectIconForItem(primaryItem)).strip()
+                infobox['damage_per_second'] = displayData
 
     damageType = GetDamageTypeForItem(primaryItem)
     if damageType:
@@ -409,7 +422,7 @@ def GetWikiInfoboxDataForPrimaryOrSecondary(itemList):
         #     displayData = '{} {}'.format(displayData, GetDamageTypeIconForItem(primaryItem)).strip()
         # if GeneralUtils.floatCmp(GetItemEffectDamage(primaryItem), '>', 0):
         #     displayData = '{} {}'.format(displayData, GetEffectIconForItem(primaryItem)).strip()
-        if 'damage_per_volley' not in infobox or infobox['damage_per_volley'] != displayData:
+        if 'damage_per_round' not in infobox or infobox['damage_per_round'] != displayData:
             infobox['total_damage_per_volley'] = displayData
 
     if primaryItem['energyBased']:
@@ -491,7 +504,7 @@ def GetWikiInfoboxDataForPrimaryOrSecondary(itemList):
         if 'Vortex Bomb' in primaryItem['name']:
             vdata = [ GeneralUtils.NumDisplay(i['effectTime'], 1) for i in itemList ]
         else:
-            vdata = [ GeneralUtils.NumDisplay(i['life'], 1) for i in itemList ]
+            vdata = [ GeneralUtils.NumDisplay(GetItemLife(i), 1) for i in itemList ]
         if vdata[0] != '0':
             displayData = str(vdata[0]) if len(set(vdata)) == 1 else "s / ".join(vdata)
             infobox['lifetime'] = "{}s".format(displayData)
@@ -513,7 +526,7 @@ def GetWikiInfoboxDataForPrimaryOrSecondary(itemList):
 
     armIsNotLifeExceptionList = ['Thunderbomb', 'Tornadian Hurricane']
     if weaponType == 'Large' and primaryItem['name'] not in armIsNotLifeExceptionList:
-        vdata = [ GeneralUtils.NumDisplay(i['life'], 1) for i in itemList ]
+        vdata = [ GeneralUtils.NumDisplay(GetItemLife(i), 1) for i in itemList ]
     else:
         vdata = [ GeneralUtils.NumDisplay(i['armingTime'], 1) for i in itemList ]
     displayData = vdata[0] if len(set(vdata)) == 1 else "s / ".join(vdata)
@@ -839,13 +852,18 @@ def IsItemNprExclusive(item):
 
 
 def GetDamagePerRoundForItem(item):
-    try:
-        # if item['weaponType'] == 5:
-        subWeapon = GetItemSubWeapon(item)
-        if subWeapon:  return GetDamagePerRoundForItem(subWeapon)
+    with suppress(AttributeError, KeyError):
+        return Config.weaponDamagePerHitOverride[item['name']]
+
+    ctd = GetItemContinuousDamageTotalDamage(item)
+    if ctd:
+        return ctd / GetItemLife(item)
+
+    subWeapon = GetItemSubWeapon(item)
+    if subWeapon:  return GetDamagePerRoundForItem(subWeapon)
+
+    with suppress(KeyError):
         return item['damage']
-    except:
-        pass
 
 
 def GetAllItemsSharingItemRange(item, funcItemList=...):
@@ -983,7 +1001,7 @@ def IsBeamWeapon(item):
         return False
     if "guidance" not in item or GeneralUtils.floatCmp(item['guidance'], '!=', 1):
         return False
-    if "life" not in item or GeneralUtils.floatCmp(item['life'], '>', 1):
+    if "life" not in item or GeneralUtils.floatCmp(GetItemLife(item), '>', 1):
         return False
     if "lockingRange" not in item or GeneralUtils.floatCmp(item['lockingRange'], '>', 100):
         return False
@@ -1019,11 +1037,9 @@ def GetItemRange(item):
 
     subWeapon = GetItemSubWeapon(item)
 
-    try:
+    with suppress(KeyError):
         if item['weaponType'] == 5 and subWeapon:
             return GetItemRange(subWeapon)
-    except:
-        pass
 
     itemGuidance = SmallConstants.guidanceLookup[item['guidance']] if 'guidance' in item else ''
     if 'Smart' not in item['name'] and itemGuidance in ['UNGUIDED', 'ATTACHED']:
@@ -1034,16 +1050,16 @@ def GetItemRange(item):
                     acceleration *= -1
 
                 ttts = abs(item['maxSpeed'] - item['initSpeed']) / abs(acceleration)
-                if GeneralUtils.floatCmp(ttts, '>', item['life']):
-                    rtnVal = item['life']**2 * acceleration / 2 + item['life'] * item['initSpeed']
+                if GeneralUtils.floatCmp(ttts, '>', GetItemLife(item)):
+                    rtnVal = GetItemLife(item)**2 * acceleration / 2 + GetItemLife(item) * item['initSpeed']
                 else:
-                    rtnVal = ttts**2 * acceleration / 2 + ttts * item['initSpeed'] + item['maxSpeed'] * (item['life'] - ttts)
+                    rtnVal = ttts**2 * acceleration / 2 + ttts * item['initSpeed'] + item['maxSpeed'] * (GetItemLife(item) - ttts)
             except:
                 if item['maxSpeed'] > 0:
                     if item['maxSpeed'] != item['initSpeed'] and item['initSpeed'] > 0:
-                        rtnVal = item['initSpeed'] * item['life']
+                        rtnVal = item['initSpeed'] * GetItemLife(item)
                     else:
-                        rtnVal = item['maxSpeed'] * item['life']
+                        rtnVal = item['maxSpeed'] * GetItemLife(item)
 
         try:
             if rtnVal == 0 and subWeapon:
@@ -1112,6 +1128,9 @@ def GetItemSubWeapon(item):
 
 def DisplayDamageAsPerSecond(item):
 
+    if GetItemContinuousDamageTotalDamage(item) is not None:
+        return True
+
     if 'fireRate' in item and GeneralUtils.floatCmp(item['fireRate'], '==', 0):
         return True
 
@@ -1120,12 +1139,18 @@ def DisplayDamageAsPerSecond(item):
         return False
     if 'thunder' in nameCmp or 'bug zapper' in nameCmp:
         return True
-    if 'tornadian hurricane' in nameCmp or 'radicane' in nameCmp or 'firestorm' in nameCmp or 'whirler' in nameCmp:
+    if 'tornadian hurricane' in nameCmp or 'radicane' in nameCmp or 'firestorm' in nameCmp:
         return True
     if 'tornadian' in nameCmp and 'storm' in nameCmp:
         return True
+    if 'light saw' in nameCmp:
+        return True
 
     return False
+
+
+def DisplayDamageAsPerHit(item):
+    return GetItemTotalHitCount(item) is not None
 
 
 def GetNumOfDamagingProjectiles(item, isForDisplay=False):
@@ -1134,6 +1159,9 @@ def GetNumOfDamagingProjectiles(item, isForDisplay=False):
         f.cloudTypeProjCountRegex = re.compile(r'.* fires (\d+) \[subWeapon\]s', re.I)
     cloudTypeProjCountRegex = f.cloudTypeProjCountRegex
 
+    if item['name'] in Config.projectileCountOverride:
+        return Config.projectileCountOverride[item['name']]
+
     try:
         if item['augType'] == 15:
             subWeapon = GetItemSubWeapon(item)
@@ -1141,22 +1169,24 @@ def GetNumOfDamagingProjectiles(item, isForDisplay=False):
     except:
         pass
 
-    if item['name'] in Config.projectileCountOverride:
-        return Config.projectileCountOverride[item['name']]
-
     nameCmp = item['name'].lower()
     amount = item['amount'] if 'amount' in item and item['amount'] > 0 else 1
+    lt = GetItemLife(item)
     if 'thunder' in nameCmp or 'bug zapper' in nameCmp:
-        if not isForDisplay and 'life' in item:
-            return item['life'] * amount
+        if not isForDisplay and lt is not None:
+            return lt * amount
         return amount
-    if 'tornadian hurricane' == nameCmp or 'radicane' == nameCmp or 'firestorm' == nameCmp or 'whirler' in nameCmp:
+    if 'light saw' in nameCmp:
+        if not isForDisplay and lt is not None:
+            return lt * amount
+        return amount
+    if 'tornadian hurricane' == nameCmp or 'radicane' == nameCmp or 'firestorm' == nameCmp:
         if not isForDisplay:
-            return item['life']
+            return lt
         return amount
     if 'tornadian' in nameCmp and 'storm' in nameCmp:
         if not isForDisplay:
-            return item['life']
+            return lt
         return amount
 
     varData = GetVariantDataForItem(item)
@@ -1211,44 +1241,77 @@ def GetNumOfDamagingProjectiles(item, isForDisplay=False):
     return amount
 
 
+def GetItemTotalHitCount(item):
+    with suppress(AttributeError, KeyError):
+        return Config.weaponHitCountOverride[item['name']]
+
+    subWeapon = GetItemSubWeapon(item)
+    if subWeapon:
+        val = GetItemTotalHitCount(subWeapon)
+        if val:  return val
+
+
+def GetItemContinuousDamageTotalDamage(item):
+    with suppress(AttributeError, KeyError):
+        return Config.weaponContinuousDamageTotalDamageOverride[item['name']]
+
+    subWeapon = GetItemSubWeapon(item)
+    if subWeapon:
+        val = GetItemContinuousDamageTotalDamage(subWeapon)
+        if val:  return val
+
+
+def GetItemLife(item):
+    with suppress(AttributeError, KeyError):
+        return Config.weaponLifeOverride[item['name']]
+
+    subWeapon = GetItemSubWeapon(item)
+    if subWeapon:
+        val = GetItemLife(subWeapon)
+        if val:  return val
+
+    with suppress(AttributeError, KeyError):
+        return item['life']
+
 
 def GetItemTotalDamagePerVolley(item):
     effectDamage = None
     message = None
     totalDamage = 0
 
-    try:
+    ctd = GetItemContinuousDamageTotalDamage(item)
+    if ctd:
+        totalDamage = ctd
+    elif DisplayDamageAsPerHit(item):
+        totalDamage = GetDamagePerRoundForItem(item) * GetItemTotalHitCount(item)
+    else:
         totalDamage = GetDamagePerRoundForItem(item) * GetNumOfDamagingProjectiles(item)
-    except:
-        pass
 
-    try:
-        itemType = GetItemType(item)
-        if itemType != 'Shield':
-            effectDamage = GetItemEffectDamage(item)
-            if effectDamage:
-                totalDamage += effectDamage
-
-    except:
-        pass
+    itemType = GetItemType(item)
+    if itemType != 'Shield':
+        effectDamage = GetItemEffectDamage(item)
+        if effectDamage:
+            totalDamage += effectDamage
 
     return totalDamage
 
 
 def GetItemMaxSpeed(item):
-    if 'maxSpeed' in item and GeneralUtils.floatCmp(item['maxSpeed'], '>', 0):
-        return item['maxSpeed']
     subWeapon = GetItemSubWeapon(item)
     if subWeapon:
         return GetItemMaxSpeed(subWeapon)
 
+    if 'maxSpeed' in item and GeneralUtils.floatCmp(item['maxSpeed'], '>', 0):
+        return item['maxSpeed']
+
 
 def GetItemInitialSpeed(item):
-    if 'initSpeed' in item and GeneralUtils.floatCmp(item['initSpeed'], '>', 0):
-        return item['initSpeed']
     subWeapon = GetItemSubWeapon(item)
     if subWeapon:
         return GetItemInitialSpeed(subWeapon)
+
+    if 'initSpeed' in item and GeneralUtils.floatCmp(item['initSpeed'], '>', 0):
+        return item['initSpeed']
 
 
 def GetRaceForItem(item):
@@ -1403,6 +1466,14 @@ def GetCategoryListForItem(item):
 
     if itemType == 'Collectible':
         rtnSet.add('Collectible')
+
+    if itemType == 'Primary Weapon':
+        rtnSet.add('Energy Based')
+    if itemType == 'Secondary Weapon' and 'energyBased' in item:
+        if item['energyBased']:
+            rtnSet.add('Energy Based')
+        else:
+            rtnSet.add('Ammo Based')
 
     if 'seasonal' in item and item['seasonal']:
         rtnSet.add("Seasonal Items")
@@ -1854,8 +1925,12 @@ def GetItemDescription(item, useHtmlForLinks=False, performLinkReplacement=True)
     invEffectPerc = ''
     subShipName = ''
 
-    if 'life' in item:
-        lifeTime = GeneralUtils.NumDisplay(item['life'], 1)
+
+    lifeTime = GetItemLife(item)
+    if lifeTime is not None:
+        lifeTime = GeneralUtils.NumDisplay(lifeTime, 1)
+    else:
+        lifeTime = ''
     if 'amount' in item:
         amount = item['amount']
     if 'level' in item:
@@ -2035,38 +2110,35 @@ def ShortenSkillName(skillName):
 
 def GetItemDps(item):
     dps = None
-    try:
+    with suppress(ZeroDivisionError, KeyError):
         if IsBeamWeapon(item) and GeneralUtils.floatCmp(item['fireRate'], '==', 0):
             dps = GetDamagePerRoundForItem(item)
+        elif DisplayDamageAsPerHit(item):
+            dps = GetItemTotalHitCount(item) * GetDamagePerRoundForItem(item) / item['fireRate']
         else:
             dps = GetDamagePerRoundForItem(item) / item['fireRate']
             dps *= GetNumOfDamagingProjectiles(item)
-    except:
-        pass
 
     return dps
 
 
 def GetItemDpsIncludingEffectDamage(item):
-    try:
+    with suppress(KeyError):
         if item['augType'] == 15:
             subWeapon = GetItemSubWeapon(item)
             if subWeapon:
                 return GetItemDpsIncludingEffectDamage(subWeapon)
-    except:
-        pass
 
     dps = None
     if DisplayDamageAsPerSecond(item):
         dps = GetDamagePerRoundForItem(item)
         if 'amount' in item and item['amount'] > 1:
             dps *= item['amount']
+    elif DisplayDamageAsPerHit(item):
+        dps = GetItemTotalHitCount(item) * GetDamagePerRoundForItem(item) / item['life']
     else:
-        try:
-            dps = GetDamagePerRoundForItem(item) / item['fireRate']
-            dps *= GetNumOfDamagingProjectiles(item)
-        except:
-            pass
+        dps = GetDamagePerRoundForItem(item) / item['fireRate']
+        dps *= GetNumOfDamagingProjectiles(item)
 
     effectDps = GetItemEffectDamagePerSecond(item)
     if effectDps:
@@ -2080,31 +2152,34 @@ def GetItemDpsIncludingEffectDamage(item):
 
 def GetItemDpe(item):
     dpe = None
-    try:
+    with suppress(KeyError):
         damage = GetDamagePerRoundForItem(item)
         if damage > 0 and GeneralUtils.floatCmp(item['ammoOrEnergyUsage'], '>', 0) and item['energyBased']:
-            damage *= GetNumOfDamagingProjectiles(item)
+            if DisplayDamageAsPerHit(item):
+                damage *= GetItemTotalHitCount(item)
+            else:
+                damage *= GetNumOfDamagingProjectiles(item)
+
             dpe = damage / item['ammoOrEnergyUsage']
-    except:
-        pass
 
     return dpe
 
 
 def GetItemDpeIncludingEffectDamage(item):
     dpe = None
-    try:
+    with suppress(KeyError):
         damage = GetDamagePerRoundForItem(item)
         if damage and GeneralUtils.floatCmp(item['ammoOrEnergyUsage'], '>', 0) and item['energyBased']:
-            damage *= GetNumOfDamagingProjectiles(item)
+            if DisplayDamageAsPerHit(item):
+                damage *= GetItemTotalHitCount(item)
+            else:
+                damage *= GetNumOfDamagingProjectiles(item)
 
             effectDamage = GetItemEffectDamage(item)
             if effectDamage:
                 damage += effectDamage
 
             dpe = damage / item['ammoOrEnergyUsage']
-    except:
-        pass
 
     return dpe
 
@@ -2454,9 +2529,11 @@ def ItemDisplayStatDamage(item, p=..., includeProjectileDisplay=True):
     if GeneralUtils.floatCmp(damagePerRound, '==', 0):
         return ''
 
-    rtnVal = damagePerRound
+    rtnVal = GeneralUtils.NumDisplay(damagePerRound, 1)
     if DisplayDamageAsPerSecond(item):
         rtnVal = "{}/s".format(rtnVal)
+    elif DisplayDamageAsPerHit(item):
+        rtnVal = "{}/hit".format(rtnVal)
 
     if includeProjectileDisplay:
         amount = GetNumOfDamagingProjectiles(item, True)
@@ -2493,7 +2570,9 @@ def ItemDisplayStatTotalDamagePerVolley(item, p=..., includeIcons=False):
         elif effectName == 'Corrosion':
             message += '.\nDamage is approximate depending on whether the effect is refreshed. Estimation is for no refresh'
 
-        if GetNumOfDamagingProjectiles(item, True) > 1:
+        if DisplayDamageAsPerHit(item):
+            message += ' and assumes all hits land on the target.'
+        elif GetNumOfDamagingProjectiles(item, True) > 1:
             message += ' and assumes all projectiles hit the target.'
         else:
             message += '.'
@@ -2960,8 +3039,9 @@ def ItemDisplayStatItemTypeHtml(item, p=...):
 def ItemDisplayStatArmTime(item, p=...):
     rtnVal = ""
 
-    if item['weaponType'] == 5 and item['life'] > 0:
-        rtnVal = "{}s".format(GeneralUtils.NumDisplay(item['life'], 2))
+    lt = GetItemLife(item)
+    if item['weaponType'] == 5 and lt is not None and lt > 0:
+        rtnVal = "{}s".format(GeneralUtils.NumDisplay(lt, 2))
     if not rtnVal and item['armingTime'] > 0:
         rtnVal = "{}s".format(GeneralUtils.NumDisplay(item['armingTime'], 2))
 
@@ -3033,10 +3113,10 @@ itemDisplayStatSwitcher = {
     'is': (lambda obj, p: GeneralUtils.NumDisplay(GetItemInitialSpeed(obj), 1) if GetItemInitialSpeed(obj) else ""),
     'item': ItemDisplayStatNameAndImage,
     'is passive': (lambda obj, p: 'Yes' if 'passive' in obj and obj['passive'] else 'No'),
-    'lifetime': (lambda obj, p: "{}s".format(GeneralUtils.NumDisplay(obj['life']), 1) if obj['life'] > 0 else ""),
-    'lifetime (s)': (lambda obj, p: GeneralUtils.NumDisplay(obj['life'], 1) if obj['life'] > 0 else ""),
+    'lifetime': (lambda obj, p: "{}s".format(GeneralUtils.NumDisplay(GetItemLife(obj)), 1) if GetItemLife(obj) else ""),
+    'lifetime (s)': (lambda obj, p: GeneralUtils.NumDisplay(GetItemLife(obj), 1) if GetItemLife(obj) > 0 else ""),
     'lrng': (lambda obj, p: "{}su".format(GeneralUtils.NumDisplay(GetItemRange(obj), 1)) if obj['guidance'] == 1 or IsBeamWeapon(obj) or 'Smart' in obj['name'] else ''),
-    'lt': (lambda obj, p: "{}s".format(GeneralUtils.NumDisplay(obj['life'], 1)) if obj['life'] > 0 else ""),
+    'lt': (lambda obj, p: "{}s".format(GeneralUtils.NumDisplay(GetItemLife(obj), 1)) if GetItemLife(obj) > 0 else ""),
     'max spd': (lambda obj, p: GeneralUtils.NumDisplay(GetItemMaxSpeed(obj), 1) if GetItemMaxSpeed(obj) else ""),
     'max speed': (lambda obj, p: GeneralUtils.NumDisplay(GetItemMaxSpeed(obj), 1) if GetItemMaxSpeed(obj) else ""),
     'maximum charge multiplier': (lambda obj, p: "x{}".format(GeneralUtils.NumDisplay(obj['maxModifier'], 4)) if obj['maxModifier'] > 0 else ""),

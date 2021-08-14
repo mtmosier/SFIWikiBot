@@ -16,7 +16,7 @@ botBpLocationOverride = White Xandelevium Blaster=Sh-1-4, Quark Xandelevium Blas
 # botBpLocationOverride =
 #
 # botCraftingPageName = Crafting
-# botNprPageNameMapping = Ascendants=Ascendant, Andromedans=Andromedan, Dartians=Dartian, Devimon=Devimon, Forkworms=Forkworm, Ghosts=Ghost, Igni=Igni, Null Dwellers=Null Dweller, Prongworms=Prongworm, Radii=Radii, Red Mist=Red Mist, Relisk=Relisk, Resonites=Resonite, Rodions=Rodion, Sheenites=Sheenite, Solarions=Solarion, Splicers=Splicer, The Church of Megmos=Church of Megmos, The Gao=The Gao, Tobor=Tobor, Tornadians=Tornadian, Tyraan=Tyraan, Vacuum Flies=Vacuum Fly
+# botNprPageNameMapping = Andromedans=Andromedan, Ascendants=Ascendant, Dartians=Dartian, Devimon=Devimon, Forkworms=Forkworm, Ghosts=Ghost, Igni=Igni, Null Dwellers=Null Dweller, Prongworms=Prongworm, Radii=Radii, Red Mist=Red Mist, Relisk=Relisk, Resonites=Resonite, Robopheres=Robosphere, Rodions=Rodion, Sheenites=Sheenite, Solarions=Solarion, Splicers=Splicer, The Church of Megmos=Church of Megmos, The Gao=The Gao, Tobor=Tobor, Tornadians=Tornadian, Tyraan=Tyraan, Vacuum Flies=Vacuum Fly
 # botMainFactionList = Human Alliance=, Alliance Science Corps=Human Alliance\#Alliance Science Corps, Aralien Empire=, Empire Intelligence=Aralien Empire\#Empire Intelligence, Freedom Initiative=
 #
 # botMaxWordsInArticleTitleSearch = 4
@@ -35,6 +35,10 @@ botBpLocationOverride = White Xandelevium Blaster=Sh-1-4, Quark Xandelevium Blas
 # botProjectileCountOverride = Sheenite Orbital Ultra Ring=30, Sheenite Orbital Chevron Ring=8
 # botWeaponRangeOverride = Sheenite Orbital Ultra Ring=17, Sheenite Orbital Chevron Ring=17, Ascendant Gun Turret=125
 # botSubWeaponIDOverride = Cake Bomb=cks, Stinger Cloud=st_1, Sheenite Orbital Ultra Ring=soc, Sheenite Orbital Chevron Ring=soc
+# botWeaponHitCountOverride = Tornadian Ice Whirler=120, Tornadian Electro Whirler=120, Tornadian Plasma Whirler=120, Tornadian Rad Whirler=120
+# botWeaponDamagePerHitOverride =
+# botWeaponContinuousDamageTotalDamageOverride = Red Mist Horn Circle=480, Red Mist Drop Circle=525
+# botWeaponLifeOverride =
 #
 # botPauseBetweenContentUpdateStepsInSec = 2
 # botPauseAfterSuccessfullyUpdatingWikiPageInSec = 1.5

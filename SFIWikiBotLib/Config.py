@@ -74,13 +74,29 @@ weaponRangeOverrideDefault = 'Sheenite Orbital Ultra Ring=17, Sheenite Orbital C
 weaponRangeOverride = dict(config('botWeaponRangeOverride', cast=Csv(cast=lambda s: tuple(s.split('='))), default=weaponRangeOverrideDefault))
 weaponRangeOverride = { k:float(v) for k, v in weaponRangeOverride.items() }
 
+weaponHitCountOverrideDefault = 'Tornadian Ice Whirler=120, Tornadian Electro Whirler=120, Tornadian Plasma Whirler=120, Tornadian Rad Whirler=120'
+weaponHitCountOverride = dict(config('botWeaponHitCountOverride', cast=Csv(cast=lambda s: tuple(s.split('='))), default=weaponHitCountOverrideDefault))
+weaponHitCountOverride = { k:int(v) for k, v in weaponHitCountOverride.items() }
+
+weaponDamagePerHitOverrideDefault = ''
+weaponDamagePerHitOverride = dict(config('botWeaponDamagePerHitOverride', cast=Csv(cast=lambda s: tuple(s.split('='))), default=weaponDamagePerHitOverrideDefault))
+weaponDamagePerHitOverride = { k:float(v) for k, v in weaponDamagePerHitOverride.items() }
+
+weaponContinuousDamageTotalDamageOverrideDefault = 'Red Mist Horn Circle=480, Red Mist Drop Circle=525'
+weaponContinuousDamageTotalDamageOverride = dict(config('botWeaponContinuousDamageTotalDamageOverride', cast=Csv(cast=lambda s: tuple(s.split('='))), default=weaponContinuousDamageTotalDamageOverrideDefault))
+weaponContinuousDamageTotalDamageOverride = { k:float(v) for k, v in weaponContinuousDamageTotalDamageOverride.items() }
+
+weaponLifeOverrideDefault = ''
+weaponLifeOverride = dict(config('botWeaponLifeOverride', cast=Csv(cast=lambda s: tuple(s.split('='))), default=weaponLifeOverrideDefault))
+weaponLifeOverride = { k:float(v) for k, v in weaponLifeOverride.items() }
+
 mainFactionListDefault = 'Human Alliance=, Alliance Science Corps=Human Alliance\#Alliance Science Corps, Aralien Empire=, Empire Intelligence=Aralien Empire\#Empire Intelligence, Freedom Initiative='
 mainFactionList = dict(config('botMainFactionList', cast=Csv(cast=lambda s: tuple(s.split('='))), default=mainFactionListDefault))
 
-nprPageNameMappingDefault = 'Andromedans=Andromedan, Ascendants=Ascendant, Dartians=Dartian, Devimon=Devimon, Forkworms=Forkworm, Ghosts=Ghost, Igni=Igni, Null Dwellers=Null Dweller, Prongworms=Prongworm, Radii=Radii, Red Mist=Red Mist, Relisk=Relisk, Resonites=Resonite, Rodions=Rodion, Sheenites=Sheenite, Solarions=Solarion, Splicers=Splicer, The Church of Megmos=Church of Megmos, The Gao=The Gao, Tobor=Tobor, Tornadians=Tornadian, Tyraan=Tyraan, Vacuum Flies=Vacuum Fly'
+nprPageNameMappingDefault = 'Andromedans=Andromedan, Ascendants=Ascendant, Dartians=Dartian, Devimon=Devimon, Forkworms=Forkworm, Ghosts=Ghost, Igni=Igni, Null Dwellers=Null Dweller, Prongworms=Prongworm, Radii=Radii, Red Mist=Red Mist, Relisk=Relisk, Resonites=Resonite, Robospheres=Robosphere, Rodions=Rodion, Sheenites=Sheenite, Solarions=Solarion, Splicers=Splicer, The Church of Megmos=Church of Megmos, The Gao=The Gao, Tobor=Tobor, Tornadians=Tornadian, Tyraan=Tyraan, Vacuum Flies=Vacuum Fly'
 nprPageNameMapping = dict(config('botNprPageNameMapping', cast=Csv(cast=lambda s: tuple(s.split('='))), default=nprPageNameMappingDefault))
 
-subWeaponIDOverrideDefault = 'Cake Bomb=cks, Stinger Cloud=st_1, Sheenite Orbital Ultra Ring=soc, Sheenite Orbital Chevron Ring=soc'
+subWeaponIDOverrideDefault = 'Cake Bomb=cks, Stinger Cloud=st_1,Red Mist Horn Circle Deathtrap=rmc, Sheenite Orbital Ultra Ring=soc, Sheenite Orbital Chevron Ring=soc'
 subWeaponIDOverride = dict(config('botSubWeaponIDOverride', cast=Csv(cast=lambda s: tuple(s.split('='))), default=subWeaponIDOverrideDefault))
 
 wikiImageAndPageListTtl = config("botWikiImageAndPageListTtlSec", default=900, cast=int)  # Default 15 minutes

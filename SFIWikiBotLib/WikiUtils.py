@@ -853,7 +853,7 @@ def UpdateIndividualItemPageByItemRange(itemList, comment=None, allowRetry=True)
     if not itemList:
         return rtnVal
 
-    fullEffectList = [ v.lower() for v in SmallConstants.GetFullEffectNameList() ]
+    fullCategoryList = [ v.lower() for v in SmallConstants.GetFullItemManagedCategoryList() ]
 
     primaryItem = itemList[-1]
     pageName = ItemUtils.GetItemWikiArticlePage(primaryItem)
@@ -882,7 +882,7 @@ def UpdateIndividualItemPageByItemRange(itemList, comment=None, allowRetry=True)
         for catInfo in catList:
             # Remove any effect categories which don't apply to this item
             catName = catInfo['name'].lower()
-            if catName not in itemCatListCmp and catName in fullEffectList:
+            if catName not in itemCatListCmp and catName in fullCategoryList:
                 content = content.replace(catInfo['content'], '')
                 catChanges = True
             else:
@@ -919,7 +919,7 @@ def UpdateIndividualItemPageByItemRange(itemList, comment=None, allowRetry=True)
                 if sourceClassName:
                     name = '<span class="{}">{}</span>'.format(sourceClassName, nameInfo['fullNameMinusLevel'])
                 else:
-                    name = splitItemName['fullNameMinusLevel']
+                    name = nameInfo['fullNameMinusLevel']
                 if name.lower() != template['data']['itemname'].lower():
                     replacementTemplate['itemname'] = name
                     updateTemplate = True
