@@ -234,14 +234,15 @@ def Initialize():
         for raceInfo in raceData:
             if raceInfo['race'] > 1:
                 raceSpawnFound = False
-                raceOrgId = GetOrgInfoListByRaceId(raceInfo['race'])[0]['id']
-                for systemInfo in GalaxyUtils.GetSystemList():
-                    if systemInfo['prefix'] == 'TBZ':  continue
-                    for spawn in systemInfo['otherRaceSpawns']:
-                        if spawn['orgID'] == raceOrgId:
-                            raceSpawnFound = True
-                            break
-                    if raceSpawnFound:  break
+                with suppress(IndexError):
+                    raceOrgId = GetOrgInfoListByRaceId(raceInfo['race'])[0]['id']
+                    for systemInfo in GalaxyUtils.GetSystemList():
+                        if systemInfo['prefix'] == 'TBZ':  continue
+                        for spawn in systemInfo['otherRaceSpawns']:
+                            if spawn['orgID'] == raceOrgId:
+                                raceSpawnFound = True
+                                break
+                        if raceSpawnFound:  break
 
                 if not raceSpawnFound:
                     unreleasedRaceList.append(raceInfo['name'])
