@@ -276,9 +276,11 @@ def GetShipPageContent(ship):
     for catName in shipCatList:
         pageFooter += '[[Category:{}]]\n'.format(catName)
 
+    shipType = GetShipUseCategory(ship)
+    if shipType == 'NPR':
+        return GetNPRShipPageContent(ship)
 
     infoBox = GetWikiInfoboxDataForShip(ship)
-    shipType = GetShipUseCategory(ship)
 
     introSection = ''
 
@@ -350,6 +352,35 @@ def GetShipPageContent(ship):
     content += pageFooter
 
     return content
+
+
+def GetNPRShipPageContent(ship):
+    pageHeader = '__NOTOC__\n'
+    pageFooter = '\n{{Template:NPR Ships}}\n[[Category:NPR Ships]]\n'
+
+    nprPageName = WikiUtils.GetNprWikiPageByNprName(GetRaceForShip(ship))
+    if nprPageName:
+        pageFooter += '[[Category:{}]]\n'.format(nprPageName)
+
+    infoBox = GetWikiInfoboxDataForShip(ship)
+
+    # Template name is   Infobox_Ship
+    nprShipInfo = OrderedDict()
+    nprShipInfo['shipName'] = ship['name']
+    nprShipInfo['nprName'] = nprPageName
+    #nprShipInfo['Description'] = GeneralUtils.AddWikiLinksToText(ship['description'], useHtml=False, allowExtraWeaponCheck=False) if 'description' in ship else ''
+    nprShipInfo['Description'] = ''  # Where NPR ships have descriptions in the exported data it tends to be wrong, a copy of playable ships
+    nprShipInfo['Combat and Strategy'] = ''
+    nprShipInfo['Notes'] = ''
+
+    content = pageHeader
+    content += WikiUtils.ConvertDictionaryToWikiTemplate('Infobox_Ship', infoBox).strip()
+    content += "\n"
+    content += WikiUtils.ConvertDictionaryToWikiTemplate('NPRShip', nprShipInfo).strip()
+    content += pageFooter
+
+    return content
+
 
 
 def GetShipPurchasePrice(ship):
