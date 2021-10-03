@@ -1812,7 +1812,6 @@ def GetEffectNameListForItem(item):
                 if effectName:
                     if effectName == 'Hellfire':
                         rtnList.add('Hellfire')
-                        rtnList.add('Heat Damage')
                         rtnList.add('Anti Stealth')
                     elif effectName == 'Holographic Disguise':
                         rtnList.add('Holographic Disguise')
@@ -1828,7 +1827,6 @@ def GetEffectNameListForItem(item):
             if effectName:
                 if effectName == 'Hellfire':
                     rtnList.add('Hellfire')
-                    rtnList.add('Heat Damage')
                     rtnList.add('Anti Stealth')
                 elif effectName == 'Holographic Disguise':
                     rtnList.add('Holographic Disguise')
