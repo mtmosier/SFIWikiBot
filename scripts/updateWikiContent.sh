@@ -19,12 +19,16 @@ $PYTHON $DIR/updateWikiGalaxyContent.py
 echo `date` " - End galaxy data update" >> /home/app/app.log
 echo
 
+sleep 1m
+
 
 echo `date` " - Begin ship data update" >> /home/app/app.log
 echo Running updateWikiShipContent.py
 $PYTHON $DIR/updateWikiShipContent.py
 echo `date` " - End ship data update" >> /home/app/app.log
 echo
+
+sleep 1m
 
 
 echo `date` " - Begin item data update" >> /home/app/app.log

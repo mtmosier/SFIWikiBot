@@ -38,10 +38,13 @@ shipMassForDamageCalculation = config("botShipMassForDamageCalculation", default
 turnMultiplier = config("botTurnMultiplier", default=30, cast=float)
 
 pauseBetweenContentUpdateStepsInSec = config("botPauseBetweenContentUpdateStepsInSec", default=2, cast=float)
-pauseAfterSuccessfullyUpdatingWikiPageInSec = config("botPauseAfterSuccessfullyUpdatingWikiPageInSec", default=1.5, cast=float)
-pauseAfterFailingToUpdateWikiPageInSec = config("botPauseAfterFailingToUpdateWikiPageInSec", default=2, cast=float)
+pauseAfterSuccessfullyUpdatingWikiPageInSec = config("botPauseAfterSuccessfullyUpdatingWikiPageInSec", default=2, cast=float)
+pauseAfterFailingToUpdateWikiPageInSec = config("botPauseAfterFailingToUpdateWikiPageInSec", default=3, cast=float)
 pauseAfterSkippingWikiPageUpdateInSec = config("botPauseAfterSkippingWikiPageUpdateInSec", default=1, cast=float)
 
+# Heavy Bolt Bombard=?
+itemSourceOverrideDefault = 'Double Barrelled Heavy Bolt=Turret Only, Firework Pellet=Weapon Projectile, Cake Slice=Weapon Projectile'
+itemSourceOverride = dict(config('botItemSourceOverride', cast=Csv(cast=lambda s: tuple(s.split('='))), default=''))
 
 shieldEffectIconClassMappingDefault = 'Stealth - Andromedan=fas fa-low-vision, Gravity=fab fa-grav, Nuclear=fas fa-radiation, NPR Damage=fab fa-android, Beam Refracting=fas fa-slash, Cold Fusion=fas fa-snowflake, Deflector=, Effect Reduce=fas fa-angle-double-down, Electrostatic=fas fa-bolt, Energy Absorb=fas fa-charging-station, Explosive=fas fa-bomb, Frozen=fas fa-icicles, Heat Resist=fas fa-burn, Heat Weakness=fas fa-burn, Ghostly=fas fa-ghost, Laser=fas fa-asterisk, Overdose Resist=fas fa-wind, Photonic=fas fa-sun, Projectile=fas fa-ellipsis-h, Selective Effect Reduce=fas fa-angle-down, Stabiliser Fail=fas fa-fighter-jet fa-rotate-135, Mine Claimer=fas fa-hands, Mine Sweeper=fas fa-snowplow'
 shieldEffectIconClassMapping = dict(config('botShieldEffectIconClassMapping', cast=Csv(cast=lambda s: tuple(s.split('='))), default=shieldEffectIconClassMappingDefault))

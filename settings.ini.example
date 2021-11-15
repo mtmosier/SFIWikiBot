@@ -41,9 +41,11 @@ botBpLocationOverride = White Xandelevium Blaster=Sh-1-4, Quark Xandelevium Blas
 # botWeaponLifeOverride =
 #
 # botPauseBetweenContentUpdateStepsInSec = 2
-# botPauseAfterSuccessfullyUpdatingWikiPageInSec = 1.5
-# botPauseAfterFailingToUpdateWikiPageInSec = 2
+# botPauseAfterSuccessfullyUpdatingWikiPageInSec = 2
+# botPauseAfterFailingToUpdateWikiPageInSec = 3
 # botPauseAfterSkippingWikiPageUpdateInSec = 1
+#
+# botItemSourceOverride = Double Barrelled Heavy Bolt=Turret Only, Firework Pellet=Weapon Projectile, Cake Slice=Weapon Projectile
 #
 # botWikiImageAndPageListTtlSec = 900
 # botPublicDatabaseContentTtlSec = 25200

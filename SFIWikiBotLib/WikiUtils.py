@@ -1009,11 +1009,22 @@ def UpdateIndividualItemPageByItemRange(itemList, comment=None, allowRetry=True)
                 time.sleep(Config.pauseAfterFailingToUpdateWikiPageInSec)
 
                 if allowRetry:
-                    if Config.debug:  print("Retrying update: {} - {}".format(pageName, comment))
+                    if Config.debug or Config.verbose >= 1:  print("Retrying update: {} - {}".format(pageName, comment))
                     GetWikiClientSiteObject(True)
                     return UpdateIndividualItemPageByItemRange(itemList, comment, False)
 
                 if Config.debug or Config.verbose >= 1:  print("Failed to update: {} - {}".format(pageName, comment))
+                raise ex
+
+            except requests.exceptions.ReadTimeout as ex:
+                time.sleep(Config.pauseAfterFailingToUpdateWikiPageInSec)
+
+                if allowRetry:
+                    if Config.debug or Config.verbose >= 1:  print("Retrying update: {} - {}".format(pageName, comment))
+                    GetWikiClientSiteObject(True)
+                    return UpdateIndividualItemPageByItemRange(itemList, comment, False)
+
+                if Config.debug or Config.verbose >= 1:  print("Timed out trying to update: {} - {}".format(pageName, comment))
                 raise ex
         else:
             time.sleep(Config.pauseAfterSkippingWikiPageUpdateInSec)
@@ -1135,6 +1146,17 @@ def UpdateIndividualShipPage(ship, comment=None, allowRetry=True):
 
                 if Config.debug or Config.verbose >= 1:  print("Failed to update: {} - {}".format(pageName, comment))
                 raise ex
+
+            except requests.exceptions.ReadTimeout as ex:
+                time.sleep(Config.pauseAfterFailingToUpdateWikiPageInSec)
+
+                if allowRetry:
+                    if Config.debug:  print("Retrying update: {} - {}".format(pageName, comment))
+                    GetWikiClientSiteObject(True)
+                    return UpdateIndividualShipPage(ship, comment, False)
+
+                if Config.debug or Config.verbose >= 1:  print("Timed out trying to update: {} - {}".format(pageName, comment))
+                raise ex
         else:
             time.sleep(Config.pauseAfterSkippingWikiPageUpdateInSec)
 
@@ -1185,9 +1207,14 @@ def UpdateStarSystemPage(systemInfo, comment=None, allowRetry=True):
             if template['name'].lower().replace('_', ' ') == 'star system page':
 
                 curPlanetList = sorted([ v.strip('*[]').lower() for v in template['data']['Planet List Here'].strip().split('\n') ])
+                if curPlanetList[0] == 'none':
+                    curPlanetList = []
                 expectedPlanetList = sorted(GalaxyUtils.GetSystemPlanetList(systemInfo['prefix']))
                 if curPlanetList != [v.lower() for v in expectedPlanetList]:
-                    template['data']['Planet List Here'] = '*[[{}]]'.format(']]\n*[['.join(expectedPlanetList))
+                    if not expectedPlanetList:
+                        template['data']['Planet List Here'] = 'None'
+                    else:
+                        template['data']['Planet List Here'] = '*[[{}]]'.format(']]\n*[['.join(expectedPlanetList))
 
                     updatedTemplate = ConvertDictionaryToWikiTemplate('Star System Page', template['data'])
                     updatedTemplate = updatedTemplate.strip()
@@ -1212,6 +1239,16 @@ def UpdateStarSystemPage(systemInfo, comment=None, allowRetry=True):
                     GetWikiClientSiteObject(True)
                     return UpdateStarSystemPage(systemInfo, comment, False)
                 if Config.debug or Config.verbose >= 1:  print("Failed to update: {} - {}".format(pageName, comment))
+                raise ex
+
+            except requests.exceptions.ReadTimeout as ex:
+                time.sleep(Config.pauseAfterFailingToUpdateWikiPageInSec)
+
+                if allowRetry:
+                    if Config.debug:  print("Retrying update: {} - {}".format(pageName, comment))
+                    GetWikiClientSiteObject(True)
+                    return UpdateStarSystemPage(systemInfo, comment, False)
+                if Config.debug or Config.verbose >= 1:  print("Timed out trying to update: {} - {}".format(pageName, comment))
                 raise ex
         else:
             time.sleep(Config.pauseAfterSkippingWikiPageUpdateInSec)
@@ -1313,6 +1350,16 @@ def UpdateIndividualPlanetPage(planetName, comment=None, allowRetry=True):
 
                 if Config.debug or Config.verbose >= 1:  print("Failed to update: {} - {}".format(pageName, comment))
                 raise ex
+
+            except requests.exceptions.ReadTimeout as ex:
+                time.sleep(Config.pauseAfterFailingToUpdateWikiPageInSec)
+
+                if allowRetry:
+                    if Config.debug:  print("Retrying update: {} - {}".format(pageName, comment))
+                    GetWikiClientSiteObject(True)
+                    return UpdateIndividualPlanetPage(planetName, comment, False)
+                if Config.debug or Config.verbose >= 1:  print("Timed out trying to update: {} - {}".format(pageName, comment))
+                raise ex
         else:
             time.sleep(Config.pauseAfterSkippingWikiPageUpdateInSec)
 
@@ -1368,6 +1415,16 @@ def AddMissingPlanetWikiPage(planetName, comment=None, allowRetry=True):
                 return AddMissingPlanetWikiPage(planetName, comment, False)
 
             if Config.debug or Config.verbose >= 1:  print("Failed to add page: {} - {}".format(pageName, comment))
+            raise ex
+
+        except requests.exceptions.ReadTimeout as ex:
+            time.sleep(Config.pauseAfterFailingToUpdateWikiPageInSec)
+
+            if allowRetry:
+                if Config.debug:  print("Retrying page addition: {} - {}".format(pageName, comment))
+                GetWikiClientSiteObject(True)
+                return AddMissingPlanetWikiPage(planetName, comment, False)
+            if Config.debug or Config.verbose >= 1:  print("Timed out trying to add page: {} - {}".format(pageName, comment))
             raise ex
 
     return rtnVal
@@ -1826,6 +1883,17 @@ def UpdateLorePage(comment=None, allowRetry=True):
                     return UpdateLorePage(comment, False)
 
                 if Config.debug or Config.verbose >= 1:  print("Failed to update: Lore -", comment)
+                raise ex
+
+            except requests.exceptions.ReadTimeout as ex:
+                time.sleep(Config.pauseAfterFailingToUpdateWikiPageInSec)
+
+                if allowRetry:
+                    if Config.debug or Config.verbose >= 1:  print("Retrying update: Lore -", comment)
+                    GetWikiClientSiteObject(True)
+                    return UpdateLorePage(comment, False)
+
+                if Config.debug or Config.verbose >= 1:  print("Timed out trying to update: Lore -", comment)
                 raise ex
         else:
             time.sleep(Config.pauseAfterSkippingWikiPageUpdateInSec)
@@ -2313,6 +2381,15 @@ def FixShipPages(replacementList={}, comment=None, shipList=..., allowRetry=True
                         GetWikiClientSiteObject(True)
                         return FixShipPages(replacementList, comment, shipList, False, rtnVal)
                     if Config.debug or Config.verbose >= 1:  print("Failed to update: {} - {}".format(pageName, loopComment))
+                    raise ex
+
+                except requests.exceptions.ReadTimeout as ex:
+                    time.sleep(Config.pauseAfterFailingToUpdateWikiPageInSec)
+                    if allowRetry:
+                        if Config.debug:  print("Retrying update: {} - {}".format(pageName, loopComment))
+                        GetWikiClientSiteObject(True)
+                        return FixShipPages(replacementList, comment, shipList, False, rtnVal)
+                    if Config.debug or Config.verbose >= 1:  print("Timed out trying to update page: {} - {}".format(pageName, loopComment))
                     raise ex
             else:
                 rtnVal['pagesAlreadyUpToDate'].append(pageName)

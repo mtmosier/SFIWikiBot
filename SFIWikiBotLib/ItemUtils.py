@@ -818,12 +818,15 @@ def GetItemShieldEffect(item, includeEffectLevel=False):
 
 
 
-def IsItemHidden(item):
+def IsItemHidden(item, checkItemSource=True):
     with suppress(KeyError):
         if GetRaceForItem(item) in Config.unreleasedRaceList:
             return True
 
     if item['id'] in itemIdListToSkip:
+        return True
+
+    if checkItemSource and GetItemSource(item) == 'Unknown':
         return True
 
     return False
@@ -2009,8 +2012,15 @@ def GetItemDescription(item, useHtmlForLinks=False, performLinkReplacement=True)
 
 
 def GetItemSourceExtended(item, includeLink=False):
-    source = None
+    with suppress(AttributeError, KeyError):
+        return Config.itemSourceOverride[item['name']]
 
+    with suppress(AttributeError, KeyError):
+        nameObj = SplitNameIntoBaseNameAndItemLevel(item['name'])
+        itemName = nameObj['fullNameMinusLevel']
+        return Config.itemSourceOverride[itemName]
+
+    source = None
     if IsItemHidden(item):
         source = "Unavailable"
     elif 'seasonal' in item and item['seasonal']:
@@ -2047,6 +2057,14 @@ def GetItemSourceExtended(item, includeLink=False):
 
 
 def GetItemSource(item):
+    with suppress(AttributeError, KeyError):
+        return Config.itemSourceOverride[item['name']]
+
+    with suppress(AttributeError, KeyError):
+        nameObj = SplitNameIntoBaseNameAndItemLevel(item['name'])
+        itemName = nameObj['fullNameMinusLevel']
+        return Config.itemSourceOverride[itemName]
+
     source = "Unknown"
     if 'seasonal' in item and item['seasonal']:
         source = "Purchased (Seasonal)"
@@ -2079,6 +2097,10 @@ def GetItemSourceClassName(item):
         return 'nprExclusiveItem'
     elif source == "Ultra Rare":
         return 'nprUltraRareItem'
+    elif source == "Turret Only":
+        return 'aiOnlyItem'
+    elif source == "Weapon Projectile":
+        return 'weaponProjectiveItem'
     return None
 
 def GetItemSkillName(item):
