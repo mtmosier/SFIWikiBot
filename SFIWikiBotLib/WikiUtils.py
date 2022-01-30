@@ -1883,7 +1883,7 @@ def UpdateLorePage(comment=None, allowRetry=True):
                     return UpdateLorePage(comment, False)
 
                 if Config.debug or Config.verbose >= 1:  print("Failed to update: Lore -", comment)
-                raise ex
+                return False
 
             except requests.exceptions.ReadTimeout as ex:
                 time.sleep(Config.pauseAfterFailingToUpdateWikiPageInSec)
@@ -1894,7 +1894,7 @@ def UpdateLorePage(comment=None, allowRetry=True):
                     return UpdateLorePage(comment, False)
 
                 if Config.debug or Config.verbose >= 1:  print("Timed out trying to update: Lore -", comment)
-                raise ex
+                return False
         else:
             time.sleep(Config.pauseAfterSkippingWikiPageUpdateInSec)
 
@@ -2143,7 +2143,7 @@ def UploadImageListToWiki(imageList):
     return True
 
 
-def UploadImageToWiki(path, name, desc='', allowOverwrite=True):
+def UploadImageToWiki(path, name, desc='', allowOverwrite=True, allowRetry=True):
     rtnVal = False
     site = GetWikiClientSiteObject()
 
@@ -2164,8 +2164,11 @@ def UploadImageToWiki(path, name, desc='', allowOverwrite=True):
             if result['result'].lower() == 'warning' and ('exists' in result['warnings'] or 'duplicate' in result['warnings'] or 'was-deleted' in result['warnings']):
                 if 'nochange' not in result['warnings']:
                     retryUploadReq = True
-        except:
-            raise
+        except requests.exceptions.ReadTimeout as ex:
+            if allowRetry:
+                return UploadImageToWiki(path, name, desc, allowOverwrite, False)
+            print("Failed to upload image {}".format(name))
+            return False
 
         if allowOverwrite and retryUploadReq:
             time.sleep(Config.pauseAfterFailingToUpdateWikiPageInSec)
@@ -2409,10 +2412,14 @@ def GetWikiClientSiteObject(forceLogin=False):
 
     if not wikiClientSite:
         forceLogin=True
-        wikiClientSite = mwclient.Site( 'starfighter-infinity.fandom.com', path='/', scheme='https' )
 
     if forceLogin and Config.botUsername and Config.botPassword:
-        wikiClientSite.login(Config.botUsername, Config.botPassword)
+        try:
+            wikiClientSite = mwclient.Site( 'starfighter-infinity.fandom.com', path='/', scheme='https' )
+            wikiClientSite.login(Config.botUsername, Config.botPassword)
+        except mwclient.errors.LoginError as ex:
+            print("Failed to log in:", str(ex))
+            exit()
 
     return wikiClientSite
 
