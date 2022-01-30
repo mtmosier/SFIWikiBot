@@ -2025,7 +2025,7 @@ def GetItemSourceExtended(item, includeLink=False):
         source = "Unavailable"
     elif 'seasonal' in item and item['seasonal']:
         source = "Purchased ([[:Category:Seasonal_Items|Seasonal]])"
-    elif 'buyable' in item and item['buyable']:
+    elif 'buyable' in item and item['buyable'] and ('uniqueToShipID' not in item or not item['uniqueToShipID']):
         source = "Purchased"
     elif 'race' in item and item['race'] <= 1 and item['name'] != 'Micro Gate TBZ' and GetItemBPLocation(item):
         source = "Crafted"
@@ -2068,7 +2068,7 @@ def GetItemSource(item):
     source = "Unknown"
     if 'seasonal' in item and item['seasonal']:
         source = "Purchased (Seasonal)"
-    elif 'buyable' in item and item['buyable']:
+    elif 'buyable' in item and item['buyable'] and ('uniqueToShipID' not in item or not item['uniqueToShipID']):
         source = "Purchased"
     elif 'race' in item and item['race'] <= 1 and item['name'] != 'Micro Gate TBZ' and (GetItemBPLocation(item)):
         source = "Crafted"
