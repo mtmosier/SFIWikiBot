@@ -3410,10 +3410,22 @@ def PrepareItemDataPrimaryList():
     itemData = [ v for k,v in itemDataDict.items() ]
 
 
+def ApplyCraftingDataWorkarounds():
+    item = GetItemById('pcdv1')  # Double Positronic Convergence Disc
+    craftingData = GetCraftingDataForItem(item)
+    if craftingData is None:
+        loc = GetItemBPLocation(item)
+        ingredients = []
+        ingredients.append({ "name": "300 x Yttrium", "mineralID": "Yt", "quantityRequired": 300.0 })
+        ingredients.append({ "name": "500 x Silicon", "mineralID": "Si", "quantityRequired": 500.0 })
+        ingredients.append({ "name": "50 x Gold", "mineralID": "Au", "quantityRequired": 50.0 })
+        itemCraftableData['Double_Positronic_Convergence_Disc_(Unlocked_0)'] = {'name': 'Double Positronic Convergence Disc (Unlocked 0)', 'levels': 1, 'locations': [loc], 'ingredients': ingredients, 'items': ['pcdv1'], '__dataSource': 'override'}
+
 def Initialize():
     global itemIdListToSkip, beamWeaponOverrideIdList, rarePlayerRaceDropIdList
     LoadItemInformation()
     PrepareItemDataPrimaryList()
+    ApplyCraftingDataWorkarounds()
 
     beamWeaponOverrideIdList = [ GetItemByName(n)['id'] for n in beamWeaponOverrideList ]
     rarePlayerRaceDropIdList = [ GetItemByName(n)['id'] for n in rarePlayerRaceDropList ]
