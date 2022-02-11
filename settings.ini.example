@@ -10,6 +10,8 @@ botPassword =
 botUnreleasedShipList = Forkworm Abomination, Face of Space
 botBpLocationOverride = White Xandelevium Blaster=Sh-1-4, Quark Xandelevium Blaster=Obtain Green Xand, Quark Xandelevium Heat Disc=Obtain Green Xand
 #
+# botPrimusUnleashed = False
+#
 # botUnreleasedRaceList = Auto
 # botUnreleasedSystemList = Auto
 # botUnreleasedShipList =

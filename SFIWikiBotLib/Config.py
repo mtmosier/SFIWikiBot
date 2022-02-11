@@ -55,6 +55,8 @@ damageTypeIconClassMapping = dict(config('botDamageTypeIconClassMapping', cast=C
 
 effectIconClassMapping = dict(config('botEffectIconClassMapping', cast=Csv(cast=lambda s: tuple(s.split('='))), default=''))
 
+primusUnleashed = config('botPrimusUnleashed', default=False, cast=bool)
+
 unreleasedShipList = config('botUnreleasedShipList', cast=Csv(), default='')
 unreleasedSystemList = config('botUnreleasedSystemList', cast=Csv(), default='Auto')
 unreleasedSystemListIsDynamic = False

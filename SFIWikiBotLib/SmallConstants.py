@@ -233,6 +233,9 @@ def Initialize():
         unreleasedRaceList = []
         for raceInfo in raceData:
             if raceInfo['race'] > 1:
+                if Config.primusUnleashed and raceInfo['name'] == 'Enlightened':
+                    continue
+
                 raceSpawnFound = False
                 with suppress(IndexError):
                     raceOrgId = GetOrgInfoListByRaceId(raceInfo['race'])[0]['id']
