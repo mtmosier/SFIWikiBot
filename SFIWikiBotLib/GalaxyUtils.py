@@ -255,6 +255,16 @@ def GetSpawnInformationForRace(raceId):
     return { 'spawnList': spawnList, 'locationList': locList }
 
 
+def GetStorbitalLocationList():
+    storbitalLocationList = []
+    for sysInfo in galaxyData.values():
+        for sectRowInfo in sysInfo['sectors']:
+            for sectInfo in sectRowInfo['columns']:
+                if sectInfo['type'] == 23:
+                    storbitalLocationList.append(sectInfo['name'])
+    return storbitalLocationList
+
+
 def GetPlanetImageUrl(planetName):
     return 'https://benoldinggames.co.uk/sfi/files/planets/planets/{}.png'.format(planetName)
 
