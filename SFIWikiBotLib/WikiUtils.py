@@ -1431,6 +1431,126 @@ def AddMissingPlanetWikiPage(planetName, comment=None, allowRetry=True):
 
 
 
+def UpdateSwapShopPages(comment=None):
+    UpdateSwapShopModuleInfo(comment)
+    AddMissingSwapShopNPRPages(comment)
+
+
+def UpdateSwapShopModuleInfo(comment=None, allowRetry=True):
+    from SFIWikiBotLib import ItemUtils
+    rtnVal = False
+
+    raceEquipmentListLua = ""
+    raceEquipmentListLua += "local raceEquipmentList = {\n"
+    for raceInfo in SmallConstants.raceData:
+        if raceInfo['race'] > 1 and raceInfo['name'] not in Config.unreleasedRaceList:
+            raceEquipmentListLua += "  ['" + raceInfo['name'] + "'] = {\n"
+            nprItemList = [ v for v in ItemUtils.GetItemsByRaceName(raceInfo['name']) if not ItemUtils.IsItemNprExclusive(v) ]
+            for v in nprItemList:
+                raceEquipmentListLua += "    {\n"
+                raceEquipmentListLua += "      [\"name\"] = '" + v['name'] + "',\n"
+                raceEquipmentListLua += "      [\"price\"] = '" + str(v['price']) + "',\n"
+                image = ItemUtils.GetItemWikiImage(v)
+                if image:
+                    raceEquipmentListLua += "      [\"image\"] = '[[File:" + image + "|left|thumb|55x55px]]',\n"
+                raceEquipmentListLua += "    },\n"
+            raceEquipmentListLua += "  },\n"
+
+    raceEquipmentListLua += "}\n"
+
+    pageName = 'Module:NPR_Item_Swap'
+    site = GetWikiClientSiteObject()
+    page = site.pages[pageName]
+    if page.exists:
+        content = page.text()
+        newContent = content
+
+        try:
+            regexStr = '.*?(' + re.escape('local raceEquipmentList = {') + '.*?\n}\n)'
+            m = re.match(regexStr, content, re.S)
+            currentEquipmentList = m.group(1)
+            newContent = content.replace(currentEquipmentList.strip(), raceEquipmentListLua.strip())
+        except:
+            pass
+
+        if newContent and newContent != content:
+            try:
+                if not comment:
+                    comment = "Updating Equipment Details"
+
+                page.edit(newContent, comment)
+                if Config.verbose >= 1:  print("Module Updated: {} - {}".format(pageName, comment))
+                rtnVal = True
+                time.sleep(Config.pauseAfterSuccessfullyUpdatingWikiPageInSec)
+
+            except (mwclient.errors.AssertUserFailedError, requests.exceptions.ReadTimeout) as ex:
+                time.sleep(Config.pauseAfterFailingToUpdateWikiPageInSec)
+                if allowRetry:
+                    if Config.debug:  print("Retrying update: {} - {}".format(pageName, comment))
+                    GetWikiClientSiteObject(True)
+                    return UpdateSwapShopModuleInfo(comment, False)
+                if Config.debug or Config.verbose >= 1:  print("Timed out trying to update: {} - {}".format(pageName, comment))
+                raise ex
+        else:
+            if Config.debug or Config.verbose >= 1:  print("No update needed for {}".format(pageName))
+            time.sleep(Config.pauseAfterSkippingWikiPageUpdateInSec)
+            rtnVal = True
+
+    return rtnVal
+
+
+
+def AddMissingSwapShopNPRPages(comment=None, allowRetry=True):
+    rtnVal = {
+        'pagesAdded': [],
+        'pagesAlreadyUpToDate': [],
+        'pagesFailedToAdd': [],
+    }
+
+    site = GetWikiClientSiteObject()
+    for raceInfo in SmallConstants.raceData:
+        if raceInfo['race'] > 1 and raceInfo['name'] not in Config.unreleasedRaceList:
+            pageName = "SwapShop" + raceInfo['name'].replace(' ', '')
+            page = site.pages[pageName]
+            if not page.exists:
+                comment = "Creating race swap shop page"
+                content = "{{#invoke:NPR Item Swap|GetItemSwapWikiTextForRace|" + raceInfo['name'] + "}}"
+                content = content + """
+{{CURRENTYEAR}}-{{CURRENTMONTH}}-{{CURRENTDAY2}} {{CURRENTTIME}} UTC
+
+__NOTOC__
+__NOEDITSECTION__
+__NOINDEX__
+__NONEWSECTIONLINK__
+""".format(planetTemplate, planetImageInfo)
+
+                try:
+                    if not comment:
+                        comment = "Adding {} Swap Shop page {}".format(raceInfo['name'], pageName)
+                    page.edit(content, comment)
+                    if Config.verbose >= 1:  print("Page added: {} - {}".format(pageName, comment))
+                    rtnVal['pagesAdded'].append(pageName)
+                    time.sleep(Config.pauseAfterSuccessfullyUpdatingWikiPageInSec)
+
+                except (mwclient.errors.AssertUserFailedError, requests.exceptions.ReadTimeout) as ex:
+                    time.sleep(Config.pauseAfterFailingToUpdateWikiPageInSec)
+
+                    if allowRetry:
+                        if Config.debug:  print("Retrying page addition: {} - {}".format(pageName, comment))
+                        GetWikiClientSiteObject(True)
+                        return AddMissingSwapShopNPRPages(comment, False)
+
+                    if Config.debug or Config.verbose >= 1:  print("Failed to add page: {} - {}".format(pageName, comment))
+                    rtnVal['pagesFailedToAdd'].append(pageName)
+                    raise ex
+            else:
+                rtnVal['pagesAlreadyUpToDate'].append(pageName)
+
+    return rtnVal
+
+
+
+
 def FollowWikiPageRedirect(pageName):
     pass
 

@@ -139,6 +139,13 @@ def FindItemsByPartialName(name, objList=...):
     return sorted(GeneralUtils.SearchObjectListUsingRuleset(objList, ruleSet), key=GetItemSortFunc())
 
 
+def GetItemsByRaceName(name, objList=...):
+    if objList is ...:
+        objList = itemData
+    ruleSet = { "condition": "OR", "rules": [ { "id": "ItemUtils.GetRaceForItem", "operator": "equal", "value": name } ] }
+    return GeneralUtils.SearchObjectListUsingRuleset(objList, ruleSet)
+
+
 def DownloadMissingImagesForTheWikiByItemList(itemList):
     rtnVal = 0
     for item in itemList:

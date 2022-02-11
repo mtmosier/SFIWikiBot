@@ -55,6 +55,10 @@ print('** Updating NPR pages', datetime.now(tz).strftime("%I:%M %p").lstrip('0')
 res = WikiUtils.UpdateWikiNPRPages(comment)
 time.sleep(Config.pauseBetweenContentUpdateStepsInSec)
 
+print('** Updating Swap Shop pages', datetime.now(tz).strftime("%I:%M %p").lstrip('0'))
+res = WikiUtils.UpdateSwapShopPages(comment)
+time.sleep(Config.pauseBetweenContentUpdateStepsInSec)
+
 print('** Updating item pages', datetime.now(tz).strftime("%I:%M %p").lstrip('0'))
 res = WikiUtils.UpdateIndividualPagesForAllItems(comment)
 
