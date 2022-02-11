@@ -1329,7 +1329,7 @@ def GetRaceForItem(item):
 
 
 def GetItemDamageType(item):
-    with suppress(KeyError):
+    with suppress(KeyError, IndexError):
         return GeneralUtils.CamelCaseToTitleCase(SmallConstants.damageTypeLookup[item['damageType']])
 
 
@@ -1362,7 +1362,7 @@ def GetShieldEffectIconsForItem(item, type="both"):
 
 def GetDamageTypeIconForItem(item):
     damageType = GetItemDamageType(item)
-    with suppress(KeyError):
+    with suppress(KeyError, AttributeError):
         className = Config.damageTypeIconClassMapping[damageType.title().replace(' ', '')]
         if className[:6].lower() == '[html]':
             iconHtml = className[6:]
