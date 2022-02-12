@@ -1549,6 +1549,88 @@ __NONEWSECTIONLINK__
     return rtnVal
 
 
+def UpdateEngineRequirementsModuleInfo(commentOverride=None, allowRetry=True):
+    raceIdsUsingUseOrgNameList = [ 5 ]
+    rtnVal = False
+    comment = commentOverride
+
+    engineRaceList = OrderedDict()
+    for orgInfo in SmallConstants.orgData:
+        if orgInfo['race'] > 1:
+            raceInfo = SmallConstants.GetNprInfoById(orgInfo['race'])
+            if raceInfo['allowInChaosEngine'] and raceInfo['name'] not in Config.unreleasedRaceList:
+                raceName = raceInfo['name']
+                if raceInfo['race'] in raceIdsUsingUseOrgNameList:
+                    raceName = orgInfo['name']
+                engineRaceList[raceName] = GeneralUtils.NumDisplay(orgInfo['engineBossPrice'], 0, True)
+
+    raceListLua = 'local raceList = {\n'
+    for raceName, cost in engineRaceList.items():
+        raceListLua += "\t'{}',\n".format(raceName)
+    raceListLua += '}\n'
+
+    raceCreditCostLookupLua = 'local creditCostLookup = {\n'
+    for raceName, cost in sorted(engineRaceList.items()):
+        raceCreditCostLookupLua += "\t['{}'] = '{}',\n".format(raceName, cost)
+    raceCreditCostLookupLua += '}\n'
+
+
+    pageName = 'Module:NPR_Engine_Requirements'
+    site = GetWikiClientSiteObject()
+    page = site.pages[pageName]
+    if page.exists:
+        content = page.text()
+        newContent = content
+
+        try:
+            regexStr = '.*?(' + re.escape('local raceList = {') + '.*?\n}\n)'
+            m = re.match(regexStr, newContent, re.S)
+            currentRaceList = m.group(1)
+            if currentRaceList.strip() != raceListLua.strip():
+                newContent = newContent.replace(currentRaceList.strip(), raceListLua.strip())
+                if not commentOverride:
+                    comment = "Updating Race List"
+        except:
+            pass
+
+        try:
+            regexStr = '.*?(' + re.escape('local creditCostLookup = {') + '.*?\n}\n)'
+            m = re.match(regexStr, newContent, re.S)
+            currentRaceCreditCostLookup = m.group(1)
+            if currentRaceCreditCostLookup.strip() != raceCreditCostLookupLua.strip():
+                newContent = newContent.replace(currentRaceCreditCostLookup.strip(), raceCreditCostLookupLua.strip())
+                if not commentOverride:
+                    if comment:
+                        comment += ', '
+                    else:
+                        comment = ''
+                    comment += "Updating Race Cost Lookup"
+        except:
+            pass
+
+        if newContent and newContent != content:
+            try:
+                page.edit(newContent, comment)
+                if Config.verbose >= 1:  print("Module Updated: {} - {}".format(pageName, comment))
+                rtnVal = True
+                time.sleep(Config.pauseAfterSuccessfullyUpdatingWikiPageInSec)
+
+            except (mwclient.errors.AssertUserFailedError, requests.exceptions.ReadTimeout) as ex:
+                time.sleep(Config.pauseAfterFailingToUpdateWikiPageInSec)
+                if allowRetry:
+                    if Config.debug:  print("Retrying update: {} - {}".format(pageName, comment))
+                    GetWikiClientSiteObject(True)
+                    return UpdateEngineRequirementsModuleInfo(commentOverride, False)
+                if Config.debug or Config.verbose >= 1:  print("Timed out trying to update: {} - {}".format(pageName, comment))
+                raise ex
+        else:
+            if Config.debug or Config.verbose >= 1:  print("No update needed for {}".format(pageName))
+            time.sleep(Config.pauseAfterSkippingWikiPageUpdateInSec)
+            rtnVal = True
+
+    return rtnVal
+
+
 
 
 def FollowWikiPageRedirect(pageName):
