@@ -1522,7 +1522,7 @@ __NOTOC__
 __NOEDITSECTION__
 __NOINDEX__
 __NONEWSECTIONLINK__
-""".format(planetTemplate, planetImageInfo)
+"""
 
                 try:
                     if not comment:
