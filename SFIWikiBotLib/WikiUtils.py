@@ -1870,13 +1870,14 @@ def GetLoreblurbTemplateDataForObject(objectInfo, pullDescriptonFromWikiIfEmpty=
 
     if pullDescriptonFromWikiIfEmpty and not data['loreText']:
         content = GetWikiPageContent(data['loreSubjectLinkName'])
-        templateList = GetTemplateListFromWikiPageContent(content)
-        for templateInfo in templateList:
-            if templateInfo['name'] == 'Object' and templateInfo['data']['Object Name'].lower() == data['loreSubjectName'].lower():
-                loreText = GeneralUtils.RemoveWikiLinksFromText(templateInfo['data']['Description'])
-                testText = GeneralUtils.StripTags(loreText.lower()).strip()
-                if loreText and testText != 'none' and testText != 'no description':
-                    data['loreText'] = loreText
+        if content:
+            templateList = GetTemplateListFromWikiPageContent(content)
+            for templateInfo in templateList:
+                if templateInfo['name'] == 'Object' and templateInfo['data']['Object Name'].lower() == data['loreSubjectName'].lower():
+                    loreText = GeneralUtils.RemoveWikiLinksFromText(templateInfo['data']['Description'])
+                    testText = GeneralUtils.StripTags(loreText.lower()).strip()
+                    if loreText and testText != 'none' and testText != 'no description':
+                        data['loreText'] = loreText
 
     data['loreText'] = GeneralUtils.AddWikiLinksToText(GeneralUtils.CleanupImportedText(data['loreText']))
     return data
