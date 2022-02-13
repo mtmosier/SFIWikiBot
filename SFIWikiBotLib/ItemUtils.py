@@ -969,6 +969,13 @@ def SplitNameIntoBaseNameAndItemLevel(input):
     parts = input.split(' ')
     name = input
 
+    if 'Micro Gate' in name:
+        # Micro Gates are never leveled
+        levelList1 = []
+        levelList2 = []
+        levelList3 = []
+        postfixList = []
+
     postfixDisplay = parts[-1].upper().rstrip('S')
     postfix = None
     if postfixDisplay in postfixList and len(parts) > 1:
