@@ -864,6 +864,7 @@ def GetFilterListForShipFinder(params):
             'Boss Ship',
             'Turret',
             'Special Non-Player Ship',
+            'Megaboss',
         ],
         'operators': [ 'equal', 'not_equal' ],
     })

@@ -24,7 +24,7 @@ shipAccelMult = 80;
 # shipPurchasePriceModifier = 1.17645
 shipPurchasePriceModifier = 1 / 0.85
 
-shipTypeLookup = [ 'Small Ship', 'Turret', 'Drone', 'Boss Ship', 'Escape Pod', 'CC / Elite Ship', 'Capital Ship', 'Dogfighter', 'Warship', 'Mining Ship', 'Special Non-Player Ship', '', 'Converted Drone' ]
+shipTypeLookup = [ 'Small Ship', 'Turret', 'Drone', 'Boss Ship', 'Escape Pod', 'CC / Elite Ship', 'Capital Ship', 'Dogfighter', 'Warship', 'Mining Ship', 'Special Non-Player Ship', 'Megaboss', 'Converted Drone' ]
 
 
 shipData = None
@@ -502,7 +502,7 @@ def NormalizeShipName(name):
 def ShipCanBeBoughtByPlayers(ship):
     return ship['race'] <= 1 \
             and (ship['buyable'] or 'Pod' in ship['name']) \
-            and (GetTypeForShip(ship) not in ['Drone', 'Turret', 'Special Non-Player Ship']) \
+            and (GetTypeForShip(ship) not in ['Drone', 'Turret', 'Special Non-Player Ship', 'Megaboss']) \
             and not IsShipHidden(ship)
 
 
