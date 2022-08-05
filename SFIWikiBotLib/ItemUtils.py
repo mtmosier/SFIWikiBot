@@ -1432,7 +1432,7 @@ def GetShieldStatusEffectList(item):
             elif effectName == 'Dark':
                 rtnList['positiveEffects'].add('Gravity')
                 rtnList['positiveEffects'].add('Cold Fusion')
-            else:
+            elif effectName:
                 rtnList['positiveEffects'].add(effectName)
 
         with suppress(KeyError):
