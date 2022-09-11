@@ -186,14 +186,14 @@ def GetRenderedNprPageShipList(race):
 def GetRenderedNprPageItemList(race, nprExclusiveItemList=False):
     if not nprExclusiveItemList:
         if race == 'Ghost':
-            itemPs = {'tableColumnList': [], 'ruleSet': {'condition': 'AND', 'rules': [{'field': 'ItemUtils.IsItemHidden', 'type': 'boolean', 'input': 'radio', 'id': 'ItemUtils.IsItemHidden', 'value': False, 'operator': 'equal'}, {'field': 'ItemUtils.IsItemNprExclusive', 'type': 'boolean', 'input': 'radio', 'id': 'ItemUtils.IsItemNprExclusive', 'value': False, 'operator': 'equal'}, {'condition': 'OR', 'rules': [{'field': 'ItemUtils.GetRaceForItem', 'type': 'string', 'input': 'select', 'id': 'ItemUtils.GetRaceForItem', 'value': 'Human Ghost', 'operator': 'equal'}, {'field': 'ItemUtils.GetRaceForItem', 'type': 'string', 'input': 'select', 'id': 'ItemUtils.GetRaceForItem', 'value': 'Aralien Ghost', 'operator': 'equal'}]}], 'valid': True}, 'tableCaption': '', 'name': 'NPR Items', 'tableHeader': '', 'pageType': 'npr', 'useCustomTableOptions': 0, 'tableClassNames': ''}
+            itemPs = {'tableColumnList': [], 'ruleSet': {'condition': 'AND', 'rules': [{'field': 'ItemUtils.IsItemHidden', 'type': 'boolean', 'input': 'radio', 'id': 'ItemUtils.IsItemHidden', 'value': False, 'operator': 'equal'}, {'field': 'ItemUtils.IsItemNprExclusive', 'type': 'boolean', 'input': 'radio', 'id': 'ItemUtils.IsItemNprExclusive', 'value': False, 'operator': 'equal'}, {'field': 'ItemUtils.IsItemShipExclusive', 'type': 'boolean', 'input': 'radio', 'id': 'ItemUtils.IsItemShipExclusive', 'value': False, 'operator': 'equal'}, {'condition': 'OR', 'rules': [{'field': 'ItemUtils.GetRaceForItem', 'type': 'string', 'input': 'select', 'id': 'ItemUtils.GetRaceForItem', 'value': 'Human Ghost', 'operator': 'equal'}, {'field': 'ItemUtils.GetRaceForItem', 'type': 'string', 'input': 'select', 'id': 'ItemUtils.GetRaceForItem', 'value': 'Aralien Ghost', 'operator': 'equal'}]}], 'valid': True}, 'tableCaption': '', 'name': 'NPR Items', 'tableHeader': '', 'pageType': 'npr', 'useCustomTableOptions': 0, 'tableClassNames': ''}
         else:
-            itemPs = {'tableColumnList': [], 'ruleSet': {'condition': 'AND', 'rules': [{'field': 'ItemUtils.IsItemHidden', 'type': 'boolean', 'input': 'radio', 'id': 'ItemUtils.IsItemHidden', 'value': False, 'operator': 'equal'}, {'field': 'ItemUtils.IsItemNprExclusive', 'type': 'boolean', 'input': 'radio', 'id': 'ItemUtils.IsItemNprExclusive', 'value': False, 'operator': 'equal'}, {'field': 'ItemUtils.GetRaceForItem', 'type': 'string', 'input': 'select', 'id': 'ItemUtils.GetRaceForItem', 'value': race, 'operator': 'equal'}], 'valid': True}, 'tableCaption': '', 'name': 'NPR Items', 'tableHeader': '', 'pageType': 'npr', 'useCustomTableOptions': 0, 'tableClassNames': ''}
+            itemPs = {'tableColumnList': [], 'ruleSet': {'condition': 'AND', 'rules': [{'field': 'ItemUtils.IsItemHidden', 'type': 'boolean', 'input': 'radio', 'id': 'ItemUtils.IsItemHidden', 'value': False, 'operator': 'equal'}, {'field': 'ItemUtils.IsItemNprExclusive', 'type': 'boolean', 'input': 'radio', 'id': 'ItemUtils.IsItemNprExclusive', 'value': False, 'operator': 'equal'}, {'field': 'ItemUtils.IsItemShipExclusive', 'type': 'boolean', 'input': 'radio', 'id': 'ItemUtils.IsItemShipExclusive', 'value': False, 'operator': 'equal'}, {'field': 'ItemUtils.GetRaceForItem', 'type': 'string', 'input': 'select', 'id': 'ItemUtils.GetRaceForItem', 'value': race, 'operator': 'equal'}], 'valid': True}, 'tableCaption': '', 'name': 'NPR Items', 'tableHeader': '', 'pageType': 'npr', 'useCustomTableOptions': 0, 'tableClassNames': ''}
     else:
         if race == 'Ghost':
-            itemPs = {'tableColumnList': [], 'ruleSet': {'condition': 'AND', 'rules': [{'field': 'ItemUtils.IsItemNprExclusive', 'type': 'boolean', 'input': 'radio', 'id': 'ItemUtils.IsItemNprExclusive', 'value': True, 'operator': 'equal'}, {'condition': 'OR', 'rules': [{'field': 'ItemUtils.GetRaceForItem', 'type': 'string', 'input': 'select', 'id': 'ItemUtils.GetRaceForItem', 'value': 'Human Ghost', 'operator': 'equal'}, {'field': 'ItemUtils.GetRaceForItem', 'type': 'string', 'input': 'select', 'id': 'ItemUtils.GetRaceForItem', 'value': 'Aralien Ghost', 'operator': 'equal'}]}], 'valid': True}, 'tableCaption': '', 'name': 'NPR Items', 'tableHeader': '', 'pageType': 'npr', 'useCustomTableOptions': 0, 'tableClassNames': ''}
+            itemPs = {'tableColumnList': [], 'ruleSet': {'condition': 'AND', 'rules': [{'field': 'ItemUtils.IsItemNprExclusive', 'type': 'boolean', 'input': 'radio', 'id': 'ItemUtils.IsItemNprExclusive', 'value': True, 'operator': 'equal'}, {'field': 'ItemUtils.IsItemShipExclusive', 'type': 'boolean', 'input': 'radio', 'id': 'ItemUtils.IsItemShipExclusive', 'value': False, 'operator': 'equal'}, {'condition': 'OR', 'rules': [{'field': 'ItemUtils.GetRaceForItem', 'type': 'string', 'input': 'select', 'id': 'ItemUtils.GetRaceForItem', 'value': 'Human Ghost', 'operator': 'equal'}, {'field': 'ItemUtils.GetRaceForItem', 'type': 'string', 'input': 'select', 'id': 'ItemUtils.GetRaceForItem', 'value': 'Aralien Ghost', 'operator': 'equal'}]}], 'valid': True}, 'tableCaption': '', 'name': 'NPR Items', 'tableHeader': '', 'pageType': 'npr', 'useCustomTableOptions': 0, 'tableClassNames': ''}
         else:
-            itemPs = {'tableColumnList': [], 'ruleSet': {'condition': 'AND', 'rules': [{'field': 'ItemUtils.IsItemNprExclusive', 'type': 'boolean', 'input': 'radio', 'id': 'ItemUtils.IsItemNprExclusive', 'value': True, 'operator': 'equal'}, {'field': 'ItemUtils.GetRaceForItem', 'type': 'string', 'input': 'select', 'id': 'ItemUtils.GetRaceForItem', 'value': race, 'operator': 'equal'}], 'valid': True}, 'tableCaption': '', 'name': 'NPR Items', 'tableHeader': '', 'pageType': 'npr', 'useCustomTableOptions': 0, 'tableClassNames': ''}
+            itemPs = {'tableColumnList': [], 'ruleSet': {'condition': 'AND', 'rules': [{'field': 'ItemUtils.IsItemNprExclusive', 'type': 'boolean', 'input': 'radio', 'id': 'ItemUtils.IsItemNprExclusive', 'value': True, 'operator': 'equal'}, {'field': 'ItemUtils.IsItemShipExclusive', 'type': 'boolean', 'input': 'radio', 'id': 'ItemUtils.IsItemShipExclusive', 'value': False, 'operator': 'equal'}, {'field': 'ItemUtils.GetRaceForItem', 'type': 'string', 'input': 'select', 'id': 'ItemUtils.GetRaceForItem', 'value': race, 'operator': 'equal'}], 'valid': True}, 'tableCaption': '', 'name': 'NPR Items', 'tableHeader': '', 'pageType': 'npr', 'useCustomTableOptions': 0, 'tableClassNames': ''}
 
     includeHtml = False
     includeResultObjList = False
@@ -625,7 +625,7 @@ def UpdateWikiEquipmentPagesForPresetList(presetList, comment=None):
             rtnVal['pagesNotFound'].append(pageName)
             if Config.debug:  print("Page not found {}".format(pageName))
 
-        time.sleep(2.5)  # We're not in a hurry.  Don't overwhelm the wiki
+        time.sleep(Config.pauseBetweenContentUpdateStepsInSec)  # We're not in a hurry.  Don't overwhelm the wiki
 
     return rtnVal
 
@@ -1443,9 +1443,9 @@ def UpdateSwapShopModuleInfo(comment=None, allowRetry=True):
     raceEquipmentListLua = ""
     raceEquipmentListLua += "local raceEquipmentList = {\n"
     for raceInfo in SmallConstants.raceData:
-        if raceInfo['race'] > 1 and raceInfo['name'] not in Config.unreleasedRaceList:
+        if raceInfo['race'] > 1 and raceInfo['name'] not in Config.unreleasedRaceList and not raceInfo['name'] == 'Meteor Burger':
             raceEquipmentListLua += "  ['" + raceInfo['name'] + "'] = {\n"
-            nprItemList = [ v for v in ItemUtils.GetItemsByRaceName(raceInfo['name']) if not ItemUtils.IsItemNprExclusive(v) ]
+            nprItemList = [ v for v in ItemUtils.GetItemsByRaceName(raceInfo['name']) if not ItemUtils.IsItemNprExclusive(v) and not ItemUtils.IsItemHidden(v) ]
             for v in nprItemList:
                 raceEquipmentListLua += "    {\n"
                 raceEquipmentListLua += "      [\"name\"] = '" + v['name'] + "',\n"
@@ -1509,7 +1509,7 @@ def AddMissingSwapShopNPRPages(comment=None, allowRetry=True):
 
     site = GetWikiClientSiteObject()
     for raceInfo in SmallConstants.raceData:
-        if raceInfo['race'] > 1 and raceInfo['name'] not in Config.unreleasedRaceList:
+        if raceInfo['race'] > 1 and raceInfo['name'] not in Config.unreleasedRaceList and not raceInfo['name'] == 'Meteor Burger':
             pageName = "SwapShop" + raceInfo['name'].replace(' ', '')
             page = site.pages[pageName]
             if not page.exists:

@@ -118,6 +118,13 @@ def GetNprIdFromName(name):
         return "ghost"
 
 
+def GetFullOrgNameList():
+    list = {}
+    for race in raceData:
+        list[race['race']] = race['name']
+    return list
+
+
 def GetFullShipManagedCategoryList():
     from SFIWikiBotLib import WikiUtils
 
@@ -232,7 +239,7 @@ def Initialize():
 
         unreleasedRaceList = []
         for raceInfo in raceData:
-            if raceInfo['race'] > 1:
+            if raceInfo['race'] > 1 and not raceInfo['name'] == 'Meteor Burger':
                 if Config.primusUnleashed and raceInfo['name'] == 'Enlightened':
                     continue
 

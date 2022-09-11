@@ -317,9 +317,17 @@ def GetShipPageContent(ship):
             introSection = "{}s are stationary defence platforms which are equipped with a variety of weapons.".format(ship['name'])
         elif nameCmp == 'shawker':
             introSection = "Shawkers are the ultimate combination of [[Shredder]] and [[Hawk]], brought to you by the friendly souls at the [[Freedom Initiative]].  (Not available for player use.)"
-        else:
+        elif ship['race'] < 2:
             shipOrg = 'Human Alliance' if ship['race'] == 0 else 'Aralien Empire'
             introSection = "The {} is the boss ship of the [[{}]] fleet.  (Not available for player use.)".format(ship['name'], shipOrg)
+        elif ship['shipType'] == 3:
+            shipOrg = SmallConstants.GetNprNameFromId(ship['race'])
+            introSection = "The {} is the boss ship of the [[{}]] fleet.  (Not available for player use.)".format(ship['name'], shipOrg)
+        elif ship['shipType'] == 11:
+            shipOrg = SmallConstants.GetNprNameFromId(ship['race'])
+            introSection = "The {} is a megaboss associated with the [[{}]] race.  (Not available for player use.)".format(ship['name'], shipOrg)
+        else:
+            introSection = "This is an unknown ship type.  (Not available for player use.)"
 
     else:
         # NPR Ships

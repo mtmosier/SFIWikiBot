@@ -858,6 +858,18 @@ def IsItemNprExclusive(item):
     except:
         pass
 
+    try:
+        if item['uniqueToShipID']:  # Ship Specific
+            return True
+    except:
+        pass
+
+    return False
+
+
+def IsItemShipExclusive(item):
+    if 'uniqueToShipID' in item and item['uniqueToShipID']:
+        return True
     return False
 
 
@@ -2037,6 +2049,19 @@ def GetItemSourceExtended(item, includeLink=False):
     source = None
     if IsItemHidden(item):
         source = "Unavailable"
+    elif 'uniqueToShipID' in item and item['uniqueToShipID']:
+        from SFIWikiBotLib import ShipUtils
+        shipInfo = ShipUtils.GetShipById(item['uniqueToShipID'])
+        if shipInfo:
+            source = 'Ship Exclusive'
+            if not includeLink:
+                source += " ({})".format(shipInfo['name'])
+            else:
+                wikiPage = ShipUtils.GetShipWikiPageName(shipInfo)
+                if wikiPage == shipInfo['name']:
+                    source += " ([[{}]])".format(shipInfo['name'])
+                else:
+                    source += " ([[{}|{}]])".format(wikiPage, shipInfo['name'])
     elif 'seasonal' in item and item['seasonal']:
         source = "Purchased ([[:Category:Seasonal_Items|Seasonal]])"
     elif 'buyable' in item and item['buyable'] and ('uniqueToShipID' not in item or not item['uniqueToShipID']):
@@ -2080,9 +2105,14 @@ def GetItemSource(item):
         return Config.itemSourceOverride[itemName]
 
     source = "Unknown"
-    if 'seasonal' in item and item['seasonal']:
+    if 'uniqueToShipID' in item and item['uniqueToShipID']:
+        from SFIWikiBotLib import ShipUtils
+        shipInfo = ShipUtils.GetShipById(item['uniqueToShipID'])
+        if shipInfo and not ShipUtils.IsShipHidden(shipInfo):
+            source = 'Ship Exclusive'
+    elif 'seasonal' in item and item['seasonal']:
         source = "Purchased (Seasonal)"
-    elif 'buyable' in item and item['buyable'] and ('uniqueToShipID' not in item or not item['uniqueToShipID']):
+    elif 'buyable' in item and item['buyable']:
         source = "Purchased"
     elif 'race' in item and item['race'] <= 1 and item['name'] != 'Micro Gate TBZ' and (GetItemBPLocation(item)):
         source = "Crafted"
@@ -2115,6 +2145,8 @@ def GetItemSourceClassName(item):
         return 'aiOnlyItem'
     elif source == "Weapon Projectile":
         return 'weaponProjectiveItem'
+    elif source == "Ship Exclusive":
+        return 'shipExclusiveItem'
     return None
 
 def GetItemSkillName(item):
