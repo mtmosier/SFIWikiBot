@@ -33,7 +33,6 @@ itemsToSkip = [
     "Double Barrelled Heavy Bolt III",
     "Double Barrelled Heavy Bolt IV",
     "Double Barrelled Heavy Bolt V",
-    "Wabbajack",
     "Big Smoke Screen",
     "Firework Pellet",
     "Cake Slice",
@@ -41,7 +40,6 @@ itemsToSkip = [
     "Micro Gate TBZ",
     "Tyraan Decay Cannon",
     "Shard Torpedo",
-    "Igni Rock Rocket I",
 ]
 itemIdListToSkip = []
 
