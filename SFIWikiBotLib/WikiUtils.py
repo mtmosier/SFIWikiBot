@@ -1068,6 +1068,7 @@ def UpdateIndividualShipPage(ship, comment=None, allowRetry=True):
     if page.exists:
         updatesIncluded = []
         content = page.text().strip()
+        descriptionFound = False
 
         shipCatList = ShipUtils.GetCategoryListForShip(ship)
         shipCatListCmp = [v.lower().strip() for v in shipCatList]
@@ -1094,7 +1095,8 @@ def UpdateIndividualShipPage(ship, comment=None, allowRetry=True):
             updatesIncluded.append("Categories")
 
 
-        templateList = GetTemplateListFromWikiPageContent(content)
+        # templateList = GetTemplateListFromWikiPageContent(content)
+        templateList = GetTemplateListFromWikiPageContentRecursive(content)
         for template in templateList:
             if template['name'].replace(' ', '_').lower() == 'infobox_ship':
                 infoBox = ShipUtils.GetWikiInfoboxDataForShip(ship)
@@ -1116,16 +1118,34 @@ def UpdateIndividualShipPage(ship, comment=None, allowRetry=True):
                     else:
                         print("Unable to get new content for {}".format(ship['name']))
 
+            if template['name'].replace(' ', '_').lower() == 'playershiplayout':
+                updateTemplate = False
+                replacementTemplate = template['data']
+
+                if 'race' in ship and ship['race'] < 2:
+                    if 'description' in ship and ship['description'].strip():
+                        descriptionFound = True
+                        shipDescription = "''" + ShipUtils.GetShipDescription(ship).strip() + "''"
+                        if shipDescription.strip() != template['data']['GameDescription'].strip():
+                            replacementTemplate['GameDescription'] = shipDescription
+                            updateTemplate = True
+                            updatesIncluded.append("Game description")
+
+                if updateTemplate:
+                    templateContent = ConvertDictionaryToWikiTemplate(template['name'], replacementTemplate)
+                    content = content.replace(template['content'], templateContent.strip())
+
         if 'race' in ship and ship['race'] < 2:
             if 'description' in ship and ship['description'].strip():
                 pageSectionList = GetWikiPageSectionsFromContent(content)
                 if 'Game Description' in pageSectionList and pageSectionList['Game Description']:
+                    descriptionFound = True
                     newContent = "{}\n''{}''".format(pageSectionList['Game Description']['nameContent'].strip(), ShipUtils.GetShipDescription(ship)).strip()
                     if pageSectionList['Game Description']['content'].strip() != newContent.strip():
                         content = content.replace(pageSectionList['Game Description']['content'].strip(), newContent)
                         updatesIncluded.append("Game description")
-                else:
-                    if Config.verbose >= 1:  print("Game Description section not found for {} - Unable to update".format(pageName))
+                if not descriptionFound:  print("Game Description section not found for {} - Unable to update".format(pageName))
+
 
         if updatesIncluded:
             try:
