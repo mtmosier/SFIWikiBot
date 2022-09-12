@@ -871,6 +871,48 @@ def IsItemShipExclusive(item):
     return False
 
 
+def GetShipInfoAssociatedWithItem(item):
+    rtnInfo = False
+    if 'uniqueToShipID' in item and item['uniqueToShipID']:
+        from SFIWikiBotLib import ShipUtils
+
+        shipInfo = ShipUtils.GetShipById(item['uniqueToShipID'])
+        if shipInfo:
+            rtnInfo = {"name": shipInfo['name'], "id": item['uniqueToShipID'], "link": None}
+            wikiPage = ShipUtils.GetShipWikiPageName(shipInfo)
+            if not wikiPage or wikiPage == shipInfo['name']:
+                rtnInfo['link'] = "[[{}]]".format(shipInfo['name'])
+            else:
+                rtnInfo['link'] = "[[{}|{}]]".format(wikiPage, shipInfo['name'])
+
+    return rtnInfo
+
+def GetNameOfShipAssociatedWithItem(item):
+    info = GetShipInfoAssociatedWithItem(item)
+    if info:
+        return info['name']
+
+def GetShipInfoListAssociatedWithItems(objList=...):
+    if objList is ...:
+        objList = itemData
+    rtnList = []
+    shipIdList = []
+    itemList = []
+
+    for item in objList:
+        if IsItemShipExclusive(item):
+            itemList.append(item)
+            if not item['uniqueToShipID'] in shipIdList:
+                shipIdList.append(item['uniqueToShipID'])
+
+    for item in itemList:
+        if item['uniqueToShipID'] in shipIdList:
+            info = GetShipInfoAssociatedWithItem(item)
+            if info:
+                rtnList.append(info)
+
+    return rtnList
+
 def GetDamagePerRoundForItem(item):
     with suppress(AttributeError, KeyError):
         return Config.weaponDamagePerHitOverride[item['name']]
@@ -2052,14 +2094,14 @@ def GetItemSourceExtended(item, includeLink=False):
         shipInfo = ShipUtils.GetShipById(item['uniqueToShipID'])
         if shipInfo:
             source = 'Ship Exclusive'
-            if not includeLink:
-                source += " ({})".format(shipInfo['name'])
-            else:
+            if includeLink:
                 wikiPage = ShipUtils.GetShipWikiPageName(shipInfo)
-                if wikiPage == shipInfo['name']:
+                if not wikiPage or wikiPage == shipInfo['name']:
                     source += " ([[{}]])".format(shipInfo['name'])
                 else:
                     source += " ([[{}|{}]])".format(wikiPage, shipInfo['name'])
+            else:
+                source += " ({})".format(shipInfo['name'])
     elif 'seasonal' in item and item['seasonal']:
         source = "Purchased ([[:Category:Seasonal_Items|Seasonal]])"
     elif 'buyable' in item and item['buyable'] and ('uniqueToShipID' not in item or not item['uniqueToShipID']):

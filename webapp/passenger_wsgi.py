@@ -402,6 +402,14 @@ def GetFilterListForItemFinder(params):
         'validation': { 'min': 0, 'step': 0.1 },
     })
     filterList.append({
+        'id': 'uniqueToShipID',
+        'label': 'Associated Ship',
+        'type': 'string',
+        'input': 'select',
+        'values': dict({(v['id'],v['name']) for v in ItemUtils.GetShipInfoListAssociatedWithItems() if v}),
+        'operators': [ 'equal', 'not_equal', 'is_not_empty' ],
+    })
+    filterList.append({
         'id': 'ItemUtils.GetItemAugType',
         'label': 'Augmentation Type',
         'type': 'string',

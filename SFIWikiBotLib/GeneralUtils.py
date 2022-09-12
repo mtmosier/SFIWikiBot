@@ -572,6 +572,8 @@ def ResolveRuleForObject(object, rule):
         value1 = ItemUtils.IsItemNprExclusive(object)
     elif rule['id'] == 'ItemUtils.IsItemShipExclusive':
         value1 = ItemUtils.IsItemShipExclusive(object)
+    elif rule['id'] == 'ItemUtils.GetNameOfShipAssociatedWithItem':
+        value1 = ItemUtils.GetNameOfShipAssociatedWithItem(object)
     elif rule['id'] == 'ItemUtils.GetItemRange':
         value1 = ItemUtils.GetItemRange(object)
     elif rule['id'] == 'ItemUtils.GetItemDps':
