@@ -564,6 +564,13 @@ def GetFilterListForItemFinder(params):
         'operators': [ 'equal' ],
     })
     filterList.append({
+        'id': 'ItemUtils.IsItemShipExclusive',
+        'label': 'Is Item Ship Exclusive',
+        'type': 'boolean',
+        'input': 'radio',
+        'values': {True: 'Yes', False: 'No'},
+    })
+    filterList.append({
         'id': 'ItemUtils.IsItemNprExclusive',
         'label': 'Is Item NPR Exclusive',
         'type': 'boolean',
