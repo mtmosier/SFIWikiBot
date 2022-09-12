@@ -407,7 +407,7 @@ def GetFilterListForItemFinder(params):
         'type': 'string',
         'input': 'select',
         'values': dict({(v['id'],v['name']) for v in ItemUtils.GetShipInfoListAssociatedWithItems() if v}),
-        'operators': [ 'equal', 'not_equal', 'is_not_empty' ],
+        'operators': [ 'equal', 'not_equal', 'is_not_empty', 'is_empty' ],
     })
     filterList.append({
         'id': 'ItemUtils.GetItemAugType',
