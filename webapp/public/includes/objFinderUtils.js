@@ -460,6 +460,41 @@ function showRaceSpoilersInFilters() {
     }
 }
 
+function hideShipSpoilersInFilters() {
+    var i = 0;
+    var elem = $('.rule-filter-container [name=builder-basic_rule_' + i + '_filter]');
+    while (elem.length) {
+        if (elem.val() == 'uniqueToShipID') {
+            var valElem = $('.rule-value-container [name=builder-basic_rule_' + i + '_value_0]');
+            try {
+                for (var j = 0; j < unreleasedShipList.length; j++) {
+                    valElem.find('option:contains("' + unreleasedShipList[j] + '")').each(function(){
+                        if (!$(this).data("origOption"))  $(this).data("origOption", $(this).text());
+                    })
+                    valElem.find('option:contains("' + unreleasedShipList[j] + '")').text('-- Spoiler --');
+                }
+            } catch(e) {}
+        }
+        i++;
+        elem = $('.rule-filter-container [name=builder-basic_rule_' + i + '_filter]');
+    }
+}
+
+function showShipSpoilersInFilters() {
+    var i = 0;
+    var elem = $('.rule-filter-container [name=builder-basic_rule_' + i + '_filter]');
+    while (elem.length) {
+        if (elem.val() == 'uniqueToShipID') {
+            var valElem = $('.rule-value-container [name=builder-basic_rule_' + i + '_value_0]');
+            valElem.find('option:contains("-- Spoiler --")').each(function(){
+                $(this).text($(this).data("origOption"));
+            });
+        }
+        i++;
+        elem = $('.rule-filter-container [name=builder-basic_rule_' + i + '_filter]');
+    }
+}
+
 
 $( document ).ready(function() {
     if (window.location.pathname.indexOf('shipFinder') != -1) {
@@ -468,6 +503,7 @@ $( document ).ready(function() {
         var defaultRuleset = {"condition":"AND","rules":[{"id":"ItemUtils.IsItemHidden","field":"ItemUtils.IsItemHidden","type":"boolean","input":"radio","operator":"equal","value":false}],"valid":true};
     }
 
+/*
     var spoilerFreeFilters = JSON.parse(JSON.stringify(filterList));
     for (var i = 0; i < spoilerFreeFilters.length; i++) {
         if (spoilerFreeFilters[i].label == 'Race') {
@@ -478,6 +514,7 @@ $( document ).ready(function() {
             }
         }
     }
+*/
 
     var queryBuilderConfig = {
     	'plugins': [ 'bt-tooltip-errors' ],
@@ -497,10 +534,12 @@ $( document ).ready(function() {
             if (spoilersActive === false) {
                 $("#spoilerAlert").hide();
                 hideRaceSpoilersInFilters();
+                hideShipSpoilersInFilters();
             } else {
                 // Here there be dragons...
                 $("#spoilerAlert").show();
                 showRaceSpoilersInFilters();
+                showShipSpoilersInFilters();
             }
         }
     });
