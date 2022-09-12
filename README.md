@@ -132,3 +132,5 @@ If you do not have Passenger installed you'll need to do that first.  As there a
 - The [Human](https://starfighter-infinity.fandom.com/wiki/Category:Human_Ships), [Aralien](https://starfighter-infinity.fandom.com/wiki/Category:Aralien_Ships) and [Restricted](https://starfighter-infinity.fandom.com/wiki/Restricted_Ships) ship list pages (Ship Listing Tables)
 - The [Ships Category](https://starfighter-infinity.fandom.com/wiki/Category:Ships) page (Detailed Ship Listing)
 - The [Lore](https://starfighter-infinity.fandom.com/wiki/Lore) page (Lore for each faction listed)
+- The [Engine Summoning Requirements](https://starfighter-infinity.fandom.com/wiki/Module:NPR_Engine_Requirements) lua Module (Output can be seen on [The Engine](https://starfighter-infinity.fandom.com/wiki/The_Engine) page.)
+- The [Swap Shop](https://starfighter-infinity.fandom.com/wiki/Module:NPR_Item_Swap) lua Module (Output can be seen on the [Storbital](https://starfighter-infinity.fandom.com/wiki/Storbital) page.)
