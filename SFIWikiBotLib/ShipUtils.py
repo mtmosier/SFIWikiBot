@@ -118,6 +118,9 @@ def GetCategoryListForShip(ship):
         rtnSet.add('Restricted Ships')
     elif shipType == 'NPR':
         rtnSet.add('NPR Ships')
+        nprPageName = WikiUtils.GetNprWikiPageByNprName(GetRaceForShip(ship))
+        if nprPageName:
+            rtnSet.add(nprPageName)
 
     return sorted(list(rtnSet))
 
@@ -268,123 +271,64 @@ def GetShipPageContent(ship):
     if not ship:
         return ''
 
-    pageHeader = '__NOTOC__\n'
-    pageFooter = '\n{{Template:Human Ships}}\n{{Template:Aralien Ships}}\n{{Template:Restricted Ships}}\n{{Template:NPR Ships}}\n'
+    shipType = GetShipUseCategory(ship)
 
+    pageHeader = '__NOTOC__\n'
+    pageFooter = ''
+    mainPageTemplateName = ''
+
+    if shipType == 'Human' or shipType == 'Aralien':
+        pageFooter = '\n{{Template:Human Ships}}\n{{Template:Aralien Ships}}\n'
+        mainPageTemplateName = 'PlayerShipLayout'
+    elif shipType == 'NPC':
+        pageFooter = '\n{{Template:Restricted Ships}}\n'
+        mainPageTemplateName = ''
+    elif shipType == 'NPR':
+        pageFooter = '\n{{Template:NPR Ships}}\n'
+        mainPageTemplateName = 'NPRShip'
 
     shipCatList = GetCategoryListForShip(ship)
     for catName in shipCatList:
         pageFooter += '[[Category:{}]]\n'.format(catName)
 
-    shipType = GetShipUseCategory(ship)
-    if shipType == 'NPR':
-        return GetNPRShipPageContent(ship)
-
     infoBox = GetWikiInfoboxDataForShip(ship)
 
-    introSection = ''
+    mainPage = OrderedDict()
+    if mainPageTemplateName == 'PlayerShipLayout':
+        mainPage['GameDescription'] = GetShipDescription(ship)
+        mainPage['Traits'] = ''
+        mainPage['Equipment'] = ''
+        mainPage['Notes'] = ''
+        mainPage['Trivia'] = ''
+    elif mainPageTemplateName == 'NPRShip':
+        nprPageName = WikiUtils.GetNprWikiPageByNprName(GetRaceForShip(ship))
+        mainPage['shipName'] = ship['name']
+        mainPage['nprName'] = nprPageName
+        mainPage['Description'] = ''  # Where NPR ships have descriptions in the exported data it tends to be wrong, a copy of playable ships
+        mainPage['Combat and Strategy'] = ''
+        mainPage['Notes'] = ''
 
-    raceName = GetRaceForShip(ship)
-    nameCmp = ship['name'].lower()
-    if ' pod' in nameCmp:
-        if 'elite' in nameCmp or 'commander' in nameCmp:
-            introSection = "The {} is a more advanced version of the [[{}]] emergency escape craft available only on select ships.".format(ship['name'], raceName)
-        else:
-            introSection = "The {} is the [[{}]] emergency escape craft.".format(ship['name'], raceName)
-    elif shipType == 'Human' or shipType == 'Aralien':
-        gameSection = ''
-        try:
-            if ship['unlockLevel'] <= 40:
-                gameSection = 'n early game'
-            elif ship['unlockLevel'] <= 90:
-                gameSection = ' mid game'
-            else:
-                gameSection = ' late game'
-        except:
-            pass
+    if not mainPageTemplateName:
+        introSection = ''
+        gameDescriptionSection = "== Game Description ==\n{}\n".format(GeneralUtils.AddWikiLinksToText(ship['description'], useHtml=False, allowExtraWeaponCheck=False) if 'description' in ship else '')
+        overviewSection = "== Overview ==\n"
+        npcCombatSection = "== NPC Combat ==\n"
+        purchaseLocationsSection = "== Purchase Locations ==\n"
+        notesSection = "== Notes ==\n"
+        gallerySection = '== Gallery ==\n{| class="article-table"\n!\n!\n!\n|}\n'
 
-        designOrg = 'Human Alliance' if ship['race'] == 0 else 'Aralien Empire'
-        descCmp = ship['description'].lower() if 'description' in ship else ''
-        if ship['race'] == 0 and 'science corps' in descCmp:
-            designOrg = 'Alliance Science Corps'
-        elif ship['race'] == 1 and 'aralien intelligence' in descCmp:
-            designOrg = 'Aralien Intelligence'
-
-        introSection = "The {} is a{} ship designed by {}[[{}]]".format(ship['name'], gameSection, 'the ' if designOrg != 'Aralien Intelligence' else '', designOrg)
-
-    elif shipType == 'NPC':
-        if 'turret' in nameCmp:
-            introSection = "{}s are stationary defence platforms which are equipped with a variety of weapons.".format(ship['name'])
-        elif nameCmp == 'shawker':
-            introSection = "Shawkers are the ultimate combination of [[Shredder]] and [[Hawk]], brought to you by the friendly souls at the [[Freedom Initiative]].  (Not available for player use.)"
-        elif ship['race'] < 2:
-            shipOrg = 'Human Alliance' if ship['race'] == 0 else 'Aralien Empire'
-            introSection = "The {} is the boss ship of the [[{}]] fleet.  (Not available for player use.)".format(ship['name'], shipOrg)
-        elif ship['shipType'] == 3:
-            shipOrg = SmallConstants.GetNprNameFromId(ship['race'])
-            introSection = "The {} is the boss ship of the [[{}]] fleet.  (Not available for player use.)".format(ship['name'], shipOrg)
-        elif ship['shipType'] == 11:
-            shipOrg = SmallConstants.GetNprNameFromId(ship['race'])
-            introSection = "The {} is a megaboss associated with the [[{}]] race.  (Not available for player use.)".format(ship['name'], shipOrg)
-        else:
-            introSection = "This is an unknown ship type.  (Not available for player use.)"
-
+    content = pageHeader
+    content += WikiUtils.ConvertDictionaryToWikiTemplate('Infobox_Ship', infoBox).strip()
+    if mainPageTemplateName:
+        content += WikiUtils.ConvertDictionaryToWikiTemplate(mainPageTemplateName, mainPage).strip()
     else:
-        # NPR Ships
-        if 'turret' in nameCmp:
-            introSection = "{}s are stationary defence platforms used by {}[[{}|{}]].".format(ship['name'], 'the ' if 'the' in raceName.lower() else '', WikiUtils.GetNprWikiPageByNprName(raceName), raceName)
-        elif GeneralUtils.NumDisplay(100 *ship['specialDropLikelihood'], 0) >= '100':
-            introSection = "{}s are boss ships used by {}[[{}|{}]].".format(ship['name'], 'the ' if 'the' in raceName.lower() else '', WikiUtils.GetNprWikiPageByNprName(raceName), raceName)
-        else:
-            introSection = "{}s are ships used by {}[[{}|{}]].".format(ship['name'], 'the ' if 'the' in raceName.lower() else '', WikiUtils.GetNprWikiPageByNprName(raceName), raceName)
-
-    introSection = "{}\n".format(introSection.strip())
-    gameDescriptionSection = "== Game Description ==\n{}\n".format(GeneralUtils.AddWikiLinksToText(ship['description'], useHtml=False, allowExtraWeaponCheck=False) if 'description' in ship else '')
-    overviewSection = "== Overview ==\n"
-    npcCombatSection = "== NPC Combat ==\n"
-    purchaseLocationsSection = "== Purchase Locations ==\n"
-    notesSection = "== Notes ==\n"
-    gallerySection = '== Gallery ==\n{| class="article-table"\n!\n!\n!\n|}\n'
-
-
-    content = pageHeader
-    content += WikiUtils.ConvertDictionaryToWikiTemplate('Infobox_Ship', infoBox).strip()
-    content += introSection
-    content += gameDescriptionSection
-    content += overviewSection
-    content += npcCombatSection
-    content += purchaseLocationsSection
-    content += notesSection
-    content += gallerySection
-
-    content += pageFooter
-
-    return content
-
-
-def GetNPRShipPageContent(ship):
-    pageHeader = '__NOTOC__\n'
-    pageFooter = '\n{{Template:NPR Ships}}\n[[Category:NPR Ships]]\n'
-
-    nprPageName = WikiUtils.GetNprWikiPageByNprName(GetRaceForShip(ship))
-    if nprPageName:
-        pageFooter += '[[Category:{}]]\n'.format(nprPageName)
-
-    infoBox = GetWikiInfoboxDataForShip(ship)
-
-    # Template name is   Infobox_Ship
-    nprShipInfo = OrderedDict()
-    nprShipInfo['shipName'] = ship['name']
-    nprShipInfo['nprName'] = nprPageName
-    #nprShipInfo['Description'] = GeneralUtils.AddWikiLinksToText(ship['description'], useHtml=False, allowExtraWeaponCheck=False) if 'description' in ship else ''
-    nprShipInfo['Description'] = ''  # Where NPR ships have descriptions in the exported data it tends to be wrong, a copy of playable ships
-    nprShipInfo['Combat and Strategy'] = ''
-    nprShipInfo['Notes'] = ''
-
-    content = pageHeader
-    content += WikiUtils.ConvertDictionaryToWikiTemplate('Infobox_Ship', infoBox).strip()
-    content += "\n"
-    content += WikiUtils.ConvertDictionaryToWikiTemplate('NPRShip', nprShipInfo).strip()
+        content += introSection
+        content += gameDescriptionSection
+        content += overviewSection
+        content += npcCombatSection
+        content += purchaseLocationsSection
+        content += notesSection
+        content += gallerySection
     content += pageFooter
 
     return content
