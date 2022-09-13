@@ -2468,16 +2468,17 @@ def AddMissingShipWikiPages():
         page = site.pages[pageName]
         if not page.exists:
             content = ShipUtils.GetShipPageContent(ship)
-            try:
-                page.edit(content, 'Adding ship page')
-                if Config.verbose >= 1:  print("Page added: {}".format(pageName))
-                rtnVal['pagesAdded'].append(pageName)
-                time.sleep(Config.pauseAfterSuccessfullyUpdatingWikiPageInSec)
+            if content:
+                try:
+                    page.edit(content, 'Adding ship page')
+                    if Config.verbose >= 1:  print("Page added: {}".format(pageName))
+                    rtnVal['pagesAdded'].append(pageName)
+                    time.sleep(Config.pauseAfterSuccessfullyUpdatingWikiPageInSec)
 
-            except:
-                if Config.debug or Config.verbose >= 1:  print("Failed to add: {}".format(pageName))
-                time.sleep(Config.pauseAfterFailingToUpdateWikiPageInSec)
-                rtnVal['pagesFailedToSave'].append(pageName)
+                except:
+                    if Config.debug or Config.verbose >= 1:  print("Failed to add: {}".format(pageName))
+                    time.sleep(Config.pauseAfterFailingToUpdateWikiPageInSec)
+                    rtnVal['pagesFailedToSave'].append(pageName)
         else:
             rtnVal['pagesAlreadyExist'].append(pageName)
             time.sleep(Config.pauseAfterSkippingWikiPageUpdateInSec)
