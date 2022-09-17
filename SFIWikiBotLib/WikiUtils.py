@@ -19,6 +19,7 @@ import mwclient
 from SFIWikiBotLib import Config
 from SFIWikiBotLib import SmallConstants
 from SFIWikiBotLib import GeneralUtils
+from SFIWikiBotLib import ShipUtils
 from pprint import pprint as pp
 import pytz
 
@@ -84,6 +85,14 @@ def NormalizePageName(input):
 def GetNprWikiPageByNprName(nprName):
     if not nprName:  return None
     if type(nprName) != str:  return None
+
+    if nprName.lower() == 'meteor burger':
+        shipList = ShipUtils.GetNPRShipList('Meteor Burger', False)
+        try:
+            shipInfo = shipList[-1]
+            return ShipUtils.GetShipWikiPageName(shipInfo)
+        except IndexError:
+            pass
 
     if nprName.lower() == 'aralien ghost' or nprName.lower() == 'human ghost':
         nprName = 'ghost';
@@ -235,8 +244,6 @@ def GetWikiCategoryMemberList(catName):
 
 
 def RenderShipPreset(preset, includeHtml=False, includeResultObjList=False, includeTableHeaders=True):
-    from SFIWikiBotLib import ShipUtils
-
     if not includeTableHeaders:
         preset['tableHeader'] = ''
         preset['tableCaption'] = ''
@@ -426,7 +433,6 @@ def RevertRecentChanges(pageList, contentDiffThreshold=200):
 
 
 def UpdateWikiShipNavboxTemplates(comment=None):
-    from SFIWikiBotLib import ShipUtils
     rtnVal = {
         'pagesUpdated': [],
         'pagesAlreadyUpToDate': [],
@@ -440,7 +446,7 @@ def UpdateWikiShipNavboxTemplates(comment=None):
         'Template:Human Ships': ShipUtils.GetHumanPlayerShipList(),
         'Template:Aralien Ships': ShipUtils.GetAralienPlayerShipList(),
         'Template:Restricted Ships': ShipUtils.GetRestrictedShipList(),
-        'Template:NPR Ships': ShipUtils.GetNPRShipList(),
+        'Template:NPR Ships': ShipUtils.GetFullNPRShipList(),
     }
 
     for templatePageName, shipList in templatePageList.items():
@@ -645,7 +651,7 @@ def UpdateWikiNPRPages(comment=None, forceUpdate=False):
         nprName = Config.nprPageNameMapping[pageName]
 
         page = site.pages[pageName]
-        if page.exists:
+        if nprName and page.exists:
             updateRequired = False
             if forceUpdate:  updateRequired = True
 
@@ -1035,7 +1041,6 @@ def UpdateIndividualItemPageByItemRange(itemList, comment=None, allowRetry=True)
 
 
 def UpdateIndividualPagesForAllShips(comment=None):
-    from SFIWikiBotLib import ShipUtils
     rtnVal = {
         'pagesUpdated': [],
         'pagesAlreadyUpToDate': [],
@@ -1057,7 +1062,7 @@ def UpdateIndividualPagesForAllShips(comment=None):
 
 
 def UpdateIndividualShipPage(ship, comment=None, allowRetry=True):
-    from SFIWikiBotLib import ShipUtils
+    from SFIWikiBotLib import ItemUtils
     rtnVal = False
     pageName = ship['name']
 
@@ -1095,7 +1100,6 @@ def UpdateIndividualShipPage(ship, comment=None, allowRetry=True):
             updatesIncluded.append("Categories")
 
 
-        # templateList = GetTemplateListFromWikiPageContent(content)
         templateList = GetTemplateListFromWikiPageContentRecursive(content)
         for template in templateList:
             if template['name'].replace(' ', '_').lower() == 'infobox_ship':
@@ -1134,6 +1138,25 @@ def UpdateIndividualShipPage(ship, comment=None, allowRetry=True):
                 if updateTemplate:
                     templateContent = ConvertDictionaryToWikiTemplate(template['name'], replacementTemplate)
                     content = content.replace(template['content'], templateContent.strip())
+
+        pageSectionList = GetWikiPageSectionsFromContent(content)
+        exclusiveItemList = ItemUtils.GetItemsExclusiveToShip(ship)
+        exclusiveItemList = sorted(exclusiveItemList, key=ItemUtils.GetItemSortFunc('name'))
+        if exclusiveItemList:
+            sectionName = 'Ship Specific Items'
+            if 'Ship Exclusive Items' in pageSectionList and pageSectionList['Ship Exclusive Items']:
+                sectionName = 'Ship Exclusive Items'
+            if sectionName in pageSectionList and pageSectionList[sectionName]:
+                try:
+                    itemList = [[ItemUtils.ItemDisplayStatName(v[0], ..., True)] for v in ItemUtils.ItemPageIter(exclusiveItemList)]
+                    newContent = "{}\n{}".format(pageSectionList[sectionName]['nameContent'].strip(), ConvertListToWikiTable(itemList)).strip()
+                    if pageSectionList[sectionName]['content'].strip() != newContent.strip():
+                        content = content.replace(pageSectionList[sectionName]['content'].strip(), newContent)
+                        updatesIncluded.append(sectionName)
+                except (TypeError, IndexError):
+                    pass
+            else:
+                print(sectionName + " section not found for {} - Unable to update".format(pageName))
 
         if 'race' in ship and ship['race'] < 2:
             if 'description' in ship and ship['description'].strip():
@@ -2315,16 +2338,12 @@ def UploadMissingPlanetImages():
 
 
 def UploadMissingShipImages():
-    from SFIWikiBotLib import ShipUtils
-
     shipList = [ v for v in ShipUtils.shipData if not ShipUtils.IsShipHidden(v) ]
     ShipUtils.DownloadMissingImagesForTheWikiByShipList(shipList)
     ShipUtils.UploadImagesToWikiForShipList(shipList)
 
 
 def UploadAllShipImagesToWiki():
-    from SFIWikiBotLib import ShipUtils
-
     shipList = [ v for v in ShipUtils.shipData if not ShipUtils.IsShipHidden(v) ]
     ShipUtils.DownloadImagesByShipList(shipList)
     ShipUtils.UploadImagesToWikiForShipList(shipList)
@@ -2451,8 +2470,6 @@ def AddMissingItemWikiPages():
 
 
 def AddMissingShipWikiPages():
-    from SFIWikiBotLib import ShipUtils
-
     rtnVal = {
         'pagesAdded': [],
         'pagesAlreadyExist': [],
@@ -2487,7 +2504,6 @@ def AddMissingShipWikiPages():
 
 
 def UpdateAllWikiMainShipPages(comment=None):
-    from SFIWikiBotLib import ShipUtils
     rtnVal = {
         'pagesUpdated': [],
         'pagesAlreadyUpToDate': [],
@@ -2553,8 +2569,6 @@ def UpdateWikiMainShipPage(pageName, shipList, comment=None):
 
 
 def FixShipPages(replacementList={}, comment=None, shipList=..., allowRetry=True, pageStatusSoFar=None):
-    from SFIWikiBotLib import ShipUtils
-
     if not pageStatusSoFar:
         rtnVal = {
             'pagesUpdated': [],
@@ -2570,7 +2584,7 @@ def FixShipPages(replacementList={}, comment=None, shipList=..., allowRetry=True
         hpShips = ShipUtils.GetHumanPlayerShipList()
         alShips = ShipUtils.GetAralienPlayerShipList()
         npcShips = ShipUtils.GetRestrictedShipList()
-        nprShips = ShipUtils.GetNPRShipList()
+        nprShips = ShipUtils.GetFullNPRShipList()
         shipList = hpShips + alShips + npcShips + nprShips
 
     site = GetWikiClientSiteObject()
@@ -2903,7 +2917,6 @@ def GetNormalizedWikiArticlePageMapping():
 
 
 def GetMainShipPageTableForShipList(shipList):
-    from SFIWikiBotLib import ShipUtils
 
     colCount = 4 if len(shipList) > 6 else 3
     idx = 0

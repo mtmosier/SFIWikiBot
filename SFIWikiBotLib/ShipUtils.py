@@ -103,9 +103,13 @@ def GetAralienPlayerShipList(sortBy='name'):
 def GetCategoryListForShip(ship):
     rtnSet = set()
 
-    nprPageName = WikiUtils.GetNprWikiPageByNprName(GetRaceForShip(ship))
-    if nprPageName:
-        rtnSet.add(nprPageName)
+    nprName = GetRaceForShip(ship)
+    if nprName.lower() == 'meteor burger':
+        rtnSet.add('Meteor Burger')
+    else:
+        nprPageName = WikiUtils.GetNprWikiPageByNprName(nprName)
+        if nprPageName:
+            rtnSet.add(nprPageName)
 
     shipType = GetShipUseCategory(ship)
     if shipType == 'Human':
@@ -118,9 +122,6 @@ def GetCategoryListForShip(ship):
         rtnSet.add('Restricted Ships')
     elif shipType == 'NPR':
         rtnSet.add('NPR Ships')
-        nprPageName = WikiUtils.GetNprWikiPageByNprName(GetRaceForShip(ship))
-        if nprPageName:
-            rtnSet.add(nprPageName)
 
     return sorted(list(rtnSet))
 
@@ -204,7 +205,26 @@ def GetMaxSpeedForShip(ship):
         return 0
 
 
-def GetNPRShipList(sortBy='name'):
+
+def GetNPRShipList(race, includeHidden=True):
+    if includeHidden:
+        if race == 'Ghost':
+            ruleSet = {'condition': 'AND', 'rules': [{'condition': 'OR', 'rules': [{'field': 'ShipUtils.GetRaceForShip', 'type': 'string', 'input': 'select', 'id': 'ShipUtils.GetRaceForShip', 'value': 'Human Ghost', 'operator': 'equal'}, {'field': 'ShipUtils.GetRaceForShip', 'type': 'string', 'input': 'select', 'id': 'ShipUtils.GetRaceForShip', 'value': 'Aralien Ghost', 'operator': 'equal'}]}], 'valid': True}
+        else:
+            ruleSet = {'condition': 'AND', 'rules': [{'field': 'ShipUtils.GetRaceForShip', 'type': 'string', 'input': 'select', 'id': 'ShipUtils.GetRaceForShip', 'value': race, 'operator': 'equal'}], 'valid': True}
+    else:
+        if race == 'Ghost':
+            ruleSet = {'condition': 'AND', 'rules': [{'field': 'ShipUtils.IsShipHidden', 'type': 'boolean', 'input': 'radio', 'id': 'ShipUtils.IsShipHidden', 'value': False, 'operator': 'equal'}, {'condition': 'OR', 'rules': [{'field': 'ShipUtils.GetRaceForShip', 'type': 'string', 'input': 'select', 'id': 'ShipUtils.GetRaceForShip', 'value': 'Human Ghost', 'operator': 'equal'}, {'field': 'ShipUtils.GetRaceForShip', 'type': 'string', 'input': 'select', 'id': 'ShipUtils.GetRaceForShip', 'value': 'Aralien Ghost', 'operator': 'equal'}]}], 'valid': True}
+        else:
+            ruleSet = {'condition': 'AND', 'rules': [{'field': 'ShipUtils.IsShipHidden', 'type': 'boolean', 'input': 'radio', 'id': 'ShipUtils.IsShipHidden', 'value': False, 'operator': 'equal'}, {'field': 'ShipUtils.GetRaceForShip', 'type': 'string', 'input': 'select', 'id': 'ShipUtils.GetRaceForShip', 'value': race, 'operator': 'equal'}], 'valid': True}
+
+    filteredShipList = GeneralUtils.SearchObjectListUsingRuleset(shipData, ruleSet)
+    filteredShipList = sorted(filteredShipList, key=GetShipSortFunc(''))
+
+    return filteredShipList
+
+
+def GetFullNPRShipList(sortBy='name'):
     ruleSet = PresetList.shipPresetList['NPR Ships']['ruleSet']
     return sorted(GeneralUtils.SearchObjectListUsingRuleset(shipData, ruleSet), key=GetShipSortFunc(sortBy))
 
@@ -263,7 +283,7 @@ def GetShipUseCategory(ship):
         return 'Aralien'
     elif ship in GetRestrictedShipList():
         return 'NPC'
-    elif ship in GetNPRShipList():
+    elif ship in GetFullNPRShipList():
         return 'NPR'
 
 

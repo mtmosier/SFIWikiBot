@@ -75,6 +75,7 @@ class ItemPageIter:
         if itemList is ...:
             itemList = itemData
         itemList = itemList.copy()
+        itemList.reverse()
 
         self.itemPageList = []
         self.pos = 0
@@ -141,6 +142,19 @@ def GetItemsByRaceName(name, objList=...):
     if objList is ...:
         objList = itemData
     ruleSet = { "condition": "OR", "rules": [ { "id": "ItemUtils.GetRaceForItem", "operator": "equal", "value": name } ] }
+    return GeneralUtils.SearchObjectListUsingRuleset(objList, ruleSet)
+
+
+def GetItemsExclusiveToShip(ship, objList=...):
+    from SFIWikiBotLib import ShipUtils
+
+    if objList is ...:
+        objList = itemData
+
+    if ShipUtils.GetRaceForShip(ship) == 'Meteor Burger':
+        return GetItemsByRaceName('Meteor Burger', objList)
+
+    ruleSet = { "condition": "OR", "rules": [ { "id": "uniqueToShipID", "operator": "equal", "value": ship['id'] } ] }
     return GeneralUtils.SearchObjectListUsingRuleset(objList, ruleSet)
 
 
@@ -872,20 +886,27 @@ def IsItemShipExclusive(item):
 
 
 def GetShipInfoAssociatedWithItem(item):
+    from SFIWikiBotLib import ShipUtils
+
     rtnInfo = False
     if 'uniqueToShipID' in item and item['uniqueToShipID']:
-        from SFIWikiBotLib import ShipUtils
-
         shipInfo = ShipUtils.GetShipById(item['uniqueToShipID'])
-        if shipInfo:
-            rtnInfo = {"name": shipInfo['name'], "id": item['uniqueToShipID'], "link": None}
-            wikiPage = ShipUtils.GetShipWikiPageName(shipInfo)
-            if not wikiPage or wikiPage == shipInfo['name']:
-                rtnInfo['link'] = "[[{}]]".format(shipInfo['name'])
-            else:
-                rtnInfo['link'] = "[[{}|{}]]".format(wikiPage, shipInfo['name'])
+
+    if GetRaceForItem(item) == 'Meteor Burger':
+        shipList = ShipUtils.GetNPRShipList('Meteor Burger', False)
+        if shipList:
+            shipInfo = shipList[-1]
+
+    if shipInfo:
+        rtnInfo = {"name": shipInfo['name'], "id": item['uniqueToShipID'], "link": None}
+        wikiPage = ShipUtils.GetShipWikiPageName(shipInfo)
+        if not wikiPage or wikiPage == shipInfo['name']:
+            rtnInfo['link'] = "[[{}]]".format(shipInfo['name'])
+        else:
+            rtnInfo['link'] = "[[{}|{}]]".format(wikiPage, shipInfo['name'])
 
     return rtnInfo
+
 
 def GetNameOfShipAssociatedWithItem(item):
     info = GetShipInfoAssociatedWithItem(item)
@@ -1524,9 +1545,13 @@ def GetCategoryListForItem(item):
     rtnSet = set()
     itemType = SmallConstants.typeLookup[item['type']].replace('_', ' ').title()
 
-    nprPageName = WikiUtils.GetNprWikiPageByNprName(GetRaceForItem(item))
-    if nprPageName:
-        rtnSet.add(nprPageName)
+    nprName = GetRaceForItem(item)
+    if nprName.lower() == 'meteor burger':
+        rtnSet.add('Meteor Burger')
+    else:
+        nprPageName = WikiUtils.GetNprWikiPageByNprName(nprName)
+        if nprPageName:
+            rtnSet.add(nprPageName)
 
     with suppress(KeyError):
         if item['equipCategory'] == 7:
@@ -2929,15 +2954,17 @@ def ItemDisplayStatSkillFull(item, p=...):
     return rtnVal
 
 
-def ItemDisplayStatName(item, p=...):
+def ItemDisplayStatName(item, p=..., useBaseName=False):
     displayName = item['name']
+    if useBaseName:
+        displayName = SplitNameIntoBaseNameAndItemLevel(item['name'])['fullNameMinusLevel']
 
     itemArticlePage = GetItemWikiArticlePage(item)
     if itemArticlePage:
-        if WikiUtils.PageNamesEqual(itemArticlePage, item['name']):
-            displayName = '[[{}]]'.format(item['name'])
+        if WikiUtils.PageNamesEqual(itemArticlePage, displayName):
+            displayName = '[[{}]]'.format(displayName)
         else:
-            displayName = '[[{}|{}]]'.format(itemArticlePage, item['name'])
+            displayName = '[[{}|{}]]'.format(itemArticlePage, displayName)
 
     rtnVal = displayName
     sourceClass = GetItemSourceClassName(item)

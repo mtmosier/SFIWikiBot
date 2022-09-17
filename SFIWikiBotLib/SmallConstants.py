@@ -134,6 +134,7 @@ def GetFullShipManagedCategoryList():
     rtnList.add('Aralien Ships')
     rtnList.add('Restricted Ships')
     rtnList.add('NPR Ships')
+    rtnList.add('Meteor Burger')
 
     for race in raceData:
         nprPageName = WikiUtils.GetNprWikiPageByNprName(race['name'])
@@ -144,9 +145,18 @@ def GetFullShipManagedCategoryList():
 
 
 def GetFullItemManagedCategoryList():
+    from SFIWikiBotLib import WikiUtils
+
     categoryList = set(GetFullEffectNameList())
     categoryList.add('Energy Based')
     categoryList.add('Ammo Based')
+    categoryList.add('Meteor Burger')
+
+    for race in raceData:
+        nprPageName = WikiUtils.GetNprWikiPageByNprName(race['name'])
+        if nprPageName:
+            categoryList.add(nprPageName)
+
     return sorted(list(categoryList))
 
 
