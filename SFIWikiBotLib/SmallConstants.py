@@ -214,6 +214,12 @@ def GetFullEffectNameList():
             rtnList.add('Effect:{}'.format(catName))
         rtnList.add(catName.replace(' Damage', '').replace(' Resist', '').replace(' Weakness', ''))
 
+    # We do have a "Blessing of Megmos" but this bot does not manage it
+    if 'Blessing of Megmos' in rtnList:
+        rtnList.remove('Blessing of Megmos')
+    if 'Effect:Blessing of Megmos' in rtnList:
+        rtnList.remove('Effect:Blessing of Megmos')
+
     return sorted(list(rtnList))
 
 
