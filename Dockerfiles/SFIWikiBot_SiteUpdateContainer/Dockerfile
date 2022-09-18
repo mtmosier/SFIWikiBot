@@ -1,7 +1,7 @@
 FROM mtmosier/sfiwikibot_base:0.3
 
 LABEL maintainer="mtmosier@gmail.com"
-LABEL version="0.4.8"
+LABEL version="0.4.9"
 
 ENV HOME /root
 
