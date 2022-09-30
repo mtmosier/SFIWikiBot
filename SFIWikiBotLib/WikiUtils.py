@@ -1535,7 +1535,7 @@ def UpdateSwapShopModuleInfo(comment=None, allowRetry=True):
                 if Config.debug or Config.verbose >= 1:  print("Timed out trying to update: {} - {}".format(pageName, comment))
                 raise ex
         else:
-            if Config.debug or Config.verbose >= 1:  print("No update needed for {}".format(pageName))
+            if Config.debug or Config.verbose > 1:  print("No update needed for {}".format(pageName))
             time.sleep(Config.pauseAfterSkippingWikiPageUpdateInSec)
             rtnVal = True
 
@@ -1667,7 +1667,7 @@ def UpdateEngineRequirementsModuleInfo(commentOverride=None, allowRetry=True):
                 if Config.debug or Config.verbose >= 1:  print("Timed out trying to update: {} - {}".format(pageName, comment))
                 raise ex
         else:
-            if Config.debug or Config.verbose >= 1:  print("No update needed for {}".format(pageName))
+            if Config.debug or Config.verbose > 1:  print("No update needed for {}".format(pageName))
             time.sleep(Config.pauseAfterSkippingWikiPageUpdateInSec)
             rtnVal = True
 
