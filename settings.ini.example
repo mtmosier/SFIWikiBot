@@ -32,7 +32,7 @@ botBpLocationOverride = White Xandelevium Blaster=Sh-1-4, Quark Xandelevium Blas
 #
 # botWikiLinkReplacementOverrideList = Black Ship=Ascendant, Fork worm=Forkworm, Mini bomb=Minibomb
 # botWikiLinkReplacementExclusionList = Black, Damage, Energy, Ships, Live
-# botWikiLinkReplacementExactMatchRequiredList = Ascendance, Lives, Conqueror, Devastator, Mining, Craft, Recharger, Dephase, Dephaser, Destroyer, Gatherer, Organic, Organics, Organism, Organisms, Refus, Defender, Engineering, Utilize, Experience, Disheartener, Accumulator, Hunted, Prongworms, Kamikaze Drones
+# botWikiLinkReplacementExactMatchRequiredList = Ascendance, Lives, Conqueror, Devastator, Mining, Craft, Recharger, Dephase, Dephaser, Destroyer, Gatherer, Organic, Organics, Organism, Organisms, Refus, Defender, Engineering, Utilize, Experience, Disheartener, Accumulator, Hunted, Prongworms, Kamikaze Drones, Imposer
 #
 # botProjectileCountOverride = Sheenite Orbital Ultra Ring=30, Sheenite Orbital Chevron Ring=8
 # botWeaponRangeOverride = Sheenite Orbital Ultra Ring=17, Sheenite Orbital Chevron Ring=17, Ascendant Gun Turret=125
