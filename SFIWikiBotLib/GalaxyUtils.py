@@ -85,7 +85,13 @@ planetTypeLookup = [
     "Unclassified",
 ]
 
-
+starColorLookup = [
+    "Yellow",
+    "Red",
+    "Blue",
+    "White",
+    "Quark"
+]
 
 def GetPlanetType(type):
     with suppress(KeyError):
