@@ -367,6 +367,14 @@ def GetShipWikiImage(ship):
     return WikiUtils.GetWikiImageForNameList(shipNameList)
 
 
+def GetShipWikiImageForInfobox(ship):
+    shipNameList = [ "{} Standard".format(ship['name']) ]
+    rtnVal = WikiUtils.GetWikiImageForNameList(shipNameList)
+    if not rtnVal:
+        rtnVal = GetShipWikiImage(ship)
+    return rtnVal
+
+
 def GetShipWikiPageName(ship):
     shipNameList = [ ship['name'], "Ship {}".format(ship['name']), "{} (Ship)".format(ship['name']), ship['name'].replace(' ', '') ]
     return WikiUtils.GetWikiArticlePageForNameList(shipNameList)
@@ -403,7 +411,7 @@ def GetWikiInfoboxDataForShip(ship):
     infobox['race'] = GetRaceForShip(ship)
     infobox['title1'] = ship['name']
 
-    image = GetShipWikiImage(ship)
+    image = GetShipWikiImageForInfobox(ship)
     if image:
         infobox['image1'] = image
     if ShipCanBeBoughtByPlayers(ship) and 'Pod' not in ship['name']:
