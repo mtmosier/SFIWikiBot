@@ -2268,8 +2268,9 @@ def GetItemDpsIncludingEffectDamage(item):
     elif DisplayDamageAsPerHit(item):
         dps = GetItemTotalHitCount(item) * GetDamagePerRoundForItem(item) / item['life']
     else:
-        dps = GetDamagePerRoundForItem(item) / item['fireRate']
-        dps *= GetNumOfDamagingProjectiles(item)
+        with suppress(KeyError):
+            dps = GetDamagePerRoundForItem(item) / item['fireRate']
+            dps *= GetNumOfDamagingProjectiles(item)
 
     effectDps = GetItemEffectDamagePerSecond(item)
     if effectDps:
