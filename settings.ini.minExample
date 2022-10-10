@@ -3,5 +3,5 @@
 botUsername =  # Only needed if performing wiki site updates
 botPassword =  # Only needed if performing wiki site updates
 verbose = 1
-botUnreleasedShipList = Forkworm Abomination, Face of Space, Prongliathan, Andromedan Gateway, Dartian Stellar Lathe
+botUnreleasedShipList = Forkworm Abomination, Face of Space, Prongliathan, Andromedan Gateway, Dartian Stellar Lathe, Sheenite Cow Mangler
 botBpLocationOverride = White Xandelevium Blaster=Sh-1-4, Quark Xandelevium Blaster=Obtain Green Xand, Quark Xandelevium Heat Disc=Obtain Green Xand

@@ -7,7 +7,7 @@ botPassword =
 # botCacheDir = /tmp
 #
 # These settings are recommended (2022-09-11)
-botUnreleasedShipList = Forkworm Abomination, Face of Space, Prongliathan, Andromedan Gateway, Dartian Stellar Lathe, Devimon Archfiend
+botUnreleasedShipList = Forkworm Abomination, Face of Space, Prongliathan, Andromedan Gateway, Dartian Stellar Lathe, Devimon Archfiend, Sheenite Cow Mangler
 botBpLocationOverride = White Xandelevium Blaster=Sh-1-4, Quark Xandelevium Blaster=Obtain Green Xand, Quark Xandelevium Heat Disc=Obtain Green Xand
 #
 # botPrimusUnleashed = False
