@@ -79,7 +79,8 @@ weaponRangeOverrideDefault = 'Sheenite Orbital Ultra Ring=17, Sheenite Orbital C
 weaponRangeOverride = dict(config('botWeaponRangeOverride', cast=Csv(cast=lambda s: tuple(s.split('='))), default=weaponRangeOverrideDefault))
 weaponRangeOverride = { k:float(v) for k, v in weaponRangeOverride.items() }
 
-weaponHitCountOverrideDefault = 'Tornadian Ice Whirler=120, Tornadian Electro Whirler=120, Tornadian Plasma Whirler=120, Tornadian Rad Whirler=120'
+#weaponHitCountOverrideDefault = 'Tornadian Ice Whirler=120, Tornadian Electro Whirler=120, Tornadian Plasma Whirler=120, Tornadian Rad Whirler=120'
+weaponHitCountOverrideDefault = ''
 weaponHitCountOverride = dict(config('botWeaponHitCountOverride', cast=Csv(cast=lambda s: tuple(s.split('='))), default=weaponHitCountOverrideDefault))
 weaponHitCountOverride = { k:int(v) for k, v in weaponHitCountOverride.items() }
 
