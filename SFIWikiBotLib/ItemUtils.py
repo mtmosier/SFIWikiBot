@@ -1002,10 +1002,10 @@ def GetCraftingDataForItem(item):
         if item['id'] in v['items']:
             return v
 
-    if 'micro gate' in item['name'].lower() and 'loca' not in item['name'].lower():
+    if 'micro gate' in item['name'].lower() and 'local' not in item['name'].lower():
         prefix = item['name'].split(' ')[-1]
         systemInfo = GalaxyUtils.GetSystemByPrefix(prefix)
-        if systemInfo:
+        if systemInfo and systemInfo['state'] != 0:
             return GalaxyUtils.GetCraftingRecipeForSystem(systemInfo)
 
     return None
