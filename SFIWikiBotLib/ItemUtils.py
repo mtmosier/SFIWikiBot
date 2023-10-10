@@ -2955,7 +2955,7 @@ def ItemDisplayStatSkillFull(item, p=...):
     return rtnVal
 
 
-def ItemDisplayStatName(item, p=..., useBaseName=False):
+def ItemDisplayStatName(item, p=..., useBaseName=False, includeSourceClass=True):
     displayName = item['name']
     if useBaseName:
         displayName = SplitNameIntoBaseNameAndItemLevel(item['name'])['fullNameMinusLevel']
@@ -2968,9 +2968,10 @@ def ItemDisplayStatName(item, p=..., useBaseName=False):
             displayName = '[[{}|{}]]'.format(itemArticlePage, displayName)
 
     rtnVal = displayName
-    sourceClass = GetItemSourceClassName(item)
-    if sourceClass:
-        rtnVal = ' class="{}" | {}'.format(sourceClass, displayName)
+    if includeSourceClass:
+        sourceClass = GetItemSourceClassName(item)
+        if sourceClass:
+            rtnVal = ' class="{}" | {}'.format(sourceClass, displayName)
 
     return rtnVal
 

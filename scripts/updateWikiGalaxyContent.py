@@ -46,6 +46,7 @@ WikiUtils.UpdateStarSystemPages(comment)
 print('** Update lore page', datetime.now(tz).strftime("%I:%M %p").lstrip('0'))
 WikiUtils.UpdateLorePage(comment)
 
+# Temporarily disabled while we wait for the abyss to fully release
 print('** Update engine requirements module', datetime.now(tz).strftime("%I:%M %p").lstrip('0'))
 WikiUtils.UpdateEngineRequirementsModuleInfo()
 

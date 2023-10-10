@@ -652,7 +652,7 @@ def GetFilterListForItemFinder(params):
         'label': 'Race',
         'type': 'string',
         'input': 'select',
-        'values': ['Humans', 'Aralien', 'Andromedan', 'Aralien Ghost', 'Ascendant', 'Chronoduke', 'Church of Megmos', 'Dartian', 'Devimon', 'Enlightened', 'Face of Space', 'Forkworm', 'The Gao', 'Human Ghost', 'Igni', 'Meteor Burger', 'Null Dweller', 'Prongworm', 'Radii', 'Red Mist', 'Relisk', 'Resonite', 'Robosphere', 'Rodion', 'Sheenite', 'Solarion', 'Splicer', 'Tobor', 'Tornadian', 'Tyraan', 'Vacuum Fly'],
+        'values': ['Humans', 'Aralien', 'The Abyss', 'Andromedan', 'Aralien Ghost', 'Ascendant', 'Chronoduke', 'Church of Megmos', 'Dartian', 'Devimon', 'Enlightened', 'Face of Space', 'Forkworm', 'The Gao', 'Human Ghost', 'Igni', 'Meteor Burger', 'Null Dweller', 'Prongworm', 'Radii', 'Red Mist', 'Relisk', 'Resonite', 'Robosphere', 'Rodion', 'Sheenite', 'Solarion', 'Splicer', 'Tobor', 'Tornadian', 'Tyraan', 'Vacuum Fly'],
         'operators': [ 'equal', 'not_equal' ],
     })
     filterList.append({
@@ -844,7 +844,7 @@ def GetFilterListForShipFinder(params):
         'label': 'Race',
         'type': 'string',
         'input': 'select',
-        'values': ['Humans', 'Aralien', 'Andromedan', 'Aralien Ghost', 'Ascendant', 'Chronoduke', 'Church of Megmos', 'Dartian', 'Devimon', 'Enlightened', 'Face of Space', 'Forkworm', 'The Gao', 'Human Ghost', 'Igni', 'Meteor Burger', 'Null Dweller', 'Prongworm', 'Radii', 'Red Mist', 'Relisk', 'Resonite', 'Robosphere', 'Rodion', 'Sheenite', 'Solarion', 'Splicer', 'Tobor', 'Tornadian', 'Tyraan', 'Vacuum Fly'],
+        'values': ['Humans', 'Aralien', 'The Abyss', 'Andromedan', 'Aralien Ghost', 'Ascendant', 'Chronoduke', 'Church of Megmos', 'Dartian', 'Devimon', 'Enlightened', 'Face of Space', 'Forkworm', 'The Gao', 'Human Ghost', 'Igni', 'Meteor Burger', 'Null Dweller', 'Prongworm', 'Radii', 'Red Mist', 'Relisk', 'Resonite', 'Robosphere', 'Rodion', 'Sheenite', 'Solarion', 'Splicer', 'Tobor', 'Tornadian', 'Tyraan', 'Vacuum Fly'],
         'operators': [ 'equal', 'not_equal' ],
     })
     filterList.append({

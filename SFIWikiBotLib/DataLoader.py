@@ -101,7 +101,7 @@ def LoadDataFromBenOldingJsonp(dataType):
     url = Config.privateDataUrlTemplate
     if not '?' in url:  url += '?cb={}'
 
-    response = requests.get(url.format(dataType, time.time()))
+    response = requests.get(url.format(dataType, time.time()), verify=False)
     if response.status_code != 200:
         print("Got", response.status_code, 'trying to read content from benoldinggames.co.uk for', dataType)
         return

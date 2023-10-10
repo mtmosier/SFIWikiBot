@@ -88,6 +88,14 @@ def DownloadImageForShip(ship):
     return rtnVal
 
 
+def GetShipInfoByName(name, objList=...):
+    if objList is ...:
+        objList = shipData
+    ruleSet = { "condition": "OR", "rules": [ { "id": "name", "operator": "equal", "value": name } ] }
+    with suppress(IndexError):
+        return GeneralUtils.SearchObjectListUsingRuleset(objList, ruleSet)[0]
+
+
 def FindShipsByPartialName(name, objList=...):
     if objList is ...:
         objList = shipData
@@ -359,6 +367,22 @@ def GetShipPurchasePrice(ship):
     if 'price' not in ship:
         return ''
     return int(GeneralUtils.RoundToSignificantAmount(ship['price'] * shipPurchasePriceModifier))
+
+
+
+def GetShipsAssociatedWithRaceOrOrg(raceOrOrgName):
+    rtnInfo = []
+    pageName = raceOrOrgName
+    possibleObjectsToCheck = WikiUtils.GetWikiCategoryMemberList(raceOrOrgName)
+
+    for searchName in possibleObjectsToCheck:
+        shipInfo = GetShipInfoByName(searchName)
+        if shipInfo:
+            rtnInfo.append(shipInfo)
+
+    rtnInfo = sorted(rtnInfo, key=lambda x: x['name'])
+    return rtnInfo
+
 
 
 def GetShipWikiImage(ship):

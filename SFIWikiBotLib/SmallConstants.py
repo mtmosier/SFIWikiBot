@@ -238,7 +238,7 @@ def Initialize():
 
         unreleasedSystemList = ['TBZ']
         for systemInfo in GalaxyUtils.GetSystemList(False):
-            if systemInfo['state'] == 0:
+            if 'isSetup' not in systemInfo or not systemInfo['isSetup']:
                 unreleasedSystemList.append(systemInfo['prefix'])
 
         if Config.debug:  print("Setting unreleased system list to ", unreleasedSystemList)
@@ -255,20 +255,21 @@ def Initialize():
 
         unreleasedRaceList = []
         for raceInfo in raceData:
-            if raceInfo['race'] > 1 and not raceInfo['name'] == 'Meteor Burger':
-                if Config.primusUnleashed and raceInfo['name'] == 'Enlightened':
-                    continue
-
+            if raceInfo['race'] > 1 and not raceInfo['name'] == 'Meteor Burger' and not raceInfo['name'] == 'Enlightened':
                 raceSpawnFound = False
                 with suppress(IndexError):
-                    raceOrgId = GetOrgInfoListByRaceId(raceInfo['race'])[0]['id']
-                    for systemInfo in GalaxyUtils.GetSystemList():
-                        if systemInfo['prefix'] == 'TBZ':  continue
-                        for spawn in systemInfo['otherRaceSpawns']:
-                            if spawn['orgID'] == raceOrgId:
-                                raceSpawnFound = True
-                                break
-                        if raceSpawnFound:  break
+                    # Ugly hack - remove this once we find the bug
+                    if raceInfo['name'] == 'The Abyss':
+                        raceSpawnFound = True
+                    else:
+                        raceOrgId = GetOrgInfoListByRaceId(raceInfo['race'])[0]['id']
+                        for systemInfo in GalaxyUtils.GetSystemList():
+                            if systemInfo['prefix'] == 'TBZ':  continue
+                            for spawn in systemInfo['otherRaceSpawns']:
+                                if spawn['orgID'] == raceOrgId:
+                                    raceSpawnFound = True
+                                    break
+                            if raceSpawnFound:  break
 
                 if not raceSpawnFound:
                     unreleasedRaceList.append(raceInfo['name'])

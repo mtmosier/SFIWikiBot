@@ -55,7 +55,7 @@ damageTypeIconClassMapping = dict(config('botDamageTypeIconClassMapping', cast=C
 
 effectIconClassMapping = dict(config('botEffectIconClassMapping', cast=Csv(cast=lambda s: tuple(s.split('='))), default=''))
 
-primusUnleashed = config('botPrimusUnleashed', default=False, cast=bool)
+primusUnleashed = config('botPrimusUnleashed', default=True, cast=bool)
 
 unreleasedShipList = config('botUnreleasedShipList', cast=Csv(), default='')
 unreleasedSystemList = config('botUnreleasedSystemList', cast=Csv(), default='Auto')
@@ -99,7 +99,7 @@ weaponLifeOverride = { k:float(v) for k, v in weaponLifeOverride.items() }
 mainFactionListDefault = 'Human Alliance=, Alliance Science Corps=Human Alliance\#Alliance Science Corps, Aralien Empire=, Empire Intelligence=Aralien Empire\#Empire Intelligence, Freedom Initiative='
 mainFactionList = dict(config('botMainFactionList', cast=Csv(cast=lambda s: tuple(s.split('='))), default=mainFactionListDefault))
 
-nprPageNameMappingDefault = 'Andromedans=Andromedan, Ascendants=Ascendant, Dartians=Dartian, Devimon=Devimon, Forkworms=Forkworm, Ghosts=Ghost, Igni=Igni, Null Dwellers=Null Dweller, Potalan=Potalan, Prongworms=Prongworm, Radii=Radii, Red Mist=Red Mist, Relisk=Relisk, Resonites=Resonite, Robospheres=Robosphere, Rodions=Rodion, Sheenites=Sheenite, Solarions=Solarion, Splicers=Splicer, The Church of Megmos=Church of Megmos, The Gao=The Gao, Tobor=Tobor, Tornadians=Tornadian, Tyraan=Tyraan, Vacuum Flies=Vacuum Fly'
+nprPageNameMappingDefault = 'Andromedans=Andromedan, Ascendants=Ascendant, Dartians=Dartian, Devimon=Devimon, Forkworms=Forkworm, Ghosts=Ghost, Igni=Igni, Null Dwellers=Null Dweller, Potalan=Potalan, Prongworms=Prongworm, Radii=Radii, Red Mist=Red Mist, Relisk=Relisk, Resonites=Resonite, Robospheres=Robosphere, Rodions=Rodion, Sheenites=Sheenite, Solarions=Solarion, Splicers=Splicer, The Abyss=The Abyss, The Church of Megmos=Church of Megmos, The Gao=The Gao, Tobor=Tobor, Tornadians=Tornadian, Tyraan=Tyraan, Vacuum Flies=Vacuum Fly'
 nprPageNameMapping = dict(config('botNprPageNameMapping', cast=Csv(cast=lambda s: tuple(s.split('='))), default=nprPageNameMappingDefault))
 
 subWeaponIDOverrideDefault = 'Cake Bomb=cks, Stinger Cloud=st_1,Red Mist Horn Circle Deathtrap=rmc, Sheenite Orbital Ultra Ring=soc, Sheenite Orbital Chevron Ring=soc'

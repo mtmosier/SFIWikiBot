@@ -20,6 +20,7 @@ from SFIWikiBotLib import Config
 from SFIWikiBotLib import SmallConstants
 from SFIWikiBotLib import GeneralUtils
 from SFIWikiBotLib import ShipUtils
+from SFIWikiBotLib import GalaxyUtils
 from pprint import pprint as pp
 import pytz
 
@@ -234,11 +235,12 @@ def GetWikiPageContent(pageName):
 
 def GetWikiCategoryMemberList(catName):
     site = GetWikiClientSiteObject()
-    cat = site.categories[catName]
-
     rtnList = []
-    for page in cat.members():
-        rtnList.append(page.name)
+
+    with suppress(AttributeError):
+        cat = site.categories[catName]
+        for page in cat.members():
+            rtnList.append(page.name)
 
     return rtnList
 
@@ -1100,6 +1102,26 @@ def UpdateIndividualShipPage(ship, comment=None, allowRetry=True):
             updatesIncluded.append("Categories")
 
 
+        exclusiveItemList = ItemUtils.GetItemsExclusiveToShip(ship)
+        exclusiveItemList = sorted(exclusiveItemList, key=ItemUtils.GetItemSortFunc('name'))
+
+        pageSectionList = GetWikiPageSectionsFromContent(content)
+        if exclusiveItemList:
+            sectionName = 'Ship Specific Items'
+            if 'Ship Exclusive Items' in pageSectionList and pageSectionList['Ship Exclusive Items']:
+                sectionName = 'Ship Exclusive Items'
+            if sectionName in pageSectionList and pageSectionList[sectionName]:
+                try:
+                    itemList = [[ItemUtils.ItemDisplayStatName(v[0], ..., True)] for v in ItemUtils.ItemPageIter(exclusiveItemList)]
+                    newContent = "{}\n{}".format(pageSectionList[sectionName]['nameContent'].strip(), ConvertListToWikiTable(itemList)).strip()
+                    if pageSectionList[sectionName]['content'].strip() != newContent.strip():
+                        content = content.replace(pageSectionList[sectionName]['content'].strip(), newContent)
+                        updatesIncluded.append(sectionName)
+                except (TypeError, IndexError):
+                    pass
+            # else:
+            #     print(sectionName + " section not found for {} - Unable to update".format(pageName))
+
         templateList = GetTemplateListFromWikiPageContentRecursive(content)
         for template in templateList:
             if template['name'].replace(' ', '_').lower() == 'infobox_ship':
@@ -1139,24 +1161,26 @@ def UpdateIndividualShipPage(ship, comment=None, allowRetry=True):
                     templateContent = ConvertDictionaryToWikiTemplate(template['name'], replacementTemplate)
                     content = content.replace(template['content'], templateContent.strip())
 
-        pageSectionList = GetWikiPageSectionsFromContent(content)
-        exclusiveItemList = ItemUtils.GetItemsExclusiveToShip(ship)
-        exclusiveItemList = sorted(exclusiveItemList, key=ItemUtils.GetItemSortFunc('name'))
-        if exclusiveItemList:
-            sectionName = 'Ship Specific Items'
-            if 'Ship Exclusive Items' in pageSectionList and pageSectionList['Ship Exclusive Items']:
-                sectionName = 'Ship Exclusive Items'
-            if sectionName in pageSectionList and pageSectionList[sectionName]:
-                try:
-                    itemList = [[ItemUtils.ItemDisplayStatName(v[0], ..., True)] for v in ItemUtils.ItemPageIter(exclusiveItemList)]
-                    newContent = "{}\n{}".format(pageSectionList[sectionName]['nameContent'].strip(), ConvertListToWikiTable(itemList)).strip()
-                    if pageSectionList[sectionName]['content'].strip() != newContent.strip():
-                        content = content.replace(pageSectionList[sectionName]['content'].strip(), newContent)
-                        updatesIncluded.append(sectionName)
-                except (TypeError, IndexError):
-                    pass
-            else:
-                print(sectionName + " section not found for {} - Unable to update".format(pageName))
+            if template['name'].replace(' ', '_').lower() == 'ship_exclusivedrops' and exclusiveItemList:
+                updateTemplate = False
+                replacementTemplate = template['data']
+
+                # try:
+                itemList = ["*" + ItemUtils.ItemDisplayStatName(v[0], ..., True, False) for v in ItemUtils.ItemPageIter(exclusiveItemList)]
+                newContent = "\n".join(itemList)
+
+                if newContent.strip() != template['data']['Ship Exclusive Items'].strip():
+                    replacementTemplate['Ship Exclusive Items'] = newContent
+                    updateTemplate = True
+                    updatesIncluded.append("Exclusive Items")
+                # else:
+                #     print("No change for exclusive items for {}".format(pageName))
+                # except (TypeError, IndexError):
+                #     pass
+
+                if updateTemplate:
+                    templateContent = ConvertDictionaryToWikiTemplate(template['name'], replacementTemplate)
+                    content = content.replace(template['content'], templateContent.strip())
 
         if 'race' in ship and ship['race'] < 2:
             if 'description' in ship and ship['description'].strip():
@@ -1178,6 +1202,7 @@ def UpdateIndividualShipPage(ship, comment=None, allowRetry=True):
                 if Config.verbose >= 1:  print("Page Updated: {} - {}".format(pageName, comment))
                 rtnVal = True
                 time.sleep(Config.pauseAfterSuccessfullyUpdatingWikiPageInSec)
+                # print("Updating {} / {} with content [{}]".format(pageName, ', '.join(updatesIncluded), content))
 
             except mwclient.errors.AssertUserFailedError as ex:
                 time.sleep(Config.pauseAfterFailingToUpdateWikiPageInSec)
@@ -1501,6 +1526,16 @@ def UpdateSwapShopModuleInfo(comment=None, allowRetry=True):
 
     raceEquipmentListLua += "}\n"
 
+    locations = GalaxyUtils.GetStorbitalLocationList()
+    systems = [ GalaxyUtils.GetSystemByPrefix(v.partition('-')[0]) for v in locations ]
+    basicSystemInfo = { (v['name'], v['id']) for v in systems }
+
+    sysListLua = 'local systemIdList = {\n'
+    for n, k in basicSystemInfo:
+    	sysListLua += "\t['{}'] = {},\n".format(n, k)
+
+    sysListLua += '}\n'
+
     pageName = 'Module:NPR_Item_Swap'
     site = GetWikiClientSiteObject()
     page = site.pages[pageName]
@@ -1513,6 +1548,14 @@ def UpdateSwapShopModuleInfo(comment=None, allowRetry=True):
             m = re.match(regexStr, content, re.S)
             currentEquipmentList = m.group(1)
             newContent = content.replace(currentEquipmentList.strip(), raceEquipmentListLua.strip())
+        except:
+            pass
+
+        try:
+            regexStr = '.*?(' + re.escape('local systemIdList = {') + '.*?\n}\n)'
+            m = re.match(regexStr, content, re.S)
+            currentSystemList = m.group(1)
+            newContent = content.replace(currentSystemList.strip(), sysListLua.strip())
         except:
             pass
 
@@ -1885,31 +1928,19 @@ def GetLoreblurbTemplateDataForRaceOrOrgCodexEntry(raceOrOrgName, wikiPageName, 
     if not wikiLinkOverride:
         wikiLinkOverride = wikiPageName
 
-    data = {
-        'loreSubjectLinkName': wikiLinkOverride,
-        'loreSubjectName': '{} Codex Entry'.format(raceOrOrgName),
-        'loreText': desc.strip() if desc else '',
-    }
-    data['loreText'] = GeneralUtils.AddWikiLinksToText(GeneralUtils.CleanupImportedText(data['loreText']))
-    return data
-
-
-def GetLoreblurbTemplateDataForPlanet(planetInfo):
-    data = {
-        'loreSubjectLinkName': planetInfo['name'].strip(),
-        'loreSubjectName': planetInfo['name'].strip(),
-        'loreText': planetInfo['info'].strip() if planetInfo['info'] else '',
-    }
+    data = OrderedDict()
+    data['loreSubjectLinkName'] = wikiLinkOverride
+    data['loreSubjectName'] = '{} Codex Entry'.format(raceOrOrgName)
+    data['loreText'] = desc.strip() if desc else ''
     data['loreText'] = GeneralUtils.AddWikiLinksToText(GeneralUtils.CleanupImportedText(data['loreText']))
     return data
 
 
 def GetLoreblurbTemplateDataForObject(objectInfo, pullDescriptonFromWikiIfEmpty=True):
-    data = {
-        'loreSubjectLinkName': objectInfo['name'].strip(),
-        'loreSubjectName': objectInfo['name'].strip(),
-        'loreText': objectInfo['scanText'].strip() if objectInfo['scanText'] else (objectInfo['info'].strip() if objectInfo['info'] else ''),
-    }
+    data = OrderedDict()
+    data['loreSubjectLinkName'] = objectInfo['name'].strip()
+    data['loreSubjectName'] = objectInfo['name'].strip()
+    data['loreText'] = objectInfo['scanText'].strip() if objectInfo['scanText'] else (objectInfo['info'].strip() if objectInfo['info'] else '')
 
     if pullDescriptonFromWikiIfEmpty and not data['loreText']:
         content = GetWikiPageContent(data['loreSubjectLinkName'])
@@ -1926,6 +1957,24 @@ def GetLoreblurbTemplateDataForObject(objectInfo, pullDescriptonFromWikiIfEmpty=
     return data
 
 
+def GetLoreblurbTemplateDataForPlanet(planetInfo):
+    data = OrderedDict()
+    data['loreSubjectLinkName'] = planetInfo['name'].strip()
+    data['loreSubjectName'] = planetInfo['name'].strip()
+    data['loreText'] = planetInfo['info'].strip() if planetInfo['info'] else ''
+    data['loreText'] = GeneralUtils.AddWikiLinksToText(GeneralUtils.CleanupImportedText(data['loreText']))
+    return data
+
+
+def GetLoreblurbTemplateDataForShip(shipInfo):
+    desc = ShipUtils.GetShipDescription(shipInfo)
+    data = OrderedDict()
+    data['loreSubjectLinkName'] = ShipUtils.GetShipWikiPageName(shipInfo)
+    data['loreSubjectName'] = shipInfo['name'].strip()
+    data['loreText'] = desc.strip() if desc else ''
+    return data
+
+
 def GetLoreTemplateDataForRaceOrOrg(raceOrOrgName, wikiPageName=None, wikiLinkOverride=None):
     from SFIWikiBotLib import GalaxyUtils
 
@@ -1935,14 +1984,14 @@ def GetLoreTemplateDataForRaceOrOrg(raceOrOrgName, wikiPageName=None, wikiLinkOv
     if not wikiLinkOverride:
         wikiLinkOverride = wikiPageName
 
-    data = {
-        'LoreCategory': wikiPageName,
-        'loreCategoryIntro': 'This category contains information regarding lore related to the {}.'.format(GetWikiTextLink(wikiLinkOverride, wikiPageName)),
-        'planetsLore': '',
-        'objectsLore': '',
-        'codexLore': '',
-        'miscLore': '',
-    }
+    data = OrderedDict()
+    data['LoreCategory'] = wikiPageName
+    data['loreCategoryIntro'] = 'This category contains information regarding lore related to the {}.'.format(GetWikiTextLink(wikiLinkOverride, wikiPageName))
+    data['planetsLore'] = ''
+    data['objectsLore'] = ''
+    data['shipsLore'] = ''
+    data['codexLore'] = ''
+    data['miscLore'] = ''
 
     desc = ''
     raceId = SmallConstants.GetNprIdFromName(raceOrOrgName)
@@ -1970,6 +2019,15 @@ def GetLoreTemplateDataForRaceOrOrg(raceOrOrgName, wikiPageName=None, wikiLinkOv
             data['objectsLore'] += ConvertDictionaryToWikiTemplate('Loreblurb', loreBlurb, False)
         else:
             if Config.verbose > 0:  print("Skipping object", objectInfo['name'], 'due to lack of lore')
+
+
+    for shipInfo in ShipUtils.GetShipsAssociatedWithRaceOrOrg(raceOrOrgName):
+        if shipInfo['race'] < 2:
+            loreBlurb = GetLoreblurbTemplateDataForShip(shipInfo)
+            if loreBlurb['loreText']:
+                data['shipsLore'] += ConvertDictionaryToWikiTemplate('Loreblurb', loreBlurb, False)
+            else:
+                if Config.verbose > 0:  print("Skipping ship", shipInfo['name'], 'due to lack of lore')
 
     return data
 
@@ -2014,6 +2072,7 @@ def UpdateLorePage(comment=None, allowRetry=True):
         templateList = GetTemplateListFromWikiPageContentRecursive(content)
 
 
+        # Add Missing Orgranizations (Human Alliance, Empire Intelligence, etc)
         priorTemplate = False
         for orgName, orgLink in Config.mainFactionList.items():
             orgFound = False
@@ -2041,6 +2100,7 @@ def UpdateLorePage(comment=None, allowRetry=True):
             else:
                 priorTemplate = template
 
+        # Add Missing NPRs (Andromedans, Tornadians, etc)
         for wikiPageName, nprName in Config.nprPageNameMapping.items():
             if nprName in Config.unreleasedRaceList:
                 continue
@@ -2070,6 +2130,7 @@ def UpdateLorePage(comment=None, allowRetry=True):
                 priorTemplate = template
 
 
+        # Loop through existing lore templates and update them as needed
         for template in templateList:
             if template['name'].lower() == 'lore':
 
@@ -2650,10 +2711,10 @@ def GetWikiClientSiteObject(forceLogin=False):
 
     if not wikiClientSite:
         forceLogin=True
+        wikiClientSite = mwclient.Site( 'starfighter-infinity.fandom.com', path='/', scheme='https' )
 
     if forceLogin and Config.botUsername and Config.botPassword:
         try:
-            wikiClientSite = mwclient.Site( 'starfighter-infinity.fandom.com', path='/', scheme='https' )
             wikiClientSite.login(Config.botUsername, Config.botPassword)
         except mwclient.errors.LoginError as ex:
             print("Failed to log in:", str(ex))
